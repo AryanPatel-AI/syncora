@@ -19,7 +19,8 @@
 | **Backend API & WebSockets** | Render | 🟡 *Deployment Ready (Pending User Trigger)* | `https://<your-render-service>.onrender.com` *(Target)* |
 
 > [!NOTE]
-> The codebase is fully configured with production environment variable adapters, SPA route rewrite rules (`vercel.json`), Render Web Service manifests (`render.yaml`), and strict CORS handlers. Follow the [Step-by-Step Production Deployment Guide](#-step-by-step-production-deployment-guide) below to deploy in minutes.
+> The codebase is fully configured with production environment variable adapters, SPA route rewrite rules (`vercel.json`), Render Web Service manifests (`render.yaml`), and strict CORS handlers.
+> See the dedicated [Deployment Guide (docs/DEPLOYMENT.md)](docs/DEPLOYMENT.md) and [Step-by-Step Production Deployment Guide](#-step-by-step-production-deployment-guide) below to deploy in minutes.
 
 ---
 
