@@ -1,5 +1,7 @@
 {
-  "buildCommand": "npm run build:client",
+  "framework": "vite",
+  "installCommand": "npm --prefix client install",
+  "buildCommand": "npm --prefix client install && npm --prefix client run build",
   "outputDirectory": "client/dist",
   "rewrites": [
     {
