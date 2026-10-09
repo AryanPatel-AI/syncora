@@ -20,14 +20,15 @@ export class Room {
   private playback: PlaybackState;
   private controlRequests: Map<string, ControlRequest> = new Map(); // requestId -> ControlRequest
   private chatHistory: ChatMessage[] = [];
+  private likeCount: number = 0;
   private static readonly MAX_CHAT_HISTORY = SERVER_CONFIG.MAX_CHAT_HISTORY;
 
-  constructor(id: string, initialVideoId: string = SERVER_CONFIG.DEFAULT_VIDEO_ID) {
+  constructor(id: string, initialVideoId?: string | null) {
     this.id = id;
     this.hostId = '';
     this.createdAt = Date.now();
     this.playback = {
-      videoId: initialVideoId,
+      videoId: initialVideoId || SERVER_CONFIG.DEFAULT_VIDEO_ID,
       playState: 'paused',
       currentTime: 0,
       lastUpdatedAt: Date.now(),
@@ -69,6 +70,7 @@ export class Room {
       if (nextHost) {
         nextHost.makeHost();
         this.hostId = nextHost.id;
+        RoomRepository.updateHost(this.id, nextHost.id);
       }
     }
 
@@ -146,7 +148,7 @@ export class Room {
       this.playback.lastUpdatedAt,
       this.playback.playbackRate
     );
-    return this.getPlaybackState();
+    return { ...this.playback };
   }
 
   public seek(time: number, author: Participant): PlaybackState {
@@ -167,7 +169,7 @@ export class Room {
       this.playback.lastUpdatedAt,
       this.playback.playbackRate
     );
-    return this.getPlaybackState();
+    return { ...this.playback };
   }
 
   public changeVideo(videoId: string, author: Participant): PlaybackState {
@@ -198,7 +200,8 @@ export class Room {
     userId: string,
     type: ControlRequestType,
     requestedVideoId?: string,
-    requestedVideoTitle?: string
+    requestedVideoTitle?: string,
+    requestedTime?: number
   ): ControlRequest | null {
     const participant = this.participants.get(userId);
     if (!participant) return null;
@@ -216,8 +219,10 @@ export class Room {
       username: participant.username,
       role: participant.role,
       type,
+      action: type,
       requestedVideoId,
       requestedVideoTitle,
+      requestedTime,
       timestamp: Date.now(),
       status: 'pending',
     };
@@ -234,11 +239,33 @@ export class Room {
     const participant = this.participants.get(request.userId);
 
     if (status === 'approved' && participant) {
-      if (request.type === 'REQUEST_MODERATOR' || request.type === 'REQUEST_CONTROL') {
+      const normalizedType = String(request.type || '').toLowerCase();
+      if (
+        normalizedType.includes('moderator') ||
+        normalizedType.includes('control')
+      ) {
         participant.promoteToModerator();
-      }
-      if (request.type === 'REQUEST_CHANGE_VIDEO' && request.requestedVideoId) {
-        this.changeVideo(request.requestedVideoId, participant);
+      } else if (
+        normalizedType.includes('video') ||
+        request.requestedVideoId
+      ) {
+        if (request.requestedVideoId) {
+          this.changeVideo(request.requestedVideoId, participant);
+        }
+      } else if (normalizedType === 'play') {
+        const targetTime = typeof request.requestedTime === 'number'
+          ? request.requestedTime
+          : this.getAuthoritativeCurrentTime();
+        this.updatePlayState('playing', targetTime, participant);
+      } else if (normalizedType === 'pause') {
+        const targetTime = typeof request.requestedTime === 'number'
+          ? request.requestedTime
+          : this.getAuthoritativeCurrentTime();
+        this.updatePlayState('paused', targetTime, participant);
+      } else if (normalizedType === 'seek') {
+        if (typeof request.requestedTime === 'number') {
+          this.seek(request.requestedTime, participant);
+        }
       }
     }
 
@@ -261,8 +288,11 @@ export class Room {
       id: generateId('msg'),
       senderId,
       senderName,
+      username: senderName,
       senderRole,
+      role: senderRole,
       content,
+      text: content,
       type,
       timestamp: Date.now(),
     };
@@ -279,6 +309,61 @@ export class Room {
     return [...this.chatHistory];
   }
 
+  public getLikeCount(): number {
+    return this.likeCount;
+  }
+
+  public incrementLikeCount(): number {
+    this.likeCount += 1;
+    return this.likeCount;
+  }
+
+  private slowModeSeconds: number = 0;
+  private timeouts: Map<string, number> = new Map(); // userId -> expiresAt ms
+
+  public deleteChatMessage(messageId: string): boolean {
+    const msg = this.chatHistory.find((m) => m.id === messageId);
+    if (!msg) return false;
+    msg.isDeleted = true;
+    msg.content = '[This message was removed by a moderator]';
+    msg.text = msg.content;
+    return true;
+  }
+
+  public pinChatMessage(messageId: string, pinned: boolean = true): ChatMessage | null {
+    const msg = this.chatHistory.find((m) => m.id === messageId);
+    if (!msg) return null;
+    msg.isPinned = pinned;
+    return msg;
+  }
+
+  public getPinnedMessages(): ChatMessage[] {
+    return this.chatHistory.filter((m) => m.isPinned && !m.isDeleted);
+  }
+
+  public timeoutUser(userId: string, durationSeconds: number = 60): void {
+    this.timeouts.set(userId, Date.now() + durationSeconds * 1000);
+  }
+
+  public isUserTimedOut(userId: string): { timedOut: boolean; remainingSeconds: number } {
+    const expiresAt = this.timeouts.get(userId);
+    if (!expiresAt) return { timedOut: false, remainingSeconds: 0 };
+    const remaining = Math.ceil((expiresAt - Date.now()) / 1000);
+    if (remaining <= 0) {
+      this.timeouts.delete(userId);
+      return { timedOut: false, remainingSeconds: 0 };
+    }
+    return { timedOut: true, remainingSeconds: remaining };
+  }
+
+  public setSlowMode(seconds: number): void {
+    this.slowModeSeconds = Math.max(0, Math.min(seconds, 60));
+  }
+
+  public getSlowModeSeconds(): number {
+    return this.slowModeSeconds;
+  }
+
   public getStateSnapshot(): RoomStateSnapshot {
     return {
       roomId: this.id,
@@ -287,6 +372,10 @@ export class Room {
       participants: this.getAllParticipants(),
       pendingRequests: this.getPendingRequests(),
       chatHistory: this.getChatHistory(),
+      likeCount: this.getLikeCount(),
+      audienceCount: this.getParticipantCount(),
+      slowModeSeconds: this.slowModeSeconds,
+      pinnedMessages: this.getPinnedMessages(),
     };
   }
 

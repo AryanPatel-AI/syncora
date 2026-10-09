@@ -10,7 +10,7 @@ interface VideoSelectorModalProps {
 }
 
 export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, onClose }) => {
-  const { changeVideo, canControl, requestControl } = useWatchParty();
+  const { changeVideo, canControl } = useWatchParty();
   const [urlInput, setUrlInput] = useState<string>('');
   const [activeCategory, setActiveCategory] = useState<string>('All');
   const [error, setError] = useState<string | null>(null);
@@ -26,17 +26,15 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
       return;
     }
 
-    if (canControl) {
-      changeVideo(extractedId);
-      onClose();
-      setUrlInput('');
-      setError(null);
-    } else {
-      requestControl('REQUEST_CHANGE_VIDEO', extractedId, 'New video change request');
-      onClose();
-      setUrlInput('');
-      setError(null);
+    if (!canControl) {
+      setError('Only the Host or Moderator can change the broadcast stream for the room.');
+      return;
     }
+
+    changeVideo(extractedId);
+    onClose();
+    setUrlInput('');
+    setError(null);
   };
 
   const categories = ['All', 'Cinema', 'Nature', 'Chill', 'Tech'];
@@ -48,26 +46,34 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
   const previewId = extractYouTubeVideoId(urlInput);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/85 backdrop-blur-xl animate-fade-in">
-      <div className="relative w-full max-w-2xl glass-panel-elevated rounded-3xl p-6 sm:p-8 shadow-2xl border border-brand-border/80 flex flex-col gap-6 text-brand-text max-h-[90vh] overflow-y-auto">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101114]/90 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-stream-selector-title"
+    >
+      <div className="relative w-full max-w-xl bg-[#16171B] rounded-xl p-5 sm:p-6 shadow-cinema border border-[#282A33] flex flex-col gap-5 text-[#F2F0E9] max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-brand-border/50">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-brand-primary to-brand-highlight text-white shadow-glow-sm">
-              <Film className="w-5 h-5" />
-            </div>
+        <div className="flex items-center justify-between pb-3 border-b border-[#282A33]">
+          <div className="flex items-center gap-2.5">
+            <Film className="w-5 h-5 text-[#D6F279]" />
             <div>
-              <h2 className="text-lg font-extrabold text-white">Stream Selector</h2>
-              <p className="text-xs text-brand-muted">
-                {canControl ? 'Broadcast any YouTube stream to everyone in the room' : 'Submit a video change request to the host'}
+              <h2 id="modal-stream-selector-title" className="text-base font-serif font-semibold text-[#F2F0E9]">
+                Change Screening Stream
+              </h2>
+              <p className="text-xs text-[#8E919C]">
+                {canControl
+                  ? 'Broadcast any YouTube URL or select an open cinema reel'
+                  : 'Submit a video change request to the room host'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-brand-muted hover:text-white hover:bg-brand-surface transition-all"
+            aria-label="Close dialog"
+            className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -77,50 +83,49 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
             e.preventDefault();
             handleApply();
           }}
-          className="flex flex-col gap-2.5"
+          className="flex flex-col gap-2"
         >
-          <label className="text-xs font-bold text-brand-highlight uppercase tracking-wider">
-            Enter Any YouTube Link or ID
+          <label htmlFor="custom-stream-url" className="text-xs font-mono uppercase tracking-wider text-[#8E919C]">
+            YouTube URL or Video ID
           </label>
-          <div className="flex gap-2.5">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="https://www.youtube.com/watch?v=aqz-KE-bpKQ"
-                value={urlInput}
-                onChange={(e) => {
-                  setUrlInput(e.target.value);
-                  setError(null);
-                }}
-                className="w-full px-4 py-3 rounded-2xl bg-brand-dark/70 border border-brand-border focus:border-brand-primary text-sm placeholder:text-brand-subtle transition-all outline-none"
-              />
-            </div>
+          <div className="flex gap-2">
+            <input
+              id="custom-stream-url"
+              type="text"
+              placeholder="https://www.youtube.com/watch?v=aqz-KE-bpKQ"
+              value={urlInput}
+              onChange={(e) => {
+                setUrlInput(e.target.value);
+                setError(null);
+              }}
+              className="flex-1 px-3.5 py-2.5 rounded-md bg-[#101114] border border-[#282A33] focus:border-[#D6F279] text-xs text-[#F2F0E9] placeholder:text-[#5E606A] outline-none transition-colors"
+            />
             <button
               type="submit"
-              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-brand-primary to-brand-hover text-white text-sm font-bold shadow-glow hover:scale-102 active:scale-98 transition-all flex items-center gap-2 flex-shrink-0"
+              className="px-4 py-2.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-semibold transition-colors flex items-center gap-1.5 flex-shrink-0"
             >
-              <Search className="w-4 h-4" />
-              <span>Load Stream</span>
+              <Search className="w-3.5 h-3.5" />
+              <span>{canControl ? 'Load Stream' : 'Request Stream'}</span>
             </button>
           </div>
 
           {/* Quick Preview Thumbnail if Valid URL */}
           {previewId && (
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-brand-surface/70 border border-brand-border/60 animate-fade-in mt-1">
+            <div className="flex items-center gap-3 p-2.5 rounded-md bg-[#1C1E24] border border-[#282A33] mt-1">
               <img
                 src={getYouTubeThumbnail(previewId)}
-                alt="Preview"
-                className="w-20 h-14 rounded-xl object-cover"
+                alt="Stream Preview"
+                className="w-16 h-11 rounded object-cover border border-[#282A33]"
               />
               <div className="flex flex-col">
-                <span className="text-xs font-bold text-white">Valid YouTube Stream Detected</span>
-                <span className="text-[11px] font-mono text-brand-highlight">ID: {previewId}</span>
+                <span className="text-xs font-medium text-[#F2F0E9]">YouTube Stream ID Detected</span>
+                <span className="text-[11px] font-mono text-[#D6F279]">{previewId}</span>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="flex items-center gap-1.5 text-xs text-red-400 mt-1">
+            <div className="flex items-center gap-1.5 text-xs text-[#F87171] mt-1">
               <AlertCircle className="w-3.5 h-3.5" />
               <span>{error}</span>
             </div>
@@ -128,23 +133,22 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
         </form>
 
         {/* Curated Presets Library */}
-        <div className="flex flex-col gap-3.5 pt-2">
+        <div className="flex flex-col gap-3 pt-2">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-brand-highlight uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Verified 4K Presets</span>
+            <span className="text-xs font-mono uppercase tracking-wider text-[#8E919C]">
+              Curated Screening Presets
             </span>
 
             {/* Category Pills */}
-            <div className="flex items-center gap-1 overflow-x-auto pb-1">
+            <div className="flex items-center gap-1">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`text-[11px] px-2.5 py-1 rounded-xl font-medium transition-all ${
+                  className={`text-[11px] px-2.5 py-0.5 rounded-md transition-colors ${
                     activeCategory === cat
-                      ? 'bg-brand-primary text-white shadow-glow-sm'
-                      : 'bg-brand-surface text-brand-muted hover:text-white'
+                      ? 'bg-[#D6F279] text-[#101114] font-semibold'
+                      : 'bg-[#1C1E24] text-[#8E919C] hover:text-[#F2F0E9] border border-[#282A33]'
                   }`}
                 >
                   {cat}
@@ -153,35 +157,36 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-56 overflow-y-auto pr-1">
             {filteredPresets.map((preset) => (
-              <div
+              <button
                 key={preset.id}
+                type="button"
                 onClick={() => handleApply(preset.id)}
-                className="group flex items-center gap-3 p-3 rounded-2xl bg-brand-surface/60 hover:bg-brand-surface border border-brand-border/60 hover:border-brand-primary/50 cursor-pointer transition-all hover:scale-[1.02]"
+                className="group flex items-center gap-2.5 p-2 rounded-md bg-[#1C1E24] hover:bg-[#24262E] border border-[#282A33] hover:border-[#3A3D4A] cursor-pointer transition-colors text-left"
               >
-                <div className="relative w-16 h-14 rounded-xl overflow-hidden bg-brand-card flex-shrink-0">
+                <div className="relative w-14 h-11 rounded overflow-hidden bg-black flex-shrink-0 border border-[#282A33]">
                   <img
                     src={preset.thumbnail}
                     alt={preset.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-brand-dark/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-5 h-5 fill-white text-white" />
+                  <div className="absolute inset-0 bg-[#101114]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-3.5 h-3.5 fill-[#D6F279] text-[#D6F279]" />
                   </div>
                 </div>
 
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-bold text-brand-text truncate group-hover:text-brand-highlight transition-colors">
+                  <span className="text-xs font-medium text-[#F2F0E9] truncate group-hover:text-[#D6F279] transition-colors">
                     {preset.title}
                   </span>
-                  <span className="text-[11px] text-brand-muted truncate">{preset.creator}</span>
-                  <div className="flex items-center gap-1.5 text-[10px] text-brand-subtle mt-0.5">
-                    <span className="px-1.5 py-0.5 rounded-md bg-brand-card text-brand-highlight">{preset.category}</span>
+                  <div className="flex items-center gap-1.5 text-[10px] text-[#8E919C] mt-0.5 font-mono">
+                    <span>{preset.category}</span>
+                    <span>&bull;</span>
                     <span>{preset.duration}</span>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         </div>

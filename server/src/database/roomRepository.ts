@@ -4,7 +4,7 @@ import { PlaybackState, Role, ChatMessage } from '../types';
 export interface RoomRecord {
   id: string;
   host_id: string;
-  video_id: string;
+  video_id: string | null;
   play_state: 'playing' | 'paused' | 'buffering';
   current_time: number;
   last_updated_at: number;
@@ -62,7 +62,7 @@ export class RoomRepository {
 
   public static updatePlayback(
     roomId: string,
-    videoId: string,
+    videoId: string | null,
     playState: string,
     currentTime: number,
     lastUpdatedAt: number,

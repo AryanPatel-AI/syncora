@@ -48,4 +48,20 @@ export class PermissionService {
     if (!actor) return false;
     return actor.role === 'HOST' || actor.role === 'MODERATOR';
   }
+
+  /**
+   * Host and Moderators can moderate room chat (delete messages, pin messages, timeout users).
+   */
+  public static canModerateChat(actor: Participant | undefined): boolean {
+    if (!actor) return false;
+    return actor.role === 'HOST' || actor.role === 'MODERATOR';
+  }
+
+  /**
+   * Only Host can change room-wide settings like slow mode.
+   */
+  public static canManageSettings(actor: Participant | undefined): boolean {
+    if (!actor) return false;
+    return actor.role === 'HOST' || actor.isHost;
+  }
 }

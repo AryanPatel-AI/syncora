@@ -1,6 +1,6 @@
 export const SERVER_CONFIG = {
-  PORT: process.env.PORT || 4000,
-  CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:5173',
+  PORT: Number(process.env.PORT) || 4000,
+  CLIENT_URL: process.env.FRONTEND_URL || process.env.CLIENT_URL || 'http://localhost:5173',
   DEFAULT_VIDEO_ID: 'aqz-KE-bpKQ', // Big Buck Bunny 4K - 100% reliable embed
   MAX_CHAT_HISTORY: 100,
   DRIFT_THRESHOLD_SECONDS: 1.75,

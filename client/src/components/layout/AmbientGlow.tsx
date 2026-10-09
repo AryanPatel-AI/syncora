@@ -6,27 +6,23 @@ interface AmbientGlowProps {
 
 export const AmbientGlow: React.FC<AmbientGlowProps> = ({ isPlaying = false }) => {
   return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-      {/* Primary Radial Glow */}
+    <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10 select-none" aria-hidden="true">
+      {/* Subtle screening room projection cone at top */}
       <div
-        className={`absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] rounded-full blur-[140px] transition-all duration-1000 ${
-          isPlaying
-            ? 'bg-gradient-to-tr from-brand-primary/25 via-brand-highlight/20 to-cyan-500/15 scale-110 opacity-100'
-            : 'bg-brand-primary/10 scale-95 opacity-60'
+        className={`absolute top-0 left-1/2 -translate-x-1/2 w-[850px] h-[340px] rounded-full blur-[120px] transition-opacity duration-1000 ${
+          isPlaying ? 'opacity-15 bg-[#D6F279]' : 'opacity-5 bg-[#D6F279]'
         }`}
       />
 
-      {/* Secondary Ambient Corner Radials */}
-      <div className="absolute -top-32 -left-32 w-96 h-96 bg-brand-primary/10 rounded-full blur-[130px]" />
-      <div className="absolute top-1/2 -right-32 w-96 h-96 bg-brand-highlight/10 rounded-full blur-[140px]" />
-      <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-cyan-500/5 rounded-full blur-[150px]" />
+      {/* Deep cinema vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#101114]/40 via-[#101114]/90 to-[#101114]" />
 
-      {/* Subtle Starry / Mesh Grid Pattern */}
+      {/* Crisp technical drafting grid */}
       <div
-        className="absolute inset-0 opacity-[0.025]"
+        className="absolute inset-0 opacity-[0.015]"
         style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, #ffffff 1px, transparent 0)`,
-          backgroundSize: '36px 36px',
+          backgroundImage: `linear-gradient(to right, #F2F0E9 1px, transparent 1px), linear-gradient(to bottom, #F2F0E9 1px, transparent 1px)`,
+          backgroundSize: '48px 48px',
         }}
       />
     </div>

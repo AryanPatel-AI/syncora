@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
 import { VERIFIED_PRESETS } from '../../utils/constants';
-import { VolumeX, ShieldAlert, AlertTriangle, RefreshCw } from 'lucide-react';
+import { VolumeX, AlertTriangle, RefreshCw } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -22,8 +22,12 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     playVideo,
     pauseVideo,
     changeVideo,
-    requestControl,
+    setLocalPlayState,
     updateLocalPlaybackTime,
+    isLiveSynced,
+    setIsLiveSynced,
+    setTimeBehindLive,
+    getAuthoritativeTime,
   } = useWatchParty();
 
   const playerRef = useRef<any>(null);
@@ -33,15 +37,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
   const [hasPlaybackError, setHasPlaybackError] = useState<boolean>(false);
-
-  // Authoritative server timestamp calculation
-  const getAuthoritativeTime = useCallback(() => {
-    if (playback.playState === 'playing') {
-      const elapsed = (Date.now() - playback.lastUpdatedAt) / 1000;
-      return Math.max(0, playback.currentTime + elapsed * playback.playbackRate);
-    }
-    return Math.max(0, playback.currentTime);
-  }, [playback]);
 
   // 1. Load YouTube IFrame API Script
   useEffect(() => {
@@ -130,27 +125,18 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     // YT.PlayerState: PLAYING = 1, PAUSED = 2
     if (state === 1) {
+      setLocalPlayState('playing');
       if (!canControl) {
-        isProgrammaticUpdate.current = true;
-        if (playback.playState === 'paused') {
-          player.pauseVideo();
-        }
-        setTimeout(() => {
-          isProgrammaticUpdate.current = false;
-        }, 500);
+        // Viewer is playing locally on their device only
         return;
       }
       const currentTime = player.getCurrentTime() || 0;
       playVideo(currentTime);
     } else if (state === 2) {
+      setLocalPlayState('paused');
       if (!canControl) {
-        isProgrammaticUpdate.current = true;
-        if (playback.playState === 'playing') {
-          player.playVideo();
-        }
-        setTimeout(() => {
-          isProgrammaticUpdate.current = false;
-        }, 500);
+        // Viewer paused locally on their device only: enter catch-up mode
+        setIsLiveSynced(false);
         return;
       }
       const currentTime = player.getCurrentTime() || 0;
@@ -190,17 +176,21 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     isProgrammaticUpdate.current = true;
 
-    if (diff > 1.6) {
+    // Only force-seek if viewer is in live sync mode or can control
+    if ((canControl || isLiveSynced) && diff > 1.6) {
       player.seekTo(authoritativeTime, true);
     }
 
-    if (playback.playState === 'playing') {
-      const playPromise = player.playVideo();
-      if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => setNeedsUserGesture(true));
+    // Only force server play/pause state if viewer is in live sync mode or can control
+    if (canControl || isLiveSynced) {
+      if (playback.playState === 'playing') {
+        const playPromise = player.playVideo();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => setNeedsUserGesture(true));
+        }
+      } else if (playback.playState === 'paused') {
+        player.pauseVideo();
       }
-    } else if (playback.playState === 'paused') {
-      player.pauseVideo();
     }
 
     const timer = setTimeout(() => {
@@ -208,7 +198,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }, 600);
 
     return () => clearTimeout(timer);
-  }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime]);
+  }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime, canControl, isLiveSynced]);
 
   // 5. Periodic drift and progress monitoring
   useEffect(() => {
@@ -226,14 +216,27 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       }
 
       const authTime = getAuthoritativeTime();
-      const drift = Math.abs(currentTime - authTime);
+      const behindSeconds = authTime - currentTime;
 
-      if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
-        isProgrammaticUpdate.current = true;
-        player.seekTo(authTime, true);
-        setTimeout(() => {
-          isProgrammaticUpdate.current = false;
-        }, 500);
+      // In viewer catch-up mode (!canControl and !isLiveSynced):
+      if (!canControl && !isLiveSynced) {
+        setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
+        // If viewer has naturally caught up to within 1.5s of live, seamlessly restore live sync
+        if (behindSeconds <= 1.5 && behindSeconds >= -1.5) {
+          setIsLiveSynced(true);
+          setTimeBehindLive(0);
+        }
+      } else {
+        // In live synced mode:
+        const drift = Math.abs(currentTime - authTime);
+        if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
+          isProgrammaticUpdate.current = true;
+          player.seekTo(authTime, true);
+          setTimeout(() => {
+            isProgrammaticUpdate.current = false;
+          }, 500);
+        }
+        setTimeBehindLive(0);
       }
 
       updateLocalPlaybackTime(currentTime);
@@ -244,7 +247,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPlayerReady, playback.playState, getAuthoritativeTime, onProgress, updateLocalPlaybackTime]);
+  }, [isPlayerReady, playback.playState, getAuthoritativeTime, onProgress, updateLocalPlaybackTime, canControl, isLiveSynced, setIsLiveSynced, setTimeBehindLive]);
 
   const handleUnmute = () => {
     if (playerRef.current) {
@@ -267,10 +270,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
   return (
     <div
-      className={`relative w-full rounded-3xl overflow-hidden bg-brand-surface border transition-all duration-700 shadow-2xl group ${
-        isPlaying
-          ? 'border-brand-primary/40 shadow-[0_0_50px_-10px_rgba(128,103,245,0.35)]'
-          : 'border-brand-border/70 shadow-lg'
+      className={`relative w-full rounded-xl overflow-hidden bg-[#0B0C0E] border transition-colors duration-200 shadow-cinema group ${
+        isPlaying ? 'border-[#3E4250]' : 'border-[#282A33]'
       }`}
     >
       {/* 16:9 Aspect Frame */}
@@ -278,25 +279,25 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         <div id="syncora-yt-player-frame" className="w-full h-full" />
       </div>
 
-      {/* Playback Error Fallback Overlay */}
+      {/* Stream Error Recovery Overlay */}
       {hasPlaybackError && (
-        <div className="absolute inset-0 z-40 bg-brand-dark/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-          <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 mb-3 shadow-glow-sm">
-            <AlertTriangle className="w-8 h-8" />
+        <div className="absolute inset-0 z-40 bg-[#101114]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+          <div className="p-3 rounded-lg bg-[#24262E] border border-[#F59E0B]/40 text-[#F59E0B] mb-3">
+            <AlertTriangle className="w-6 h-6" />
           </div>
-          <h4 className="text-base font-bold text-white mb-1">Stream Unavailable on YouTube</h4>
-          <p className="text-xs text-brand-muted max-w-sm mb-5">
-            This YouTube video is either restricted by its uploader or its live stream ended. Switch to one of our verified 4K streams:
+          <h4 className="text-sm font-semibold text-[#F2F0E9] mb-1">Stream Unavailable for Embedding</h4>
+          <p className="text-xs text-[#8E919C] max-w-sm mb-4">
+            The video owner has disabled external playback, or the stream has ended. Select a verified screening stream:
           </p>
           <div className="flex flex-wrap items-center justify-center gap-2">
             {VERIFIED_PRESETS.slice(0, 3).map((preset) => (
               <button
                 key={preset.id}
                 onClick={() => handleFallbackRecover(preset.id)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-primary hover:bg-brand-hover text-white text-xs font-semibold shadow-glow-sm transition-all hover:scale-105 active:scale-95"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-semibold transition-colors"
               >
-                <RefreshCw className="w-3.5 h-3.5" />
-                <span>Play {preset.title.split(' ')[0]} {preset.title.split(' ')[1]}</span>
+                <RefreshCw className="w-3 h-3" />
+                <span>Switch to {preset.title.split(' ')[0]}</span>
               </button>
             ))}
           </div>
@@ -307,25 +308,11 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       {(isMuted || needsUserGesture) && !hasPlaybackError && (
         <button
           onClick={handleUnmute}
-          className="absolute top-4 left-4 z-30 flex items-center gap-2 px-3.5 py-2 rounded-full bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold shadow-glow-sm backdrop-blur-md transition-all animate-bounce"
+          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D6F279] text-[#101114] text-xs font-semibold shadow-fine hover:bg-[#C3E065] transition-colors"
         >
           <VolumeX className="w-4 h-4" />
-          <span>Click to Unmute Audio</span>
+          <span>Click to Unmute Stream Audio</span>
         </button>
-      )}
-
-      {/* Watch-Only Mode Hover Overlay */}
-      {!canControl && !hasPlaybackError && (
-        <div
-          onClick={() => requestControl('REQUEST_CONTROL')}
-          className="absolute inset-0 z-10 bg-transparent cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-brand-dark/40 backdrop-blur-[2px]"
-          title="Watch-only mode. Click to request control."
-        >
-          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-surface/90 border border-brand-primary/40 text-brand-text shadow-glow">
-            <ShieldAlert className="w-4 h-4 text-brand-highlight" />
-            <span className="text-xs font-bold">Watch-Only Mode &bull; Click to Request Playback Control</span>
-          </div>
-        </div>
       )}
     </div>
   );

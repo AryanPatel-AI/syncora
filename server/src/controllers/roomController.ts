@@ -6,6 +6,7 @@ export class RoomController {
     const roomManager = RoomManager.getInstance();
     res.json({
       status: 'ok',
+      uptime: process.uptime(),
       timestamp: new Date().toISOString(),
       activeRooms: roomManager.getRoomCount(),
       service: 'Syncora Watch Party Engine',

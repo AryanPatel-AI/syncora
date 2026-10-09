@@ -7,7 +7,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "test": "tsx src/test-sync.ts"
+    "test": "tsx src/test-sync.ts",
+    "test:platform": "tsx src/test-platform.ts",
+    "test:all": "tsx src/test-sync.ts && tsx src/test-platform.ts"
   },
   "keywords": [
     "watchparty",

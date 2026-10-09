@@ -10,17 +10,17 @@ interface SyncStatusBadgeProps {
 export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status, isConnected }) => {
   if (!isConnected) {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-red-950/60 border border-red-500/40 text-red-400 text-xs font-bold shadow-sm">
-        <AlertCircle className="w-3.5 h-3.5 animate-pulse" />
-        <span>Reconnecting...</span>
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#1C1E24] border border-[#F87171]/40 text-[#F87171] text-[11px] font-medium tracking-wide">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#F87171]" />
+        <span>Disconnected</span>
       </div>
     );
   }
 
   if (status.state === 'catching_up') {
     return (
-      <div className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-400 text-xs font-bold shadow-sm">
-        <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#1C1E24] border border-[#F59E0B]/40 text-[#F59E0B] text-[11px] font-medium tracking-wide">
+        <RefreshCw className="w-3 h-3 animate-spin" />
         <span>Catching up ({status.driftSeconds.toFixed(1)}s)</span>
       </div>
     );
@@ -28,15 +28,12 @@ export const SyncStatusBadge: React.FC<SyncStatusBadgeProps> = ({ status, isConn
 
   return (
     <div
-      className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs font-bold shadow-sm backdrop-blur-md"
-      title={`Drift: ${status.driftSeconds.toFixed(2)}s | Ping: ~${status.latencyMs}ms`}
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#16171B] border border-[#282A33] text-[#F2F0E9] text-[11px] font-medium tracking-wide"
+      title={`Frame drift: ${status.driftSeconds.toFixed(2)}s | Ping: ~${status.latencyMs}ms`}
     >
-      <span className="relative flex h-2.5 w-2.5">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_#10B981]"></span>
-      </span>
-      <Wifi className="w-3.5 h-3.5" />
-      <span>In Sync</span>
+      <span className="w-1.5 h-1.5 rounded-full bg-[#D6F279]" />
+      <span className="text-[#8E919C]">Sync</span>
+      <span className="font-mono text-[10px] text-[#D6F279]">±{Math.max(0.01, status.driftSeconds).toFixed(2)}s</span>
     </div>
   );
 };
