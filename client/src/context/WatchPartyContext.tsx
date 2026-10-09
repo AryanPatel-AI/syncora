@@ -732,8 +732,16 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       setLocalPlayState(playback.playState);
       const targetTime = getAuthoritativeTime();
       if (playerRef) {
+        // Provide a 2.5s buffer delay for live streams to avoid buffer underrun and repeated audio
+        const isLive = Boolean(
+          playback.isLive ||
+          (playerRef.getVideoData && playerRef.getVideoData().isLive) ||
+          (playerRef.getDuration && playerRef.getDuration() === 0)
+        );
+        const seekTarget = isLive ? Math.max(0, targetTime - 2.5) : targetTime;
+
         if (typeof playerRef.seekTo === 'function') {
-          playerRef.seekTo(targetTime, true);
+          playerRef.seekTo(seekTarget, true);
         }
         if (playback.playState === 'playing' && typeof playerRef.playVideo === 'function') {
           playerRef.playVideo();
@@ -743,7 +751,7 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       }
       showToast('Synchronized with Live Stream', 'success');
     },
-    [getAuthoritativeTime, playback.playState, showToast]
+    [getAuthoritativeTime, playback.playState, playback.isLive, showToast]
   );
 
   const assignRole = useCallback((userId: string, role: Role) => {

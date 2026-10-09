@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
-import { VERIFIED_PRESETS } from '../../utils/constants';
+import { VERIFIED_PRESETS, DEFAULT_VIDEO_ID } from '../../utils/constants';
+import { markVideoAsUnplayable } from '../../services/api';
 import { VolumeX, AlertTriangle, RefreshCw } from 'lucide-react';
 
 declare global {
@@ -28,15 +29,31 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     setIsLiveSynced,
     setTimeBehindLive,
     getAuthoritativeTime,
+    showToast,
   } = useWatchParty();
 
   const playerRef = useRef<any>(null);
   const isApiReady = useRef<boolean>(false);
   const isProgrammaticUpdate = useRef<boolean>(false);
+  const isBufferingRef = useRef<boolean>(false);
+  const bufferStabilizationUntilRef = useRef<number>(Date.now() + 4000);
+  const playerStateRef = useRef<number>(-1);
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
   const [hasPlaybackError, setHasPlaybackError] = useState<boolean>(false);
+
+  // Helper to detect if content is live
+  const isLiveContent = useCallback((player: any): boolean => {
+    if (!player) return false;
+    try {
+      const data = player.getVideoData ? player.getVideoData() : null;
+      if (data && data.isLive) return true;
+      const dur = player.getDuration ? player.getDuration() : 0;
+      if (dur === 0) return true;
+    } catch (_) {}
+    return Boolean(playback.isLive);
+  }, [playback.isLive]);
 
   // 1. Load YouTube IFrame API Script
   useEffect(() => {
@@ -85,9 +102,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
           setHasPlaybackError(false);
           if (playerRefCallback) playerRefCallback(event.target);
 
+          const isLive = isLiveContent(event.target);
           const targetTime = getAuthoritativeTime();
+
+          // Set generous buffer stabilization window (buffer time) to allow stream to buffer
+          bufferStabilizationUntilRef.current = Date.now() + 4000;
           isProgrammaticUpdate.current = true;
-          event.target.seekTo(targetTime, true);
+
+          // Only seek if non-live content has advanced
+          if (!isLive && targetTime > 1.0) {
+            event.target.seekTo(targetTime, true);
+          }
 
           if (playback.playState === 'playing') {
             const playPromise = event.target.playVideo();
@@ -100,21 +125,46 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
           setTimeout(() => {
             isProgrammaticUpdate.current = false;
-          }, 800);
+          }, 1200);
         },
         onStateChange: (event: any) => {
-          handlePlayerStateChange(event.data);
+          const state = event.data;
+          playerStateRef.current = state;
+
+          // YT.PlayerState:
+          // -1: UNSTARTED, 1: PLAYING, 2: PAUSED, 3: BUFFERING, 5: CUED
+          if (state === 3) {
+            // BUFFERING: suspend drift checks so player has ample buffer time to load chunks
+            isBufferingRef.current = true;
+            bufferStabilizationUntilRef.current = Date.now() + 3500;
+          } else if (state === 1) {
+            // PLAYING: ensure 2.5s of smooth playback before resuming drift monitoring
+            isBufferingRef.current = false;
+            bufferStabilizationUntilRef.current = Date.now() + 2500;
+          } else if (state === -1 || state === 5) {
+            isBufferingRef.current = true;
+            bufferStabilizationUntilRef.current = Date.now() + 3500;
+          }
+
+          handlePlayerStateChange(state);
         },
         onError: (e: any) => {
           console.warn('[YouTube Player Notice]: Code', e.data);
-          // Error codes 100, 101, 150 mean video not found or owner disabled embedding
+          // Error codes: 2 (invalid), 5 (HTML5 error), 100 (not found/private), 101/150 (embed disabled)
           if ([2, 5, 100, 101, 150].includes(e.data)) {
+            markVideoAsUnplayable(playback.videoId);
             setHasPlaybackError(true);
+            if (canControl) {
+              showToast('Stream is unavailable for external embedding. Switching to verified screening stream...', 'error');
+              setTimeout(() => {
+                handleFallbackRecover(DEFAULT_VIDEO_ID);
+              }, 1500);
+            }
           }
         },
       },
     });
-  }, [playback.videoId, getAuthoritativeTime, playerRefCallback]);
+  }, [playback.videoId, getAuthoritativeTime, playerRefCallback, isLiveContent, canControl, showToast]);
 
   // Handle Player State Changes
   const handlePlayerStateChange = (state: number) => {
@@ -127,19 +177,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     if (state === 1) {
       setLocalPlayState('playing');
       if (!canControl) {
-        // Viewer is playing locally on their device only
         return;
       }
-      const currentTime = player.getCurrentTime() || 0;
+      const currentTime = player.getCurrentTime ? player.getCurrentTime() : 0;
       playVideo(currentTime);
     } else if (state === 2) {
       setLocalPlayState('paused');
       if (!canControl) {
-        // Viewer paused locally on their device only: enter catch-up mode
         setIsLiveSynced(false);
         return;
       }
-      const currentTime = player.getCurrentTime() || 0;
+      const currentTime = player.getCurrentTime ? player.getCurrentTime() : 0;
       pauseVideo(currentTime);
     }
   };
@@ -153,6 +201,9 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     if (playback.videoId && !currentUrl.includes(playback.videoId)) {
       setHasPlaybackError(false);
       isProgrammaticUpdate.current = true;
+      isBufferingRef.current = true;
+      bufferStabilizationUntilRef.current = Date.now() + 4500; // 4.5s buffer time for new stream to load
+
       if (player.loadVideoById) {
         player.loadVideoById({
           videoId: playback.videoId,
@@ -161,7 +212,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       }
       setTimeout(() => {
         isProgrammaticUpdate.current = false;
-      }, 1000);
+      }, 1500);
     }
   }, [playback.videoId, isPlayerReady]);
 
@@ -170,25 +221,32 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
 
+    const isLive = isLiveContent(player);
     const authoritativeTime = getAuthoritativeTime();
     const playerTime = player.getCurrentTime ? player.getCurrentTime() : 0;
     const diff = Math.abs(playerTime - authoritativeTime);
 
+    // If player is actively buffering or stabilizing, do not interrupt its buffer!
+    if (isBufferingRef.current || Date.now() < bufferStabilizationUntilRef.current) {
+      return;
+    }
+
     isProgrammaticUpdate.current = true;
 
-    // Viewers cannot watch more than the host: if player is ahead of authoritative time, force seek back
-    const isAheadOfHost = !canControl && playerTime > authoritativeTime + 0.8;
+    // On recorded videos, apply drift seek; on live streams, prevent micro-seeks
+    if (!isLive) {
+      const isAheadOfHost = !canControl && playerTime > authoritativeTime + 2.5;
 
-    // Only force-seek if viewer is in live sync mode, or can control, or is ahead of host
-    if ((canControl || isLiveSynced || isAheadOfHost) && (diff > 1.6 || isAheadOfHost)) {
-      player.seekTo(authoritativeTime, true);
-      if (isAheadOfHost) {
-        setIsLiveSynced(true);
-        setTimeBehindLive(0);
+      if ((canControl || isLiveSynced || isAheadOfHost) && (diff > 2.2 || isAheadOfHost)) {
+        player.seekTo(authoritativeTime, true);
+        bufferStabilizationUntilRef.current = Date.now() + 3000;
+        if (isAheadOfHost) {
+          setIsLiveSynced(true);
+          setTimeBehindLive(0);
+        }
       }
     }
 
-    // Only force server play/pause state if viewer is in live sync mode or can control
     if (canControl || isLiveSynced) {
       if (playback.playState === 'playing') {
         const playPromise = player.playVideo();
@@ -202,10 +260,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     const timer = setTimeout(() => {
       isProgrammaticUpdate.current = false;
-    }, 600);
+    }, 1000);
 
     return () => clearTimeout(timer);
-  }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime, canControl, isLiveSynced]);
+  }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime, canControl, isLiveSynced, isLiveContent]);
 
   // 5. Periodic drift and progress monitoring
   useEffect(() => {
@@ -217,55 +275,93 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
       const currentTime = player.getCurrentTime();
       const duration = player.getDuration ? player.getDuration() : 0;
+      const isLive = isLiveContent(player);
 
       if (onProgress) {
         onProgress(currentTime, duration);
       }
 
+      // Check buffering & stabilization window:
+      // If the player is buffering or has just sought/started, DO NOT seek!
+      const isBuffering = isBufferingRef.current || playerStateRef.current === 3;
+      const isStabilizing = Date.now() < bufferStabilizationUntilRef.current;
+      const isProgrammatic = isProgrammaticUpdate.current;
+
       const authTime = getAuthoritativeTime();
       const behindSeconds = authTime - currentTime;
 
-      if (!canControl) {
-        // Enforce: Viewer CANNOT watch more than the host!
-        if (currentTime > authTime + 0.8) {
-          isProgrammaticUpdate.current = true;
-          player.seekTo(authTime, true);
-          setIsLiveSynced(true);
-          setTimeBehindLive(0);
-          setTimeout(() => {
-            isProgrammaticUpdate.current = false;
-          }, 400);
-        } else if (!isLiveSynced) {
-          // In viewer DVR catch-up mode:
-          setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
-          // If viewer has naturally caught up to the live edge, seamlessly restore live sync
-          if (behindSeconds <= 1.5) {
-            setIsLiveSynced(true);
+      if (!isBuffering && !isStabilizing && !isProgrammatic) {
+        if (isLive) {
+          // LIVE STREAM LOGIC:
+          // Preserve healthy buffer delay behind live edge so audio never stutters, loops, or gets stuck
+          if (!canControl) {
+            if (!isLiveSynced) {
+              setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
+              if (behindSeconds <= 3.0) {
+                setIsLiveSynced(true);
+                setTimeBehindLive(0);
+              }
+            } else {
+              // In live synced mode: only resync if viewer has fallen severely behind (> 9.0s)
+              if (behindSeconds > 9.0 && playback.playState === 'playing') {
+                isProgrammaticUpdate.current = true;
+                // Buffer delay: seek to authTime - 2.5s so player gets time to buffer incoming live segments
+                const safeTarget = Math.max(0, authTime - 2.5);
+                player.seekTo(safeTarget, true);
+                bufferStabilizationUntilRef.current = Date.now() + 4500;
+                setTimeout(() => {
+                  isProgrammaticUpdate.current = false;
+                }, 1200);
+              }
+              setTimeBehindLive(0);
+            }
+          } else {
             setTimeBehindLive(0);
           }
         } else {
-          // In live synced mode: keep synchronized with host broadcast
-          const drift = Math.abs(currentTime - authTime);
-          if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
-            isProgrammaticUpdate.current = true;
-            player.seekTo(authTime, true);
-            setTimeout(() => {
-              isProgrammaticUpdate.current = false;
-            }, 500);
+          // RECORDED VIDEO (VOD) LOGIC:
+          if (!canControl) {
+            if (currentTime > authTime + 2.5) {
+              isProgrammaticUpdate.current = true;
+              player.seekTo(authTime, true);
+              setIsLiveSynced(true);
+              setTimeBehindLive(0);
+              bufferStabilizationUntilRef.current = Date.now() + 3500;
+              setTimeout(() => {
+                isProgrammaticUpdate.current = false;
+              }, 800);
+            } else if (!isLiveSynced) {
+              setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
+              if (behindSeconds <= 2.0) {
+                setIsLiveSynced(true);
+                setTimeBehindLive(0);
+              }
+            } else {
+              const drift = Math.abs(currentTime - authTime);
+              if (playback.playState === 'playing' && drift > 2.5) {
+                isProgrammaticUpdate.current = true;
+                player.seekTo(authTime, true);
+                bufferStabilizationUntilRef.current = Date.now() + 3500;
+                setTimeout(() => {
+                  isProgrammaticUpdate.current = false;
+                }, 800);
+              }
+              setTimeBehindLive(0);
+            }
+          } else {
+            // Host / Controller mode:
+            const drift = Math.abs(currentTime - authTime);
+            if (playback.playState === 'playing' && drift > 2.5) {
+              isProgrammaticUpdate.current = true;
+              player.seekTo(authTime, true);
+              bufferStabilizationUntilRef.current = Date.now() + 3500;
+              setTimeout(() => {
+                isProgrammaticUpdate.current = false;
+              }, 800);
+            }
+            setTimeBehindLive(0);
           }
-          setTimeBehindLive(0);
         }
-      } else {
-        // In Host / Controller mode:
-        const drift = Math.abs(currentTime - authTime);
-        if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
-          isProgrammaticUpdate.current = true;
-          player.seekTo(authTime, true);
-          setTimeout(() => {
-            isProgrammaticUpdate.current = false;
-          }, 500);
-        }
-        setTimeBehindLive(0);
       }
 
       updateLocalPlaybackTime(currentTime);
@@ -276,7 +372,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isPlayerReady, playback.playState, getAuthoritativeTime, onProgress, updateLocalPlaybackTime, canControl, isLiveSynced, setIsLiveSynced, setTimeBehindLive]);
+  }, [isPlayerReady, playback.playState, getAuthoritativeTime, onProgress, updateLocalPlaybackTime, canControl, isLiveSynced, setIsLiveSynced, setTimeBehindLive, isLiveContent]);
 
   const handleUnmute = () => {
     if (playerRef.current) {

@@ -12,6 +12,7 @@ export interface PlaybackState {
     userId: string;
     username: string;
   };
+  isLive?: boolean;
 }
 
 export type ControlRequestType =

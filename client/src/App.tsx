@@ -13,6 +13,7 @@ import { CreatorStudioPage } from './pages/Studio/CreatorStudioPage';
 import { AuthModal } from './components/auth/AuthModal';
 import { CreateRoomModal } from './components/room/CreateRoomModal';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 
 const WatchPartyApp: React.FC = () => {
   const {
@@ -142,6 +143,7 @@ export default function App() {
   return (
     <WatchPartyProvider>
       <WatchPartyApp />
+      <Analytics />
     </WatchPartyProvider>
   );
 }

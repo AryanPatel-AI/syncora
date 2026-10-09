@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
-import { api } from '../../services/api';
+import { api, filterPlayableVideos, markVideoAsUnplayable } from '../../services/api';
+import { DEFAULT_VIDEO_ID } from '../../utils/constants';
 import { VideoItem } from '../../types';
 import {
   Play,
@@ -118,7 +119,8 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
       .getPopularVideos()
       .then((res) => {
         if (!cancelled && Array.isArray(res.items)) {
-          setRelatedVideos(res.items.filter((v) => v.id !== videoId).slice(0, 8));
+          const playable = filterPlayableVideos(res.items.filter((v) => v.id !== videoId));
+          setRelatedVideos(playable.slice(0, 8));
         }
       })
       .catch(() => {});
@@ -175,6 +177,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
             else if (event.data === 2) setIsPlaying(false);
           },
           onError: () => {
+            markVideoAsUnplayable(videoId);
             setPlayerError('This video cannot be embedded or has playback restrictions.');
           },
         },
@@ -256,7 +259,9 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
 
   const handleReturnToLive = () => {
     if (player && video?.isLive) {
-      player.seekTo(duration, true);
+      // Leave a 2.5s buffer delay so the stream has time to buffer smoothly without stuttering
+      const target = Math.max(0, duration - 2.5);
+      player.seekTo(target, true);
       player.playVideo();
     }
   };
@@ -409,15 +414,23 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                 <AlertCircle className="w-8 h-8 text-[#EF4444]" />
                 <h3 className="text-sm font-bold text-white">Playback Unavailable</h3>
                 <p className="text-xs text-[#8E919C] max-w-sm">{playerError}</p>
-                <a
-                  href={`https://www.youtube.com/watch?v=${videoId}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-2 rounded-xl bg-[#8067F5] text-white text-xs font-semibold hover:bg-[#6c51ee] flex items-center gap-2"
-                >
-                  <span>Open on YouTube</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  <button
+                    onClick={() => navigateTo(`/watch/${DEFAULT_VIDEO_ID}`)}
+                    className="px-4 py-2 rounded-xl bg-[#D6F279] text-[#101114] text-xs font-semibold hover:bg-[#c3e065] flex items-center gap-2"
+                  >
+                    <span>Play Verified Stream</span>
+                  </button>
+                  <a
+                    href={`https://www.youtube.com/watch?v=${videoId}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-4 py-2 rounded-xl bg-[#1C1E24] text-[#8E919C] hover:text-white border border-[#282A33] text-xs font-semibold flex items-center gap-2"
+                  >
+                    <span>Open on YouTube</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
               </div>
             )}
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
-import { api } from '../../services/api';
+import { api, filterPlayableVideos } from '../../services/api';
 import { VideoItem } from '../../types';
 import { FeaturedHero } from '../../components/discovery/FeaturedHero';
 import { CategoryPills } from '../../components/discovery/CategoryPills';
@@ -54,20 +54,22 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
             type: filterType === 'live' ? 'live' : 'all',
           });
           if (!isCancelled) {
-            setVideos(searchRes.items || []);
-            setLiveStreams((searchRes.items || []).filter((v) => v.isLive));
-            if (searchRes.items && searchRes.items.length > 0) {
-              setFeaturedVideo(searchRes.items[0]);
+            const playableItems = filterPlayableVideos(searchRes.items || []);
+            setVideos(playableItems);
+            setLiveStreams(playableItems.filter((v) => v.isLive));
+            if (playableItems.length > 0) {
+              setFeaturedVideo(playableItems[0]);
             }
           }
         } else if (filterType === 'live') {
           // Live now only mode
           const liveRes = await api.getLiveStreams(selectedCategory);
           if (!isCancelled) {
-            setLiveStreams(liveRes.items || []);
-            setVideos(liveRes.items || []);
-            if (liveRes.items && liveRes.items.length > 0) {
-              setFeaturedVideo(liveRes.items[0]);
+            const playableLive = filterPlayableVideos(liveRes.items || []);
+            setLiveStreams(playableLive);
+            setVideos(playableLive);
+            if (playableLive.length > 0) {
+              setFeaturedVideo(playableLive[0]);
             }
           }
         } else {
@@ -77,12 +79,14 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
             api.getPopularVideos(selectedCategory),
           ]);
           if (!isCancelled) {
-            setLiveStreams(liveRes.items || []);
-            setVideos(popRes.items || []);
-            if (liveRes.items && liveRes.items.length > 0) {
-              setFeaturedVideo(liveRes.items[0]);
-            } else if (popRes.items && popRes.items.length > 0) {
-              setFeaturedVideo(popRes.items[0]);
+            const playableLive = filterPlayableVideos(liveRes.items || []);
+            const playablePop = filterPlayableVideos(popRes.items || []);
+            setLiveStreams(playableLive);
+            setVideos(playablePop);
+            if (playableLive.length > 0) {
+              setFeaturedVideo(playableLive[0]);
+            } else if (playablePop.length > 0) {
+              setFeaturedVideo(playablePop[0]);
             }
           }
         }

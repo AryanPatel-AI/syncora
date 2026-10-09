@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
 import { extractYouTubeVideoId, getYouTubeThumbnail } from '../../utils/youtube';
 import { VERIFIED_PRESETS } from '../../utils/constants';
+import { isUnplayableVideo } from '../../services/api';
 import { X, Search, Play, Sparkles, AlertCircle, Film, Radio, MonitorPlay } from 'lucide-react';
 
 interface VideoSelectorModalProps {
@@ -23,6 +24,11 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
 
     if (!extractedId) {
       setError('Please enter a valid YouTube URL or 11-character video ID.');
+      return;
+    }
+
+    if (isUnplayableVideo(extractedId)) {
+      setError('This video cannot be played because external embedding has been disabled by the owner.');
       return;
     }
 

@@ -35,6 +35,59 @@ async function handleResponse<T>(res: Response): Promise<T> {
   return res.json();
 }
 
+const UNPLAYABLE_STORAGE_KEY = 'syncora_unplayable_videos';
+
+// Default list of videos known to be ended livestreams, deleted, or owner-restricted for embedding
+const KNOWN_UNPLAYABLE = new Set<string>([
+  'jfKfPfyJRdk', // Ended 2022 stream
+  '4xDzrJKXOOY', // Ended 2022 stream
+  '21X5lGlDOfg', // Ended ISS stream
+  'Bey4XXJAqS8', // Deleted 404
+  'dQw4w9WgXcQ', // Embedding restricted (Error 150)
+  'fJ9rUzIMcZQ', // Embedding restricted (Error 150)
+  'e-ORhEE9VVg', // Embedding restricted (Error 150)
+  'kJQP7kiw5Fk', // Embedding restricted (Error 150)
+]);
+
+function getStoredUnplayable(): Set<string> {
+  const set = new Set<string>(KNOWN_UNPLAYABLE);
+  try {
+    const raw = sessionStorage.getItem(UNPLAYABLE_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) {
+        arr.forEach((id) => set.add(id));
+      }
+    }
+  } catch (_) {}
+  return set;
+}
+
+const unplayableVideos = getStoredUnplayable();
+
+export function markVideoAsUnplayable(videoId: string): void {
+  if (!videoId || typeof videoId !== 'string') return;
+  const cleanId = videoId.trim();
+  if (!cleanId) return;
+  unplayableVideos.add(cleanId);
+  try {
+    sessionStorage.setItem(UNPLAYABLE_STORAGE_KEY, JSON.stringify(Array.from(unplayableVideos)));
+  } catch (_) {}
+}
+
+export function isUnplayableVideo(videoId: string): boolean {
+  if (!videoId || typeof videoId !== 'string') return false;
+  return unplayableVideos.has(videoId.trim());
+}
+
+export function filterPlayableVideos<T extends { id?: string; videoId?: string }>(items: T[]): T[] {
+  if (!Array.isArray(items)) return [];
+  return items.filter((item) => {
+    const id = item.id || item.videoId;
+    return id ? !unplayableVideos.has(id.trim()) : true;
+  });
+}
+
 export const api = {
   // Videos & Discovery
   async searchVideos(params: { q?: string; type?: 'all' | 'video' | 'live'; category?: string; limit?: number }): Promise<{ items: VideoItem[]; totalResults: number; configuredWithApiKey?: boolean }> {
@@ -45,19 +98,31 @@ export const api = {
     if (params.limit) query.set('limit', String(params.limit));
 
     const res = await fetch(`${API_BASE}/api/videos/search?${query.toString()}`);
-    return handleResponse(res);
+    const data = await handleResponse<{ items: VideoItem[]; totalResults: number; configuredWithApiKey?: boolean }>(res);
+    return {
+      ...data,
+      items: filterPlayableVideos(data.items || []),
+    };
   },
 
   async getLiveStreams(category?: string): Promise<{ items: VideoItem[]; total: number }> {
     const query = category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
     const res = await fetch(`${API_BASE}/api/videos/live${query}`);
-    return handleResponse(res);
+    const data = await handleResponse<{ items: VideoItem[]; total: number }>(res);
+    return {
+      ...data,
+      items: filterPlayableVideos(data.items || []),
+    };
   },
 
   async getPopularVideos(category?: string): Promise<{ items: VideoItem[]; total: number }> {
     const query = category && category !== 'all' ? `?category=${encodeURIComponent(category)}` : '';
     const res = await fetch(`${API_BASE}/api/videos/popular${query}`);
-    return handleResponse(res);
+    const data = await handleResponse<{ items: VideoItem[]; total: number }>(res);
+    return {
+      ...data,
+      items: filterPlayableVideos(data.items || []),
+    };
   },
 
   async getVideoDetails(videoId: string): Promise<VideoItem> {
