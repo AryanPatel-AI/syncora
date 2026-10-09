@@ -49,8 +49,20 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
   const isPlaying = canControl ? playback.playState === 'playing' : localPlayState === 'playing';
-  const displayTime = isScrubbing ? scrubValue : currentTime;
-  const progressPercent = duration > 0 ? (displayTime / duration) * 100 : 0;
+
+  const liveEdge = getAuthoritativeTime();
+  // For host: can scrub full duration. For viewer: live stream DVR capped at live edge (cannot watch more than host)
+  const maxScrubTime = canControl
+    ? (duration > 0 ? duration : 100)
+    : Math.max(0.5, liveEdge);
+
+  const displayTime = isScrubbing
+    ? (canControl ? scrubValue : Math.min(scrubValue, liveEdge))
+    : (canControl ? currentTime : Math.min(currentTime, liveEdge));
+
+  const progressPercent = maxScrubTime > 0
+    ? Math.min(100, Math.max(0, (displayTime / maxScrubTime) * 100))
+    : 0;
 
   const handleTogglePlay = () => {
     if (canControl) {
@@ -75,56 +87,68 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   };
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setScrubValue(parseFloat(e.target.value));
+    const rawVal = parseFloat(e.target.value);
+    if (!canControl) {
+      const currentLive = getAuthoritativeTime();
+      setScrubValue(Math.min(rawVal, currentLive));
+    } else {
+      setScrubValue(rawVal);
+    }
   };
 
   const handleSeekStart = () => {
     setIsScrubbing(true);
-    setScrubValue(currentTime);
+    const currentLive = getAuthoritativeTime();
+    setScrubValue(canControl ? currentTime : Math.min(currentTime, currentLive));
   };
 
   const handleSeekEnd = (e: React.MouseEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
     setIsScrubbing(false);
-    const targetValue = parseFloat((e.target as HTMLInputElement).value);
+    const rawTarget = parseFloat((e.target as HTMLInputElement).value);
     if (canControl) {
-      seekVideo(targetValue);
+      seekVideo(rawTarget);
       setIsLiveSynced(true);
       setTimeBehindLive(0);
     } else {
-      // In viewer mode: seek locally in the player
-      if (playerRef?.seekTo) {
-        playerRef.seekTo(targetValue, true);
-      }
-      const authTime = getAuthoritativeTime();
-      const behind = authTime - targetValue;
-      if (behind > 2.0) {
+      const currentLive = getAuthoritativeTime();
+      // Viewers cannot watch more than host: clamp to liveEdge
+      const targetValue = Math.min(rawTarget, currentLive);
+      const behind = currentLive - targetValue;
+
+      // If user scrubbed to the end (within 1.5s of host), snap to live
+      if (behind <= 1.5 || targetValue >= currentLive - 0.5) {
+        returnToLive(playerRef);
+      } else {
+        // Watching earlier part like a video (DVR catch-up mode)
+        if (playerRef?.seekTo) {
+          playerRef.seekTo(targetValue, true);
+        }
         setIsLiveSynced(false);
         setTimeBehindLive(Math.max(0, Math.round(behind)));
-      } else {
-        setIsLiveSynced(true);
-        setTimeBehindLive(0);
       }
     }
   };
 
   const handleSkip = (seconds: number) => {
-    const target = Math.max(0, Math.min(duration, currentTime + seconds));
     if (canControl) {
+      const target = Math.max(0, Math.min(duration, currentTime + seconds));
       seekVideo(target);
       setIsLiveSynced(true);
       setTimeBehindLive(0);
     } else {
-      if (playerRef?.seekTo) {
-        playerRef.seekTo(target, true);
-      }
-      const authTime = getAuthoritativeTime();
-      const behind = authTime - target;
-      if (behind > 2.0) {
+      const currentLive = getAuthoritativeTime();
+      // Viewers cannot watch more than host: clamp to liveEdge
+      const target = Math.max(0, Math.min(currentLive, currentTime + seconds));
+      const behind = currentLive - target;
+
+      if (behind <= 1.5 || target >= currentLive - 0.5) {
+        returnToLive(playerRef);
+      } else {
+        if (playerRef?.seekTo) {
+          playerRef.seekTo(target, true);
+        }
         setIsLiveSynced(false);
         setTimeBehindLive(Math.max(0, Math.round(behind)));
-      } else {
-        setIsLiveSynced(true);
-        setTimeBehindLive(0);
       }
     }
   };
@@ -181,7 +205,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             id="playback-scrubber"
             type="range"
             min={0}
-            max={duration || 100}
+            max={maxScrubTime}
             step={0.1}
             value={displayTime}
             onMouseDown={handleSeekStart}
@@ -189,9 +213,9 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             onChange={handleSeekChange}
             onMouseUp={handleSeekEnd}
             onTouchEnd={handleSeekEnd}
-            aria-label="Playback timeline"
+            aria-label={canControl ? 'Playback timeline' : 'Live stream DVR timeline'}
             aria-valuemin={0}
-            aria-valuemax={duration || 100}
+            aria-valuemax={maxScrubTime}
             aria-valuenow={displayTime}
             className="w-full h-1.5 rounded appearance-none cursor-pointer relative z-10 transition-colors"
             style={{
@@ -205,7 +229,16 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <div className="flex items-center gap-2">
             <span className="text-[#F2F0E9] font-medium">{formatSecondsToTime(displayTime)}</span>
             <span className="text-[#5E606A]">/</span>
-            <span>{formatSecondsToTime(duration)}</span>
+            <span>{formatSecondsToTime(canControl ? duration : maxScrubTime)}</span>
+
+            {!canControl && (
+              <span
+                className="text-[10px] px-1.5 py-0.2 rounded bg-[#D6F279]/10 text-[#D6F279] border border-[#D6F279]/30 font-semibold"
+                title="End of timeline is the live position the host is currently watching"
+              >
+                LIVE EDGE
+              </span>
+            )}
 
             {/* Catch-up badge when viewer is behind */}
             {!canControl && !isLiveSynced && timeBehindLive > 0 && (
@@ -221,8 +254,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                 <Radio className={`w-3 h-3 ${isLiveSynced ? 'text-[#D6F279]' : 'text-[#E5A84B]'}`} />
                 <span>
                   {isLiveSynced
-                    ? 'In sync with room'
-                    : 'Viewing locally · Click LIVE to sync'}
+                    ? 'Watching Live with Host'
+                    : 'DVR Mode · Drag to end for Live'}
                 </span>
               </div>
             ) : (

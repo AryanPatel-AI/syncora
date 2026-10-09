@@ -176,9 +176,16 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     isProgrammaticUpdate.current = true;
 
-    // Only force-seek if viewer is in live sync mode or can control
-    if ((canControl || isLiveSynced) && diff > 1.6) {
+    // Viewers cannot watch more than the host: if player is ahead of authoritative time, force seek back
+    const isAheadOfHost = !canControl && playerTime > authoritativeTime + 0.8;
+
+    // Only force-seek if viewer is in live sync mode, or can control, or is ahead of host
+    if ((canControl || isLiveSynced || isAheadOfHost) && (diff > 1.6 || isAheadOfHost)) {
       player.seekTo(authoritativeTime, true);
+      if (isAheadOfHost) {
+        setIsLiveSynced(true);
+        setTimeBehindLive(0);
+      }
     }
 
     // Only force server play/pause state if viewer is in live sync mode or can control
@@ -218,16 +225,38 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       const authTime = getAuthoritativeTime();
       const behindSeconds = authTime - currentTime;
 
-      // In viewer catch-up mode (!canControl and !isLiveSynced):
-      if (!canControl && !isLiveSynced) {
-        setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
-        // If viewer has naturally caught up to within 1.5s of live, seamlessly restore live sync
-        if (behindSeconds <= 1.5 && behindSeconds >= -1.5) {
+      if (!canControl) {
+        // Enforce: Viewer CANNOT watch more than the host!
+        if (currentTime > authTime + 0.8) {
+          isProgrammaticUpdate.current = true;
+          player.seekTo(authTime, true);
           setIsLiveSynced(true);
+          setTimeBehindLive(0);
+          setTimeout(() => {
+            isProgrammaticUpdate.current = false;
+          }, 400);
+        } else if (!isLiveSynced) {
+          // In viewer DVR catch-up mode:
+          setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
+          // If viewer has naturally caught up to the live edge, seamlessly restore live sync
+          if (behindSeconds <= 1.5) {
+            setIsLiveSynced(true);
+            setTimeBehindLive(0);
+          }
+        } else {
+          // In live synced mode: keep synchronized with host broadcast
+          const drift = Math.abs(currentTime - authTime);
+          if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
+            isProgrammaticUpdate.current = true;
+            player.seekTo(authTime, true);
+            setTimeout(() => {
+              isProgrammaticUpdate.current = false;
+            }, 500);
+          }
           setTimeBehindLive(0);
         }
       } else {
-        // In live synced mode:
+        // In Host / Controller mode:
         const drift = Math.abs(currentTime - authTime);
         if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
           isProgrammaticUpdate.current = true;
