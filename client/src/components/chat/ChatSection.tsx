@@ -152,7 +152,7 @@ export const ChatSection: React.FC = () => {
 
       {/* Pinned Messages Banner */}
       {pinnedMessages.length > 0 && (
-        <div className="px-3 py-1.5 bg-[#34D399]/10 border-b border-[#34D399]/20 flex items-center justify-between text-xs text-[#2BBF88]">
+        <div className="px-3 py-1.5 bg-[#34D399]/10 border-b border-[#34D399]/20 flex items-center justify-between text-xs text-[#34D399]">
           <div className="flex items-center gap-2 truncate">
             <Pin className="w-3.5 h-3.5 shrink-0 text-[#34D399]" />
             <span className="truncate text-[11px] font-medium">

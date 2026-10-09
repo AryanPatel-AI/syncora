@@ -526,7 +526,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               {/* Channel Row & Action Buttons */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#234735]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-white shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-[#09140F] shadow-md">
                     {video.channelTitle ? video.channelTitle.charAt(0).toUpperCase() : 'C'}
                   </div>
                   <div className="flex flex-col">
@@ -555,7 +555,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   {/* Start Watch Party Button */}
                   <button
                     onClick={handleStartWatchParty}
-                    className="px-3.5 py-2 rounded-xl bg-[#34D399] text-white text-xs font-bold hover:bg-[#2BBF88] active:scale-95 transition-all shadow-md shadow-[#34D399]/25 flex items-center gap-1.5"
+                    className="px-3.5 py-2 rounded-xl bg-[#34D399] text-[#09140F] text-xs font-bold hover:bg-[#2BBF88] active:scale-95 transition-all shadow-md shadow-[#34D399]/20 flex items-center gap-1.5"
                   >
                     <Users className="w-3.5 h-3.5" />
                     <span>Start Watch Party</span>

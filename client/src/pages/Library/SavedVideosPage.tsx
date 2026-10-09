@@ -88,7 +88,7 @@ export const SavedVideosPage: React.FC = () => {
                 <div className="flex items-center justify-between pt-2 border-t border-[#234735]/50">
                   <button
                     onClick={(e) => handleStartParty(item.videoId, e)}
-                    className="px-2.5 py-1 rounded-lg bg-[#34D399]/20 text-[#2BBF88] hover:bg-[#34D399] hover:text-white text-[11px] font-semibold flex items-center gap-1 transition-colors"
+                    className="px-2.5 py-1 rounded-lg bg-[#34D399]/15 text-[#34D399] hover:bg-[#34D399] hover:text-[#09140F] text-[11px] font-semibold flex items-center gap-1 transition-colors"
                   >
                     <Users className="w-3 h-3" />
                     <span>Watch Party</span>
