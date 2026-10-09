@@ -129,7 +129,8 @@ sequenceDiagram
 | **Frontend** | React 18, TypeScript, Vite | Fast development, strong type safety, optimized production bundling. |
 | **Styling** | Tailwind CSS, Lucide Icons | Utility-first responsive design, custom midnight theme, accessible icon set. |
 | **Backend** | Node.js, Express, TypeScript | Lightweight, high-throughput asynchronous event handling. |
-| **Real-Time** | Socket.IO | Bidirectional WebSocket engine with automatic fallbacks and heartbeat ping/pong. |
+| **Real-Time** | WebSockets (Socket.IO) | Bidirectional WebSocket engine with automatic fallbacks and heartbeat ping/pong. |
+| **Database** | SQLite (`better-sqlite3` with WAL mode) | High-performance ACID storage for persistent room states, members, and chat history. |
 | **Video Engine** | YouTube IFrame Player API | Direct programmatic iframe control with custom synchronized controls. |
 
 ---

@@ -8,6 +8,10 @@ dist/
 dist-ssr/
 build/
 *.local
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
 
 # Environment variables
 .env

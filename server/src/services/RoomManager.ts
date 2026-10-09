@@ -1,8 +1,8 @@
 import { Room } from '../models/Room';
 import { Participant } from '../models/Participant';
 import { generateRoomId, generateId } from '../utils/helpers';
-
 import { SERVER_CONFIG } from '../config/constants';
+import { RoomRepository } from '../database/roomRepository';
 
 export class RoomManager {
   private static instance: RoomManager;
@@ -30,7 +30,7 @@ export class RoomManager {
     initialVideoId?: string
   ): { room: Room; host: Participant } {
     let roomId = generateRoomId();
-    while (this.rooms.has(roomId)) {
+    while (this.rooms.has(roomId) || RoomRepository.getRoom(roomId)) {
       roomId = generateRoomId();
     }
 
@@ -44,14 +44,45 @@ export class RoomManager {
     this.socketToRoom.set(socketId, roomId);
     this.socketToUser.set(socketId, hostId);
 
+    // Persist to SQLite Database
+    RoomRepository.saveRoom(room.id, host.id, room.getPlaybackState(), room.createdAt);
+    RoomRepository.saveParticipant(
+      room.id,
+      host.id,
+      host.username,
+      host.role,
+      host.avatarColor,
+      host.joinedAt
+    );
+
     return { room, host };
   }
 
   /**
-   * Retrieves an existing room by its ID.
+   * Retrieves an existing room by its ID, rehydrating from SQLite database if needed.
    */
   public getRoom(roomId: string): Room | undefined {
-    return this.rooms.get(roomId.toUpperCase().trim());
+    const cleanId = roomId.toUpperCase().trim();
+    let room = this.rooms.get(cleanId);
+
+    if (!room) {
+      // Rehydrate room from SQLite persistent database
+      const record = RoomRepository.getRoom(cleanId);
+      if (record) {
+        room = new Room(record.id, record.video_id);
+        room.hostId = record.host_id;
+
+        // Restore chat messages from database
+        const savedChat = RoomRepository.getChatMessages(cleanId, 50);
+        for (const msg of savedChat) {
+          room.addChatMessage(msg.senderId, msg.senderName, msg.content, msg.type, msg.senderRole);
+        }
+
+        this.rooms.set(cleanId, room);
+      }
+    }
+
+    return room;
   }
 
   /**
@@ -63,13 +94,13 @@ export class RoomManager {
     socketId: string
   ): { room: Room; participant: Participant } | { error: string } {
     const cleanRoomId = roomId.toUpperCase().trim();
-    const room = this.rooms.get(cleanRoomId);
+    const room = this.getRoom(cleanRoomId);
 
     if (!room) {
       return { error: `Room ${cleanRoomId} does not exist or has expired.` };
     }
 
-    // Check if socket is already in another room
+    // Disconnect socket from any previous room
     this.leaveRoom(socketId);
 
     const userId = generateId('user');
@@ -84,6 +115,16 @@ export class RoomManager {
     room.addParticipant(participant);
     this.socketToRoom.set(socketId, cleanRoomId);
     this.socketToUser.set(socketId, userId);
+
+    // Persist participant in SQLite
+    RoomRepository.saveParticipant(
+      room.id,
+      participant.id,
+      participant.username,
+      participant.role,
+      participant.avatarColor,
+      participant.joinedAt
+    );
 
     return { room, participant };
   }
@@ -113,8 +154,11 @@ export class RoomManager {
     const participant = room.removeParticipant(userId);
     if (!participant) return null;
 
+    // Remove participant from SQLite
+    RoomRepository.removeParticipant(userId);
+
     if (room.isEmpty()) {
-      // Room has 0 participants, delete it
+      // Memory cleanup, keep room in SQLite for persistent rejoin or delete if desired
       this.rooms.delete(roomId);
       return {
         room,
@@ -136,7 +180,7 @@ export class RoomManager {
   public getRoomBySocketId(socketId: string): Room | undefined {
     const roomId = this.socketToRoom.get(socketId);
     if (!roomId) return undefined;
-    return this.rooms.get(roomId);
+    return this.getRoom(roomId);
   }
 
   public getParticipantBySocketId(socketId: string): Participant | undefined {
@@ -146,7 +190,9 @@ export class RoomManager {
   }
 
   public deleteRoom(roomId: string): boolean {
-    return this.rooms.delete(roomId.toUpperCase().trim());
+    const cleanId = roomId.toUpperCase().trim();
+    RoomRepository.deleteRoom(cleanId);
+    return this.rooms.delete(cleanId);
   }
 
   public getRoomCount(): number {

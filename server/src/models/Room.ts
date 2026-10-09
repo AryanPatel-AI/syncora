@@ -9,8 +9,8 @@ import {
   RoomStateSnapshot,
 } from '../types';
 import { generateId } from '../utils/helpers';
-
 import { SERVER_CONFIG } from '../config/constants';
+import { RoomRepository } from '../database/roomRepository';
 
 export class Room {
   public readonly id: string;
@@ -107,6 +107,7 @@ export class Room {
     currentHost.revokeHost();
     target.makeHost();
     this.hostId = target.id;
+    RoomRepository.updateHost(this.id, target.id);
     return true;
   }
 
@@ -137,6 +138,14 @@ export class Room {
         username: author.username,
       },
     };
+    RoomRepository.updatePlayback(
+      this.id,
+      this.playback.videoId,
+      this.playback.playState,
+      this.playback.currentTime,
+      this.playback.lastUpdatedAt,
+      this.playback.playbackRate
+    );
     return this.getPlaybackState();
   }
 
@@ -150,6 +159,14 @@ export class Room {
         username: author.username,
       },
     };
+    RoomRepository.updatePlayback(
+      this.id,
+      this.playback.videoId,
+      this.playback.playState,
+      this.playback.currentTime,
+      this.playback.lastUpdatedAt,
+      this.playback.playbackRate
+    );
     return this.getPlaybackState();
   }
 
@@ -165,6 +182,14 @@ export class Room {
         username: author.username,
       },
     };
+    RoomRepository.updatePlayback(
+      this.id,
+      this.playback.videoId,
+      this.playback.playState,
+      this.playback.currentTime,
+      this.playback.lastUpdatedAt,
+      this.playback.playbackRate
+    );
     return this.getPlaybackState();
   }
 
@@ -246,6 +271,7 @@ export class Room {
     if (this.chatHistory.length > Room.MAX_CHAT_HISTORY) {
       this.chatHistory.shift();
     }
+    RoomRepository.saveChatMessage(this.id, msg);
     return msg;
   }
 

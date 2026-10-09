@@ -7,8 +7,12 @@ import dotenv from 'dotenv';
 import { SERVER_CONFIG } from './config/constants';
 import apiRoutes from './routes/apiRoutes';
 import { registerSocketHandlers } from './sockets/socketHandler';
+import { initDatabase } from './database/db';
 
 dotenv.config();
+
+// Initialize SQLite schema
+initDatabase();
 
 const app = express();
 const server = http.createServer(app);

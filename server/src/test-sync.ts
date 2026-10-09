@@ -4,9 +4,12 @@ import express from 'express';
 import { Server as SocketIOServer } from 'socket.io';
 import { registerSocketHandlers } from './sockets/socketHandler';
 import { SOCKET_EVENTS } from './sockets/events';
+import { initDatabase } from './database/db';
 
 async function runTests() {
   console.log('🧪 Starting Syncora Real-Time Engine & RBAC Verification Tests...\n');
+
+  initDatabase();
 
   // 1. Setup in-memory test server on port 4009
   const app = express();
