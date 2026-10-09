@@ -4,14 +4,14 @@ import { api } from '../../services/api';
 import { X, Lock, User, Sparkles, Check } from 'lucide-react';
 
 const AVATAR_OPTIONS = [
-  '#34D399', // emerald
-  '#2BBF88', // teal-green
-  '#D1FAE5', // mint
-  '#193225', // forest
-  '#E5A84B', // gold
-  '#F59E0B', // amber
-  '#F87171', // soft red
-  '#82A8F8', // slate-blue (kept for variety)
+  '#34D399',
+  '#2BBF88',
+  '#34D399',
+  '#34D399',
+  '#34D399',
+  '#F59E0B',
+  '#34D399',
+  '#34D399',
 ];
 
 export const AuthModal: React.FC = () => {

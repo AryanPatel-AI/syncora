@@ -109,10 +109,10 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                   : 'text-[#8E919C] hover:text-[#D1FAE5]'
               }`}
             >
-              <ListVideo className="w-3.5 h-3.5 text-[#34D399]" />
+              <ListVideo className="w-3.5 h-3.5 text-[#2BBF88]" />
               <span>Queue</span>
               {roomQueue.length > 0 && (
-                <span className="w-3.5 h-3.5 rounded-full bg-[#34D399] text-[#09140F] text-[9px] font-bold font-mono flex items-center justify-center">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#2BBF88] text-[#09140F] text-[9px] font-bold font-mono flex items-center justify-center">
                   {roomQueue.length}
                 </span>
               )}
@@ -223,7 +223,7 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                   {canControl && roomQueue.length > 0 && (
                     <button
                       onClick={playNextInQueue}
-                      className="px-3.5 py-2 rounded-xl bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      className="px-3.5 py-2 rounded-xl bg-[#2BBF88] hover:bg-[#2BBF88] text-[#09140F] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Play Next</span>

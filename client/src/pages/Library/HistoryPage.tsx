@@ -35,7 +35,7 @@ export const HistoryPage: React.FC = () => {
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
       <div className="flex items-center justify-between pb-3 border-b border-[#234735]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
+          <div className="w-10 h-10 rounded-2xl bg-[#2BBF88]/15 text-[#2BBF88] flex items-center justify-center">
             <History className="w-5 h-5" />
           </div>
           <div>

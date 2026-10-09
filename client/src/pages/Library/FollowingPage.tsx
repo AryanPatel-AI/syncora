@@ -61,7 +61,7 @@ export const FollowingPage: React.FC = () => {
               className="p-4 rounded-2xl bg-[#11221A] border border-[#234735] flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-sm text-[#09140F] shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-sm text-white shrink-0">
                   {ch.channelTitle.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col overflow-hidden">
