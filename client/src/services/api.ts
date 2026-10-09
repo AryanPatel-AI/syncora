@@ -8,7 +8,9 @@ import {
   NotificationItem,
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER_URL || 'http://localhost:4000';
+import { getBackendUrl } from '../lib/socket';
+
+const API_BASE = getBackendUrl();
 
 function getAuthHeader(): Record<string, string> {
   const token = localStorage.getItem('syncora_auth_token');

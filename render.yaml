@@ -1,14 +1,12 @@
 services:
   - type: web
-    name: syncora-backend
+    name: syncora
     runtime: node
-    rootDir: server
-    buildCommand: npm install && npm run build
+    plan: free
+    buildCommand: npm run install:all && npm run build
     startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: FRONTEND_URL
-        value: https://syncora.vercel.app
