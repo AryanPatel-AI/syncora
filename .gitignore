@@ -33,6 +33,7 @@ lerna-debug.log*
 Thumbs.db
 .idea/
 .vscode/
+.vercel/
 *.suo
 *.ntvs*
 *.njsproj
