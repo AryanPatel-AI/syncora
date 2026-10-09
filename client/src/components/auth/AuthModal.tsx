@@ -72,11 +72,11 @@ export const AuthModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-sm rounded-2xl bg-[#16171B] border border-[#282A33] shadow-2xl p-6 text-[#F2F0E9] flex flex-col gap-4">
+      <div className="relative w-full max-w-sm rounded-2xl bg-[#11221A] border border-[#234735] shadow-2xl p-6 text-[#D1FAE5] flex flex-col gap-4">
         {/* Close Button */}
         <button
           onClick={() => setIsAuthModalOpen(false)}
-          className="absolute right-4 top-4 p-1.5 rounded-lg text-[#8E919C] hover:text-white hover:bg-[#282A33] transition-colors"
+          className="absolute right-4 top-4 p-1.5 rounded-lg text-[#8E919C] hover:text-white hover:bg-[#234735] transition-colors"
           aria-label="Close modal"
         >
           <X className="w-4 h-4" />
@@ -98,7 +98,7 @@ export const AuthModal: React.FC = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="grid grid-cols-2 p-1 rounded-xl bg-[#101114] border border-[#282A33]">
+        <div className="grid grid-cols-2 p-1 rounded-xl bg-[#09140F] border border-[#234735]">
           <button
             type="button"
             onClick={() => {
@@ -107,7 +107,7 @@ export const AuthModal: React.FC = () => {
             }}
             className={`py-1.5 text-xs font-semibold rounded-lg transition-colors ${
               authModalMode === 'login'
-                ? 'bg-[#1C1E24] text-white shadow-sm'
+                ? 'bg-[#193225] text-white shadow-sm'
                 : 'text-[#8E919C] hover:text-white'
             }`}
           >
@@ -121,7 +121,7 @@ export const AuthModal: React.FC = () => {
             }}
             className={`py-1.5 text-xs font-semibold rounded-lg transition-colors ${
               authModalMode === 'register'
-                ? 'bg-[#1C1E24] text-white shadow-sm'
+                ? 'bg-[#193225] text-white shadow-sm'
                 : 'text-[#8E919C] hover:text-white'
             }`}
           >
@@ -149,7 +149,7 @@ export const AuthModal: React.FC = () => {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
-                className="w-full bg-[#101114] border border-[#282A33] rounded-xl px-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
               />
             </div>
           )}
@@ -166,7 +166,7 @@ export const AuthModal: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 required
-                className="w-full bg-[#101114] border border-[#282A33] rounded-xl pl-9 pr-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
               />
             </div>
           </div>
@@ -184,7 +184,7 @@ export const AuthModal: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-[#101114] border border-[#282A33] rounded-xl pl-9 pr-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
               />
             </div>
           </div>

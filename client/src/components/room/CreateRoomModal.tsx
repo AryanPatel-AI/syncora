@@ -62,10 +62,10 @@ export const CreateRoomModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg rounded-2xl bg-[#16171B] border border-[#282A33] shadow-2xl p-6 text-[#F2F0E9] flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg rounded-2xl bg-[#11221A] border border-[#234735] shadow-2xl p-6 text-[#D1FAE5] flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
         <button
           onClick={() => setIsCreateRoomModalOpen(false)}
-          className="absolute right-4 top-4 p-1.5 rounded-lg text-[#8E919C] hover:text-white hover:bg-[#282A33] transition-colors"
+          className="absolute right-4 top-4 p-1.5 rounded-lg text-[#8E919C] hover:text-white hover:bg-[#234735] transition-colors"
           aria-label="Close modal"
         >
           <X className="w-4 h-4" />
@@ -73,7 +73,7 @@ export const CreateRoomModal: React.FC = () => {
 
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#D6F279]/15 text-[#D6F279] flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
               <Tv className="w-4 h-4" />
             </div>
             <h2 className="text-base font-bold text-white tracking-tight">
@@ -103,7 +103,7 @@ export const CreateRoomModal: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               maxLength={30}
-              className="w-full bg-[#101114] border border-[#282A33] rounded-xl px-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#D6F279]"
+              className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
             />
           </div>
 
@@ -116,7 +116,7 @@ export const CreateRoomModal: React.FC = () => {
               placeholder="https://www.youtube.com/watch?v=..."
               value={customUrl}
               onChange={(e) => setCustomUrl(e.target.value)}
-              className="w-full bg-[#101114] border border-[#282A33] rounded-xl px-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#D6F279]"
+              className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
             />
           </div>
 
@@ -135,8 +135,8 @@ export const CreateRoomModal: React.FC = () => {
                   }}
                   className={`flex items-center gap-2.5 p-2 rounded-xl text-left border transition-all ${
                     selectedVideoId === preset.id && !customUrl
-                      ? 'bg-[#1C1E24] border-[#D6F279] ring-1 ring-[#D6F279]'
-                      : 'bg-[#101114] border-[#282A33] hover:border-[#3E4250]'
+                      ? 'bg-[#193225] border-[#34D399] ring-1 ring-[#34D399]'
+                      : 'bg-[#09140F] border-[#234735] hover:border-[#2A5540]'
                   }`}
                 >
                   <img
@@ -160,7 +160,7 @@ export const CreateRoomModal: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-[#D6F279] text-[#101114] font-bold text-xs hover:bg-[#c8e860] active:scale-95 disabled:opacity-50 transition-all shadow-md shadow-[#D6F279]/15 flex items-center justify-center gap-1.5 mt-2"
+            className="w-full py-2.5 rounded-xl bg-[#34D399] text-[#09140F] font-bold text-xs hover:bg-[#2BBF88] active:scale-95 disabled:opacity-50 transition-all shadow-md shadow-[#34D399]/15 flex items-center justify-center gap-1.5 mt-2"
           >
             <span>{loading ? 'Creating Screening Room...' : 'Launch Watch Party'}</span>
             <ArrowRight className="w-3.5 h-3.5" />

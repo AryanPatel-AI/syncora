@@ -1,4 +1,4 @@
-export type Role = 'HOST' | 'MODERATOR' | 'PARTICIPANT';
+export type Role = 'HOST' | 'MODERATOR' | 'PARTICIPANT' | 'VIEWER';
 
 export type PlayState = 'playing' | 'paused' | 'buffering';
 

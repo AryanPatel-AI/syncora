@@ -19,13 +19,13 @@ export const FloatingReaction: React.FC = () => {
         return (
           <div
             key={reaction.id}
-            className="animate-float-up flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#16171B]/90 border border-[#282A33] shadow-cinema backdrop-blur-xs text-xs font-medium text-[#F2F0E9]"
+            className="animate-float-up flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#11221A]/90 border border-[#234735] shadow-cinema backdrop-blur-xs text-xs font-medium text-[#D1FAE5]"
             style={{
               animationDelay: `${index * 60}ms`,
             }}
           >
             {isHeart ? (
-              <Heart className="w-3.5 h-3.5 fill-[#D6F279] text-[#D6F279]" />
+              <Heart className="w-3.5 h-3.5 fill-[#34D399] text-[#34D399]" />
             ) : (
               <span className="text-sm leading-none">{reaction.emoji}</span>
             )}

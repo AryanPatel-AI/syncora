@@ -26,7 +26,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
   };
 
   return (
-    <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-br from-[#1C1E24] to-[#121316] border border-[#282A33] shadow-2xl p-6 sm:p-10 flex flex-col justify-end min-h-[340px] sm:min-h-[400px]">
+    <div className="relative w-full rounded-3xl overflow-hidden bg-gradient-to-br from-[#193225] to-[#09140F] border border-[#234735] shadow-2xl p-6 sm:p-10 flex flex-col justify-end min-h-[340px] sm:min-h-[400px]">
       {/* Background Graphic & Backdrop */}
       <div className="absolute inset-0 z-0">
         <img
@@ -34,8 +34,8 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
           alt={featuredVideo.title}
           className="w-full h-full object-cover object-center opacity-30 mix-blend-luminosity scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#101114] via-[#101114]/80 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#101114] via-[#101114]/60 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#09140F] via-[#09140F]/80 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#09140F] via-[#09140F]/60 to-transparent" />
       </div>
 
       {/* Content */}
@@ -48,13 +48,13 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
             </div>
           ) : (
             <div className="px-2.5 py-1 rounded-md bg-[#8067F5]/20 text-[#A99BFF] border border-[#8067F5]/30 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3 text-[#D6F279]" />
+              <Sparkles className="w-3 h-3 text-[#34D399]" />
               FEATURED PREMIERE
             </div>
           )}
 
           {featuredVideo.isLive && typeof featuredVideo.concurrentViewers === 'number' && (
-            <div className="px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-mono text-[#F2F0E9] flex items-center gap-1">
+            <div className="px-2 py-1 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-mono text-[#D1FAE5] flex items-center gap-1">
               <Radio className="w-3 h-3 text-[#EF4444]" />
               <span>{featuredVideo.concurrentViewers.toLocaleString()} watching now</span>
             </div>
@@ -75,7 +75,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-xs text-white">
               {featuredVideo.channelTitle.charAt(0).toUpperCase()}
             </div>
-            <span className="text-xs font-semibold text-[#F2F0E9]">
+            <span className="text-xs font-semibold text-[#D1FAE5]">
               {featuredVideo.channelTitle}
             </span>
           </div>
@@ -83,7 +83,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => navigateTo(`/watch/${featuredVideo.id}`)}
-              className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#D6F279] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:bg-[#34D399] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
               <span>Watch Now</span>

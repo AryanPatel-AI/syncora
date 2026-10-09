@@ -35,8 +35,8 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
   const isModerator = participant.role === 'MODERATOR';
 
   // Use avatarColor or a deterministic fallback
-  const bgColor = participant.avatarColor || '#D6F279';
-  const textColor = bgColor === '#D6F279' ? '#101114' : '#FFFFFF';
+  const bgColor = participant.avatarColor || '#34D399';
+  const textColor = bgColor === '#34D399' ? '#09140F' : '#FFFFFF';
 
   return (
     <div
@@ -45,7 +45,7 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
       aria-label={`${participant.username}, ${isHost ? 'Host' : isModerator ? 'Moderator' : 'Viewer'}`}
     >
       <div
-        className={`${sizeClasses[size]} rounded-full font-mono font-semibold flex items-center justify-center shadow-sm border border-[#282A33]`}
+        className={`${sizeClasses[size]} rounded-full font-mono font-semibold flex items-center justify-center shadow-sm border border-[#234735]`}
         style={{ backgroundColor: bgColor, color: textColor }}
       >
         {initial}
@@ -54,7 +54,7 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
       {/* Subtle green indicator dot for connected participants */}
       {showOnlineDot && (
         <span
-          className={`absolute ${dotSizes[size]} rounded-full bg-[#10B981] border border-[#101114]`}
+          className={`absolute ${dotSizes[size]} rounded-full bg-[#10B981] border border-[#09140F]`}
           aria-hidden="true"
         />
       )}
@@ -62,7 +62,7 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
       {/* Optional miniature Role Badge */}
       {showRoleBadge && isHost && (
         <span
-          className="absolute -top-1 -right-1 p-0.5 rounded-full bg-[#16171B] border border-[#E5A84B]/40 text-[#E5A84B]"
+          className="absolute -top-1 -right-1 p-0.5 rounded-full bg-[#11221A] border border-[#E5A84B]/40 text-[#E5A84B]"
           title="Room Host"
           aria-hidden="true"
         >
@@ -71,7 +71,7 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
       )}
       {showRoleBadge && isModerator && !isHost && (
         <span
-          className="absolute -top-1 -right-1 p-0.5 rounded-full bg-[#16171B] border border-[#82A8F8]/40 text-[#82A8F8]"
+          className="absolute -top-1 -right-1 p-0.5 rounded-full bg-[#11221A] border border-[#82A8F8]/40 text-[#82A8F8]"
           title="Moderator"
           aria-hidden="true"
         >

@@ -51,8 +51,8 @@ export const AudiencePresence: React.FC = () => {
         aria-label={`Audience presence: Watching now ${count} participants. Click to view roster`}
         className={`flex items-center gap-2 px-2.5 py-1 rounded-md border text-xs transition-colors select-none ${
           isOpen
-            ? 'bg-[#1C1E24] border-[#D6F279] text-[#F2F0E9]'
-            : 'bg-[#16171B] border-[#282A33] hover:border-[#3A3D4A] text-[#8E919C] hover:text-[#F2F0E9]'
+            ? 'bg-[#193225] border-[#34D399] text-[#D1FAE5]'
+            : 'bg-[#11221A] border-[#234735] hover:border-[#2A5540] text-[#8E919C] hover:text-[#D1FAE5]'
         }`}
       >
         {/* Overlapping Avatar Stack */}
@@ -63,11 +63,11 @@ export const AudiencePresence: React.FC = () => {
               participant={p}
               size="sm"
               showOnlineDot={false}
-              className="ring-1 ring-[#101114]"
+              className="ring-1 ring-[#09140F]"
             />
           ))}
           {remainingCount > 0 && (
-            <span className="w-5 h-5 rounded-full bg-[#1C1E24] border border-[#282A33] text-[9px] font-mono text-[#D6F279] flex items-center justify-center font-bold">
+            <span className="w-5 h-5 rounded-full bg-[#193225] border border-[#234735] text-[9px] font-mono text-[#34D399] flex items-center justify-center font-bold">
               +{remainingCount}
             </span>
           )}
@@ -76,15 +76,15 @@ export const AudiencePresence: React.FC = () => {
         {/* Live Audience Count Label */}
         <div className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" aria-hidden="true" />
-          <span className="text-[11px] font-medium text-[#F2F0E9]">
+          <span className="text-[11px] font-medium text-[#D1FAE5]">
             Watching now <span className="font-mono text-[#8E919C]">&middot;</span>{' '}
-            <span className="font-mono text-[#D6F279] font-semibold">{count}</span>
+            <span className="font-mono text-[#34D399] font-semibold">{count}</span>
           </span>
         </div>
 
         <ChevronDown
           className={`w-3 h-3 text-[#8E919C] transition-transform duration-150 ${
-            isOpen ? 'rotate-180 text-[#D6F279]' : ''
+            isOpen ? 'rotate-180 text-[#34D399]' : ''
           }`}
           aria-hidden="true"
         />
@@ -95,15 +95,15 @@ export const AudiencePresence: React.FC = () => {
         <div
           role="dialog"
           aria-label="Active Audience Members"
-          className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl bg-[#16171B] border border-[#282A33] shadow-cinema p-3 flex flex-col gap-3 text-xs animate-in fade-in zoom-in-95 duration-100"
+          className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl bg-[#11221A] border border-[#234735] shadow-cinema p-3 flex flex-col gap-3 text-xs animate-in fade-in zoom-in-95 duration-100"
         >
           {/* Header */}
-          <div className="flex items-center justify-between pb-2 border-b border-[#282A33]">
-            <div className="flex items-center gap-1.5 text-[#F2F0E9] font-medium">
-              <Users className="w-3.5 h-3.5 text-[#D6F279]" />
+          <div className="flex items-center justify-between pb-2 border-b border-[#234735]">
+            <div className="flex items-center gap-1.5 text-[#D1FAE5] font-medium">
+              <Users className="w-3.5 h-3.5 text-[#34D399]" />
               <span>In This Screening</span>
             </div>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#101114] text-[#8E919C] border border-[#282A33]">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#09140F] text-[#8E919C] border border-[#234735]">
               {count} connected
             </span>
           </div>
@@ -119,12 +119,12 @@ export const AudiencePresence: React.FC = () => {
                 <div
                   key={p.id}
                   className={`flex items-center justify-between p-1.5 rounded-md transition-colors ${
-                    isMe ? 'bg-[#1C1E24] border border-[#3E4250]' : 'hover:bg-[#1C1E24]/50'
+                    isMe ? 'bg-[#193225] border border-[#2A5540]' : 'hover:bg-[#193225]/50'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <ParticipantAvatar participant={p} size="sm" showOnlineDot={true} />
-                    <span className="text-xs text-[#F2F0E9] truncate font-medium max-w-[120px]">
+                    <span className="text-xs text-[#D1FAE5] truncate font-medium max-w-[120px]">
                       {p.username}
                       {isMe && <span className="text-[10px] text-[#8E919C] ml-1 font-mono">(You)</span>}
                     </span>
@@ -145,7 +145,7 @@ export const AudiencePresence: React.FC = () => {
                       </span>
                     )}
                     {!isHost && !isModerator && (
-                      <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#1C1E24] text-[#8E919C] border border-[#282A33]">
+                      <span className="inline-flex items-center gap-1 text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#193225] text-[#8E919C] border border-[#234735]">
                         <User className="w-2.5 h-2.5" />
                         <span>Viewer</span>
                       </span>
@@ -158,18 +158,18 @@ export const AudiencePresence: React.FC = () => {
 
           {/* Useful Empty State (When only 1 viewer is in room) */}
           {participants.length <= 1 && (
-            <div className="p-2.5 rounded-lg bg-[#101114] border border-[#282A33] flex flex-col gap-2 text-center">
+            <div className="p-2.5 rounded-lg bg-[#09140F] border border-[#234735] flex flex-col gap-2 text-center">
               <p className="text-[11px] text-[#8E919C] leading-snug">
                 You're the only one here right now. Invite friends to watch together!
               </p>
               <button
                 onClick={handleCopyLink}
-                className="w-full py-1.5 rounded-md bg-[#1C1E24] hover:bg-[#24262E] border border-[#282A33] hover:border-[#D6F279]/50 text-[#F2F0E9] text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5"
+                className="w-full py-1.5 rounded-md bg-[#193225] hover:bg-[#224433] border border-[#234735] hover:border-[#34D399]/50 text-[#D1FAE5] text-[11px] font-medium transition-colors flex items-center justify-center gap-1.5"
               >
                 {copied ? (
                   <>
-                    <Check className="w-3 h-3 text-[#D6F279]" />
-                    <span className="text-[#D6F279]">Link Copied</span>
+                    <Check className="w-3 h-3 text-[#34D399]" />
+                    <span className="text-[#34D399]">Link Copied</span>
                   </>
                 ) : (
                   <>

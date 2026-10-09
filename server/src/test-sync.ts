@@ -392,6 +392,40 @@ async function runTests() {
       'Demoted Aryan PAUSE'
     );
 
+    // Host assigns Aryan as VIEWER (watch-only alias)
+    await new Promise<void>((resolve, reject) => {
+      participantSocket.once(SOCKET_EVENTS.ROLE_ASSIGNED, (data: any) => {
+        if (data.userId === aryanUserId && data.role === 'VIEWER') {
+          console.log(`  ✓ Aryan assigned as VIEWER`);
+          resolve();
+        } else {
+          reject(new Error(`Failed to assign Aryan as VIEWER: ${JSON.stringify(data)}`));
+        }
+      });
+      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'VIEWER' });
+    });
+
+    // Viewer Aryan cannot pause (watch-only)
+    await expectError(
+      participantSocket,
+      () => participantSocket.emit(SOCKET_EVENTS.PAUSE, { time: 90 }),
+      'Permission denied',
+      'Viewer Aryan PAUSE'
+    );
+
+    // Host restores Aryan back to PARTICIPANT
+    await new Promise<void>((resolve, reject) => {
+      participantSocket.once(SOCKET_EVENTS.ROLE_ASSIGNED, (data: any) => {
+        if (data.userId === aryanUserId && data.role === 'PARTICIPANT') {
+          console.log(`  ✓ Aryan restored back to PARTICIPANT`);
+          resolve();
+        } else {
+          reject(new Error(`Failed to restore Aryan: ${JSON.stringify(data)}`));
+        }
+      });
+      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'PARTICIPANT' });
+    });
+
     // =========================================================================
     // REQUIREMENT 8: Allowing role assignments and participant removal only by the Host
     // =========================================================================

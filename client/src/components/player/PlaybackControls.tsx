@@ -192,7 +192,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   return (
     <div
-      className="w-full rounded-xl bg-[#16171B] border border-[#282A33] p-3.5 flex flex-col gap-2.5 shadow-cinema"
+      className="w-full rounded-xl bg-[#11221A] border border-[#234735] p-3.5 flex flex-col gap-2.5 shadow-cinema"
       aria-label="Playback Controls"
     >
       {/* Scrubber Progress Slider */}
@@ -219,7 +219,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             aria-valuenow={displayTime}
             className="w-full h-1.5 rounded appearance-none cursor-pointer relative z-10 transition-colors"
             style={{
-              background: `linear-gradient(to right, #D6F279 0%, #D6F279 ${progressPercent}%, #282A33 ${progressPercent}%, #282A33 100%)`,
+              background: `linear-gradient(to right, #34D399 0%, #34D399 ${progressPercent}%, #234735 ${progressPercent}%, #234735 100%)`,
             }}
           />
         </div>
@@ -227,13 +227,13 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         {/* Timestamps & Permission Status */}
         <div className="flex items-center justify-between text-xs text-[#8E919C] font-mono px-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-[#F2F0E9] font-medium">{formatSecondsToTime(displayTime)}</span>
+            <span className="text-[#D1FAE5] font-medium">{formatSecondsToTime(displayTime)}</span>
             <span className="text-[#5E606A]">/</span>
             <span>{formatSecondsToTime(canControl ? duration : maxScrubTime)}</span>
 
             {!canControl && (
               <span
-                className="text-[10px] px-1.5 py-0.2 rounded bg-[#D6F279]/10 text-[#D6F279] border border-[#D6F279]/30 font-semibold"
+                className="text-[10px] px-1.5 py-0.2 rounded bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/30 font-semibold"
                 title="End of timeline is the live position the host is currently watching"
               >
                 LIVE EDGE
@@ -251,7 +251,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <div className="flex items-center gap-2">
             {!canControl ? (
               <div className="flex items-center gap-1.5 text-[11px] text-[#8E919C]">
-                <Radio className={`w-3 h-3 ${isLiveSynced ? 'text-[#D6F279]' : 'text-[#E5A84B]'}`} />
+                <Radio className={`w-3 h-3 ${isLiveSynced ? 'text-[#34D399]' : 'text-[#E5A84B]'}`} />
                 <span>
                   {isLiveSynced
                     ? 'Watching Live with Host'
@@ -259,8 +259,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                 </span>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 text-[11px] text-[#D6F279]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#D6F279] animate-pulse" />
+              <div className="flex items-center gap-1.5 text-[11px] text-[#34D399]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
                 <span className="hidden sm:inline">Host broadcast</span>
               </div>
             )}
@@ -269,7 +269,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       </div>
 
       {/* Control Actions Bar */}
-      <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#282A33]/70">
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#234735]/70">
         {/* Left Side: Core Playback Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Main Play / Pause Button */}
@@ -278,8 +278,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             aria-label={canControl ? (isPlaying ? 'Pause video' : 'Play video') : 'Play/pause locally'}
             className={`flex items-center justify-center w-9 h-9 rounded-md transition-colors ${
               canControl
-                ? 'bg-[#D6F279] hover:bg-[#C3E065] text-[#101114]'
-                : 'bg-[#1C1E24] hover:bg-[#24262E] text-[#8E919C] hover:text-[#D6F279] border border-[#282A33]'
+                ? 'bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F]'
+                : 'bg-[#193225] hover:bg-[#224433] text-[#8E919C] hover:text-[#34D399] border border-[#234735]'
             }`}
             title={canControl ? (isPlaying ? 'Pause for room' : 'Play for room') : 'Play/pause locally'}
           >
@@ -294,7 +294,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <button
             onClick={() => handleSkip(-10)}
             aria-label="Rewind 10 seconds"
-            className="p-2 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+            className="p-2 rounded-md text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
             title="Rewind 10s"
           >
             <RotateCcw className="w-4 h-4" />
@@ -304,7 +304,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <button
             onClick={() => handleSkip(10)}
             aria-label="Fast forward 10 seconds"
-            className="p-2 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+            className="p-2 rounded-md text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
             title="Fast forward 10s"
           >
             <RotateCw className="w-4 h-4" />
@@ -314,10 +314,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <button
             type="button"
             onClick={() => returnToLive(playerRef)}
-            className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[30px] rounded-md text-xs font-mono font-semibold transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6F279] ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 min-h-[30px] rounded-md text-xs font-mono font-semibold transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34D399] ${
               isLiveSynced
-                ? 'bg-[#D6F279]/15 border border-[#D6F279]/40 text-[#D6F279]'
-                : 'bg-[#1C1E24] hover:bg-[#D6F279] text-[#E5A84B] hover:text-[#101114] border border-[#E5A84B] hover:border-[#D6F279] shadow-cinema cursor-pointer active:scale-95'
+                ? 'bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399]'
+                : 'bg-[#193225] hover:bg-[#34D399] text-[#E5A84B] hover:text-[#09140F] border border-[#E5A84B] hover:border-[#34D399] shadow-cinema cursor-pointer active:scale-95'
             }`}
             title={
               isLiveSynced
@@ -333,7 +333,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <span
               className={`w-2 h-2 rounded-full transition-colors ${
                 isLiveSynced
-                  ? 'bg-[#D6F279] animate-pulse'
+                  ? 'bg-[#34D399] animate-pulse'
                   : 'bg-[#E5A84B] animate-ping'
               }`}
               aria-hidden="true"
@@ -347,15 +347,15 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </button>
 
           {/* Volume Deck */}
-          <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-[#282A33]">
+          <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-[#234735]">
             <button
               onClick={handleToggleMute}
               aria-label={isMuted ? 'Unmute stream audio' : 'Mute stream audio'}
-              className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+              className="p-1.5 rounded-md text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
               title={isMuted ? 'Unmute' : 'Mute'}
             >
               {isMuted || volume === 0 ? (
-                <VolumeX className="w-4 h-4 text-[#D6F279]" />
+                <VolumeX className="w-4 h-4 text-[#34D399]" />
               ) : (
                 <Volume2 className="w-4 h-4" />
               )}
@@ -374,9 +374,9 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={isMuted ? 0 : volume}
-              className="w-16 h-1 bg-[#282A33] rounded cursor-pointer hidden sm:block"
+              className="w-16 h-1 bg-[#234735] rounded cursor-pointer hidden sm:block"
               style={{
-                background: `linear-gradient(to right, #D6F279 0%, #D6F279 ${isMuted ? 0 : volume}%, #282A33 ${isMuted ? 0 : volume}%, #282A33 100%)`,
+                background: `linear-gradient(to right, #34D399 0%, #34D399 ${isMuted ? 0 : volume}%, #234735 ${isMuted ? 0 : volume}%, #234735 100%)`,
               }}
               title="Volume"
             />
@@ -388,10 +388,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           {/* Device Playback status pill for Viewers */}
           {!canControl && (
             <span
-              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 rounded bg-[#1C1E24] border border-[#282A33] text-[10px] font-mono text-[#8E919C]"
+              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 rounded bg-[#193225] border border-[#234735] text-[10px] font-mono text-[#8E919C]"
               title="You control playback independently on your device. Click LIVE to rejoin the room stream."
             >
-              <span className={`w-1.5 h-1.5 rounded-full ${isLiveSynced ? 'bg-[#D6F279]' : 'bg-[#E5A84B]'}`} />
+              <span className={`w-1.5 h-1.5 rounded-full ${isLiveSynced ? 'bg-[#34D399]' : 'bg-[#E5A84B]'}`} />
               <span>Your Device</span>
             </span>
           )}
@@ -401,10 +401,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <button
               onClick={onOpenVideoSelector}
               aria-label="Load different YouTube video"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#1C1E24] hover:bg-[#24262E] border border-[#282A33] text-[#F2F0E9] text-xs font-medium transition-colors"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#193225] hover:bg-[#224433] border border-[#234735] text-[#D1FAE5] text-xs font-medium transition-colors"
               title="Change YouTube stream"
             >
-              <Search className="w-3.5 h-3.5 text-[#D6F279]" />
+              <Search className="w-3.5 h-3.5 text-[#34D399]" />
               <span className="hidden sm:inline">Stream URL</span>
             </button>
           )}
@@ -416,7 +416,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           <button
             onClick={handleFullscreen}
             aria-label="Toggle fullscreen video mode"
-            className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+            className="p-1.5 rounded-md text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
             title="Fullscreen"
           >
             <Maximize2 className="w-4 h-4" />

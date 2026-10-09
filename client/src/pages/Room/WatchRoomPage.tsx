@@ -76,16 +76,16 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
         {/* Right Column: Social & Moderation Sidebar */}
         <section className="lg:col-span-4 flex flex-col h-[620px] lg:h-[700px]">
           {/* Tab Switcher */}
-          <div className="grid grid-cols-3 p-1 rounded-lg bg-[#16171B] border border-[#282A33] mb-2.5 text-xs">
+          <div className="grid grid-cols-3 p-1 rounded-lg bg-[#11221A] border border-[#234735] mb-2.5 text-xs">
             <button
               onClick={() => setActiveSidebarTab('discussion')}
               className={`py-1.5 font-medium rounded transition-colors flex items-center justify-center gap-1 ${
                 activeSidebarTab === 'discussion'
-                  ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#3E4250]'
-                  : 'text-[#8E919C] hover:text-[#F2F0E9]'
+                  ? 'bg-[#193225] text-[#D1FAE5] border border-[#2A5540]'
+                  : 'text-[#8E919C] hover:text-[#D1FAE5]'
               }`}
             >
-              <MessageSquare className="w-3.5 h-3.5 text-[#D6F279]" />
+              <MessageSquare className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Chat</span>
             </button>
 
@@ -93,11 +93,11 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
               onClick={() => setActiveSidebarTab('participants')}
               className={`py-1.5 font-medium rounded transition-colors flex items-center justify-center gap-1 ${
                 activeSidebarTab === 'participants'
-                  ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#3E4250]'
-                  : 'text-[#8E919C] hover:text-[#F2F0E9]'
+                  ? 'bg-[#193225] text-[#D1FAE5] border border-[#2A5540]'
+                  : 'text-[#8E919C] hover:text-[#D1FAE5]'
               }`}
             >
-              <Users className="w-3.5 h-3.5 text-[#D6F279]" />
+              <Users className="w-3.5 h-3.5 text-[#34D399]" />
               <span>({participants.length})</span>
             </button>
 
@@ -105,14 +105,14 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
               onClick={() => setActiveSidebarTab('queue')}
               className={`py-1.5 font-medium rounded transition-colors flex items-center justify-center gap-1 relative ${
                 activeSidebarTab === 'queue'
-                  ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#3E4250]'
-                  : 'text-[#8E919C] hover:text-[#F2F0E9]'
+                  ? 'bg-[#193225] text-[#D1FAE5] border border-[#2A5540]'
+                  : 'text-[#8E919C] hover:text-[#D1FAE5]'
               }`}
             >
               <ListVideo className="w-3.5 h-3.5 text-[#A99BFF]" />
               <span>Queue</span>
               {roomQueue.length > 0 && (
-                <span className="w-3.5 h-3.5 rounded-full bg-[#A99BFF] text-[#101114] text-[9px] font-bold font-mono flex items-center justify-center">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#A99BFF] text-[#09140F] text-[9px] font-bold font-mono flex items-center justify-center">
                   {roomQueue.length}
                 </span>
               )}
@@ -135,7 +135,7 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                 </div>
 
                 {showYTChat ? (
-                  <div className="flex-1 rounded-xl bg-[#16171B] border border-[#282A33] overflow-hidden flex flex-col">
+                  <div className="flex-1 rounded-xl bg-[#11221A] border border-[#234735] overflow-hidden flex flex-col">
                     <iframe
                       title="YouTube Live Chat Embed"
                       src={`https://www.youtube.com/live_chat?v=${playback.videoId}&embed_domain=${window.location.hostname}`}
@@ -151,11 +151,11 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
             {activeSidebarTab === 'participants' && <ParticipantList />}
 
             {activeSidebarTab === 'queue' && (
-              <div className="h-full rounded-xl bg-[#16171B] border border-[#282A33] p-3.5 flex flex-col justify-between overflow-hidden">
-                <div className="flex items-center justify-between pb-2.5 border-b border-[#282A33]">
+              <div className="h-full rounded-xl bg-[#11221A] border border-[#234735] p-3.5 flex flex-col justify-between overflow-hidden">
+                <div className="flex items-center justify-between pb-2.5 border-b border-[#234735]">
                   <div className="flex items-center gap-2">
                     <ListVideo className="w-4 h-4 text-[#A99BFF]" />
-                    <span className="text-xs font-mono uppercase tracking-wider text-[#F2F0E9] font-medium">
+                    <span className="text-xs font-mono uppercase tracking-wider text-[#D1FAE5] font-medium">
                       Shared Room Queue
                     </span>
                   </div>
@@ -178,7 +178,7 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                     roomQueue.map((item, idx) => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-2.5 p-2 rounded-xl bg-[#1C1E24] border border-[#282A33]"
+                        className="flex items-center gap-2.5 p-2 rounded-xl bg-[#193225] border border-[#234735]"
                       >
                         <span className="text-[10px] font-mono text-[#5E606A] w-4 text-center">
                           {idx + 1}
@@ -211,10 +211,10 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                 </div>
 
                 {/* Queue Controls */}
-                <div className="pt-2 border-t border-[#282A33] flex items-center justify-between gap-2">
+                <div className="pt-2 border-t border-[#234735] flex items-center justify-between gap-2">
                   <button
                     onClick={() => setIsVideoModalOpen(true)}
-                    className="flex-1 py-2 rounded-xl bg-[#1C1E24] hover:bg-[#282A33] border border-[#282A33] text-xs font-semibold text-[#F2F0E9] flex items-center justify-center gap-1.5 transition-colors"
+                    className="flex-1 py-2 rounded-xl bg-[#193225] hover:bg-[#234735] border border-[#234735] text-xs font-semibold text-[#D1FAE5] flex items-center justify-center gap-1.5 transition-colors"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     <span>Add Video</span>
@@ -223,7 +223,7 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                   {canControl && roomQueue.length > 0 && (
                     <button
                       onClick={playNextInQueue}
-                      className="px-3.5 py-2 rounded-xl bg-[#A99BFF] hover:bg-[#9887f5] text-[#101114] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      className="px-3.5 py-2 rounded-xl bg-[#A99BFF] hover:bg-[#9887f5] text-[#09140F] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Play Next</span>

@@ -21,10 +21,10 @@ export const PresetsBar: React.FC<PresetsBarProps> = ({ onOpenSelector }) => {
   };
 
   return (
-    <div className="w-full rounded-xl bg-[#16171B] border border-[#282A33] p-3 flex flex-col gap-2 shadow-cinema">
+    <div className="w-full rounded-xl bg-[#11221A] border border-[#234735] p-3 flex flex-col gap-2 shadow-cinema">
       <div className="flex items-center justify-between px-0.5">
         <div className="flex items-center gap-2">
-          <Sparkles className="w-3.5 h-3.5 text-[#D6F279]" />
+          <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
           <span className="text-[11px] font-mono uppercase tracking-wider text-[#8E919C]">
             Verified Screening Presets
           </span>
@@ -32,7 +32,7 @@ export const PresetsBar: React.FC<PresetsBarProps> = ({ onOpenSelector }) => {
         {canControl && (
           <button
             onClick={onOpenSelector}
-            className="flex items-center gap-1 text-[11px] font-medium text-[#D6F279] hover:text-[#C3E065] px-2 py-0.5 rounded border border-[#282A33] hover:border-[#3A3D4A] bg-[#1C1E24] transition-colors"
+            className="flex items-center gap-1 text-[11px] font-medium text-[#34D399] hover:text-[#2BBF88] px-2 py-0.5 rounded border border-[#234735] hover:border-[#2A5540] bg-[#193225] transition-colors"
           >
             <Search className="w-3 h-3" />
             <span>Custom URL</span>
@@ -51,25 +51,25 @@ export const PresetsBar: React.FC<PresetsBarProps> = ({ onOpenSelector }) => {
               onClick={() => handleSelect(preset.id, preset.title)}
               className={`flex-shrink-0 flex items-center gap-2.5 p-1.5 pr-3 rounded-lg border text-left transition-colors ${
                 isActive
-                  ? 'bg-[#1C1E24] border-[#D6F279]'
-                  : 'bg-[#1C1E24] hover:bg-[#24262E] border-[#282A33] hover:border-[#3A3D4A]'
+                  ? 'bg-[#193225] border-[#34D399]'
+                  : 'bg-[#193225] hover:bg-[#224433] border-[#234735] hover:border-[#2A5540]'
               }`}
             >
-              <div className="relative w-11 h-9 rounded overflow-hidden bg-black flex-shrink-0 border border-[#282A33]">
+              <div className="relative w-11 h-9 rounded overflow-hidden bg-black flex-shrink-0 border border-[#234735]">
                 <img
                   src={preset.thumbnail}
                   alt={preset.title}
                   className="w-full h-full object-cover"
                 />
                 {isActive && (
-                  <div className="absolute inset-0 bg-[#D6F279]/30 flex items-center justify-center">
-                    <span className="w-2 h-2 rounded-full bg-[#D6F279]" />
+                  <div className="absolute inset-0 bg-[#34D399]/30 flex items-center justify-center">
+                    <span className="w-2 h-2 rounded-full bg-[#34D399]" />
                   </div>
                 )}
               </div>
 
               <div className="flex flex-col min-w-0 max-w-[120px]">
-                <span className={`text-[11px] font-medium truncate ${isActive ? 'text-[#D6F279]' : 'text-[#F2F0E9]'}`}>
+                <span className={`text-[11px] font-medium truncate ${isActive ? 'text-[#34D399]' : 'text-[#D1FAE5]'}`}>
                   {preset.title}
                 </span>
                 <div className="flex items-center gap-1 text-[10px] text-[#8E919C] font-mono">

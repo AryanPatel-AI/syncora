@@ -36,6 +36,12 @@ export class Participant {
     }
   }
 
+  public demoteToViewer(): void {
+    if (this.role !== 'HOST') {
+      this.role = 'VIEWER';
+    }
+  }
+
   public makeHost(): void {
     this.role = 'HOST';
     this.isHost = true;

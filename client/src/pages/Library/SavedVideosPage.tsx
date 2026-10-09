@@ -44,8 +44,8 @@ export const SavedVideosPage: React.FC = () => {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-      <div className="flex items-center gap-3 pb-3 border-b border-[#282A33]">
-        <div className="w-10 h-10 rounded-2xl bg-[#D6F279]/15 text-[#D6F279] flex items-center justify-center">
+      <div className="flex items-center gap-3 pb-3 border-b border-[#234735]">
+        <div className="w-10 h-10 rounded-2xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
           <Bookmark className="w-5 h-5" />
         </div>
         <div>
@@ -58,7 +58,7 @@ export const SavedVideosPage: React.FC = () => {
         <div className="py-12 text-center text-xs text-[#8E919C]">Loading saved videos...</div>
       ) : savedItems.length === 0 ? (
         <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#1C1E24] border border-[#282A33] flex items-center justify-center text-[#8E919C]">
+          <div className="w-12 h-12 rounded-2xl bg-[#193225] border border-[#234735] flex items-center justify-center text-[#8E919C]">
             <Film className="w-6 h-6" />
           </div>
           <div className="text-sm font-semibold text-white">No saved videos yet</div>
@@ -70,9 +70,9 @@ export const SavedVideosPage: React.FC = () => {
             <div
               key={item.id}
               onClick={() => navigateTo(`/watch/${item.videoId}`)}
-              className="group rounded-2xl bg-[#16171B] border border-[#282A33] overflow-hidden hover:border-[#3E4250] transition-all cursor-pointer flex flex-col"
+              className="group rounded-2xl bg-[#11221A] border border-[#234735] overflow-hidden hover:border-[#2A5540] transition-all cursor-pointer flex flex-col"
             >
-              <div className="relative aspect-video w-full bg-[#101114]">
+              <div className="relative aspect-video w-full bg-[#09140F]">
                 <img src={item.thumbnailUrl} alt={item.title} className="w-full h-full object-cover" />
                 {item.isLive && (
                   <span className="absolute top-2 left-2 px-1.5 py-0.5 rounded bg-[#EF4444] text-[9px] font-bold text-white uppercase">
@@ -85,7 +85,7 @@ export const SavedVideosPage: React.FC = () => {
                   <h3 className="text-xs font-semibold text-white line-clamp-2">{item.title}</h3>
                   <p className="text-[10px] text-[#8E919C] mt-1">{item.channelTitle}</p>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t border-[#282A33]/50">
+                <div className="flex items-center justify-between pt-2 border-t border-[#234735]/50">
                   <button
                     onClick={(e) => handleStartParty(item.videoId, e)}
                     className="px-2.5 py-1 rounded-lg bg-[#8067F5]/20 text-[#A99BFF] hover:bg-[#8067F5] hover:text-white text-[11px] font-semibold flex items-center gap-1 transition-colors"

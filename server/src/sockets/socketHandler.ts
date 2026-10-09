@@ -353,11 +353,14 @@ export function registerSocketHandlers(io: Server) {
         if (rawRole === 'MODERATOR') {
           targetRole = 'MODERATOR';
           target.promoteToModerator();
-        } else if (rawRole === 'PARTICIPANT' || rawRole === 'VIEWER') {
+        } else if (rawRole === 'PARTICIPANT') {
           targetRole = 'PARTICIPANT';
           target.demoteToParticipant();
+        } else if (rawRole === 'VIEWER') {
+          targetRole = 'VIEWER';
+          target.demoteToViewer();
         } else {
-          emitError('Invalid role assignment: Only Moderator or Participant can be assigned.');
+          emitError('Invalid role assignment: Only Moderator, Participant, or Viewer can be assigned.');
           return;
         }
 
@@ -692,9 +695,9 @@ export function registerSocketHandlers(io: Server) {
         return;
       }
 
-      // Check slow mode (applies to Participants)
+      // Check slow mode (applies to Participants and Viewers)
       const slowSec = room.getSlowModeSeconds();
-      if (slowSec > 0 && participant.role === 'PARTICIPANT') {
+      if (slowSec > 0 && (participant.role === 'PARTICIPANT' || participant.role === 'VIEWER')) {
         const lastChat = lastChatTimes.get(participant.id) || 0;
         const elapsed = (Date.now() - lastChat) / 1000;
         if (elapsed < slowSec) {

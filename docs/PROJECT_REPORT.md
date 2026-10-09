@@ -209,9 +209,10 @@ In Syncora, **every single mutating action is enforced on the backend**:
 
 ### A. Role Hierarchy
 ```
-Level 3: HOST       👑 Full Room Authority (Playback, Assign Roles, Kick, Transfer Host, Approvals)
-Level 2: MODERATOR  🛡️ Playback Control (Play, Pause, Seek, Change Video, Review Approvals)
-Level 1: PARTICIPANT 👤 Viewer (Watch synchronized stream, chat, like, request playback changes)
+👑 HOST        Auto (Creator)     Full Control: Play/pause, seek, change video, assign roles, remove participants, transfer host.
+🛡️ MODERATOR   Assigned by Host   Playback Control: Play/pause, seek, change video, review & approve playback requests.
+👤 PARTICIPANT Assigned by Host   Default Joiner: Watch-only; cannot control playback or change video. May submit playback requests.
+👁️ VIEWER      Assigned by Host   Spectator Alias: Watch-only; same permissions as Participant.
 ```
 
 ### B. The Authorization Pipeline

@@ -49,11 +49,12 @@ Syncora avoids generic dashboard templates in favor of a bespoke **intimate digi
 ### 2. 🛡️ Authoritative Role-Based Access Control (RBAC)
 Server-side RBAC enforces permissions on every single sensitive action:
 
-| Role | Hierarchy | Assigned By | Capabilities |
-| :--- | :---: | :--- | :--- |
-| **👑 Host** | Level 3 | Room Creator or Transferred | • Full playback control (Play, Pause, Seek, Change Video)<br>• Promote / Demote participants to Moderator<br>• Remove / Kick participants from the room<br>• Approve or reject participant playback requests<br>• Transfer Host ownership |
-| **🛡️ Moderator** | Level 2 | Host (or via approved request) | • Full playback control (Play, Pause, Seek, Change Video)<br>• Review and approve / reject playback requests<br>• Cannot demote, kick, or change participant roles |
-| **👤 Participant** | Level 1 | Default upon joining | • Watch synchronized video<br>• View live participant roster<br>• Submit playback control requests for approval<br>• Cannot directly alter playback or video |
+| Role | Assigned By | Permissions / Capabilities |
+| :--- | :--- | :--- |
+| **👑 Host** | Auto (room creator or transferred) | Full control: play/pause, seek, change video, assign roles, remove participants, transfer host. |
+| **🛡️ Moderator** | Assigned by Host | Play/pause, seek, change video; review and approve / reject playback requests. |
+| **👤 Participant** | Assigned by Host (default for joiners) | Watch only; cannot control playback or change video. May submit playback requests. |
+| **👁️ Viewer** | Assigned by Host | Same as Participant (watch-only alias to distinguish spectators). |
 
 > **Strict Server Validation**: Client UI disables locked buttons for usability, but authorization is 100% verified on the backend. Any unauthorized socket packet is immediately rejected with an `error_message`.
 

@@ -21,7 +21,7 @@ This document provides the canonical reference for all real-time events, communi
 | `seek` | Client $\rightarrow$ Server | Host / Mod | Jumps to a specific timestamp in the video across the room. |
 | `change_video` | Client $\rightarrow$ Server | Host / Mod | Switches the current YouTube video stream across the room. |
 | `sync_state` | Server $\rightarrow$ Client | Broadcast | Authoritative playback state broadcast to room. |
-| `assign_role` | Client $\rightarrow$ Server | Host Only | Host promotes or restores a member's role (`MODERATOR` / `PARTICIPANT`). |
+| `assign_role` | Client $\rightarrow$ Server | Host Only | Host promotes or restores a member's role (`MODERATOR` / `PARTICIPANT` / `VIEWER`). |
 | `role_assigned` | Server $\rightarrow$ Client | Broadcast | Broadcast to room notifying member of role promotion or demotion. |
 | `remove_participant`| Client $\rightarrow$ Server | Host Only | Host kicks a participant from the room. |
 | `participant_removed`| Server $\rightarrow$ Client | Broadcast | Broadcast notifying the room and kicked participant. |
@@ -147,7 +147,7 @@ This document provides the canonical reference for all real-time events, communi
   ```typescript
   {
     userId: string;            // ID of participant to promote/demote
-    role: 'MODERATOR' | 'PARTICIPANT'; // Cannot assign HOST directly
+    role: 'MODERATOR' | 'PARTICIPANT' | 'VIEWER'; // Cannot assign HOST directly
   }
   ```
 

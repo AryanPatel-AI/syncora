@@ -107,7 +107,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full h-16 bg-[#16171B]/95 backdrop-blur-md border-b border-[#282A33] px-3 sm:px-6 flex items-center justify-between gap-3 select-none">
+    <header className="sticky top-0 z-40 w-full h-16 bg-[#11221A]/95 backdrop-blur-md border-b border-[#234735] px-3 sm:px-6 flex items-center justify-between gap-3 select-none">
       {/* Brand & Left Navigation */}
       <div className="flex items-center gap-4 sm:gap-6">
         <button
@@ -123,7 +123,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
               <span className="font-extrabold text-lg tracking-tight text-white font-sans">
                 SYNCORA
               </span>
-              <span className="px-1.5 py-0.2 text-[9px] font-bold tracking-wider uppercase rounded bg-[#D6F279]/15 text-[#D6F279] border border-[#D6F279]/30">
+              <span className="px-1.5 py-0.2 text-[9px] font-bold tracking-wider uppercase rounded bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30">
                 LIVE
               </span>
             </div>
@@ -139,8 +139,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
             onClick={() => navigateTo('/')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               currentRoute === '/'
-                ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#282A33]'
-                : 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#1C1E24]/50'
+                ? 'bg-[#193225] text-[#D1FAE5] border border-[#234735]'
+                : 'text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#193225]/50'
             }`}
           >
             Discover
@@ -149,8 +149,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
             onClick={() => navigateTo('/live')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 ${
               currentRoute === '/live'
-                ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#282A33]'
-                : 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#1C1E24]/50'
+                ? 'bg-[#193225] text-[#D1FAE5] border border-[#234735]'
+                : 'text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#193225]/50'
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-[#EF4444] animate-ping" />
@@ -160,8 +160,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
             onClick={() => navigateTo('/explore')}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
               currentRoute === '/explore'
-                ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#282A33]'
-                : 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#1C1E24]/50'
+                ? 'bg-[#193225] text-[#D1FAE5] border border-[#234735]'
+                : 'text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#193225]/50'
             }`}
           >
             Explore
@@ -178,7 +178,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
             placeholder="Search streams, videos, channels..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full bg-[#101114] border border-[#282A33] rounded-full pl-9 pr-9 py-2 text-xs sm:text-sm text-[#F2F0E9] placeholder-[#5E606A] focus:outline-none focus:border-[#8067F5] focus:ring-1 focus:ring-[#8067F5] transition-all"
+            className="w-full bg-[#09140F] border border-[#234735] rounded-full pl-9 pr-9 py-2 text-xs sm:text-sm text-[#D1FAE5] placeholder-[#5E606A] focus:outline-none focus:border-[#8067F5] focus:ring-1 focus:ring-[#8067F5] transition-all"
           />
           {searchInput && (
             <button
@@ -201,7 +201,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
         <div className="relative" ref={createRef}>
           <button
             onClick={() => setIsCreateMenuOpen((prev) => !prev)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#D6F279] text-[#101114] font-semibold text-xs hover:bg-[#c8e860] active:scale-95 transition-all shadow-md shadow-[#D6F279]/10"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#34D399] text-[#09140F] font-semibold text-xs hover:bg-[#2BBF88] active:scale-95 transition-all shadow-md shadow-[#34D399]/10"
             aria-label="Create room or watch party"
           >
             <Plus className="w-3.5 h-3.5" />
@@ -209,13 +209,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
           </button>
 
           {isCreateMenuOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-[#1C1E24] border border-[#282A33] rounded-xl shadow-2xl p-1.5 z-50 flex flex-col gap-1 text-xs font-medium">
+            <div className="absolute right-0 mt-2 w-56 bg-[#193225] border border-[#234735] rounded-xl shadow-2xl p-1.5 z-50 flex flex-col gap-1 text-xs font-medium">
               <button
                 onClick={() => {
                   setIsCreateMenuOpen(false);
                   setIsCreateRoomModalOpen(true);
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
                 <div className="w-7 h-7 rounded-md bg-[#8067F5]/20 text-[#A99BFF] flex items-center justify-center">
                   <Tv className="w-4 h-4" />
@@ -231,9 +231,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                   setIsCreateMenuOpen(false);
                   navigateTo('/studio');
                 }}
-                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
-                <div className="w-7 h-7 rounded-md bg-[#D6F279]/15 text-[#D6F279] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-md bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
                   <Radio className="w-4 h-4" />
                 </div>
                 <div>
@@ -249,30 +249,30 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
         <div className="relative" ref={notifRef}>
           <button
             onClick={() => setIsNotificationsOpen((prev) => !prev)}
-            className="relative p-2 rounded-lg bg-[#1C1E24] border border-[#282A33] text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+            className="relative p-2 rounded-lg bg-[#193225] border border-[#234735] text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
             aria-label="View notifications"
           >
             <Bell className="w-4 h-4" />
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#D6F279] ring-2 ring-[#16171B]" />
+              <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#34D399] ring-2 ring-[#11221A]" />
             )}
           </button>
 
           {isNotificationsOpen && (
-            <div className="absolute right-0 mt-2 w-80 bg-[#1C1E24] border border-[#282A33] rounded-xl shadow-2xl p-3 z-50 flex flex-col gap-2">
-              <div className="flex items-center justify-between pb-2 border-b border-[#282A33]">
+            <div className="absolute right-0 mt-2 w-80 bg-[#193225] border border-[#234735] rounded-xl shadow-2xl p-3 z-50 flex flex-col gap-2">
+              <div className="flex items-center justify-between pb-2 border-b border-[#234735]">
                 <span className="font-semibold text-xs text-white">Notifications</span>
                 {unreadCount > 0 && (
                   <button
                     onClick={handleMarkNotificationsRead}
-                    className="text-[10px] text-[#D6F279] hover:underline flex items-center gap-1"
+                    className="text-[10px] text-[#34D399] hover:underline flex items-center gap-1"
                   >
                     <Check className="w-3 h-3" /> Mark all read
                   </button>
                 )}
               </div>
 
-              <div className="max-h-64 overflow-y-auto flex flex-col gap-1.5 divide-y divide-[#282A33]/50">
+              <div className="max-h-64 overflow-y-auto flex flex-col gap-1.5 divide-y divide-[#234735]/50">
                 {notifications.length === 0 ? (
                   <div className="py-6 text-center text-xs text-[#8E919C]">
                     No notifications yet
@@ -282,7 +282,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                     <div
                       key={n.id}
                       className={`pt-1.5 first:pt-0 text-xs flex flex-col gap-0.5 ${
-                        !n.isRead ? 'text-[#F2F0E9]' : 'text-[#8E919C]'
+                        !n.isRead ? 'text-[#D1FAE5]' : 'text-[#8E919C]'
                       }`}
                     >
                       <div className="font-medium text-white text-[11px]">{n.title}</div>
@@ -303,7 +303,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
           {currentUserAccount ? (
             <button
               onClick={() => setIsProfileOpen((prev) => !prev)}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-[#1C1E24] border border-[#282A33] hover:border-[#8067F5] transition-all"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-[#193225] border border-[#234735] hover:border-[#8067F5] transition-all"
               aria-label="User Profile Menu"
             >
               <div
@@ -312,7 +312,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
               >
                 {(currentUserAccount.displayName || currentUserAccount.username).charAt(0).toUpperCase()}
               </div>
-              <span className="text-xs font-medium text-[#F2F0E9] hidden sm:inline max-w-[100px] truncate">
+              <span className="text-xs font-medium text-[#D1FAE5] hidden sm:inline max-w-[100px] truncate">
                 {currentUserAccount.displayName || currentUserAccount.username}
               </span>
             </button>
@@ -322,7 +322,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                 setAuthModalMode('login');
                 setIsAuthModalOpen(true);
               }}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1C1E24] border border-[#282A33] text-xs font-medium text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#193225] border border-[#234735] text-xs font-medium text-[#D1FAE5] hover:bg-[#234735] transition-colors"
             >
               <User className="w-3.5 h-3.5 text-[#8E919C]" />
               <span>Sign In</span>
@@ -330,8 +330,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
           )}
 
           {isProfileOpen && currentUserAccount && (
-            <div className="absolute right-0 mt-2 w-52 bg-[#1C1E24] border border-[#282A33] rounded-xl shadow-2xl p-1.5 z-50 flex flex-col gap-1 text-xs">
-              <div className="px-3 py-2 border-b border-[#282A33]">
+            <div className="absolute right-0 mt-2 w-52 bg-[#193225] border border-[#234735] rounded-xl shadow-2xl p-1.5 z-50 flex flex-col gap-1 text-xs">
+              <div className="px-3 py-2 border-b border-[#234735]">
                 <div className="font-semibold text-white truncate">
                   {currentUserAccount.displayName}
                 </div>
@@ -345,9 +345,9 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                   setIsProfileOpen(false);
                   navigateTo('/saved');
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
-                <Bookmark className="w-3.5 h-3.5 text-[#D6F279]" />
+                <Bookmark className="w-3.5 h-3.5 text-[#34D399]" />
                 <span>Saved Videos</span>
               </button>
 
@@ -356,7 +356,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                   setIsProfileOpen(false);
                   navigateTo('/history');
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
                 <History className="w-3.5 h-3.5 text-[#A99BFF]" />
                 <span>Watch History</span>
@@ -367,13 +367,13 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                   setIsProfileOpen(false);
                   navigateTo('/following');
                 }}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#F2F0E9] hover:bg-[#282A33] transition-colors"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
                 <Users className="w-3.5 h-3.5 text-[#38BDF8]" />
                 <span>Followed Channels</span>
               </button>
 
-              <div className="border-t border-[#282A33] my-0.5" />
+              <div className="border-t border-[#234735] my-0.5" />
 
               <button
                 onClick={() => {

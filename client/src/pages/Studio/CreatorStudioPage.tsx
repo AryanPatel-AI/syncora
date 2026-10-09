@@ -65,8 +65,8 @@ export const CreatorStudioPage: React.FC = () => {
   return (
     <div className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
       {/* Header */}
-      <div className="flex items-center gap-3 pb-3 border-b border-[#282A33]">
-        <div className="w-10 h-10 rounded-2xl bg-[#D6F279]/15 text-[#D6F279] flex items-center justify-center">
+      <div className="flex items-center gap-3 pb-3 border-b border-[#234735]">
+        <div className="w-10 h-10 rounded-2xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
           <Tv className="w-5 h-5" />
         </div>
         <div>
@@ -76,7 +76,7 @@ export const CreatorStudioPage: React.FC = () => {
       </div>
 
       {/* Architectural Notice & Provider Status Card */}
-      <div className="p-5 rounded-2xl bg-[#16171B] border border-[#282A33] flex flex-col gap-3">
+      <div className="p-5 rounded-2xl bg-[#11221A] border border-[#234735] flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Server className="w-4 h-4 text-[#8067F5]" />
@@ -96,7 +96,7 @@ export const CreatorStudioPage: React.FC = () => {
         </p>
 
         {!status?.isConfigured && (
-          <div className="p-3.5 rounded-xl bg-[#1C1E24] border border-[#282A33] text-xs flex flex-col gap-2">
+          <div className="p-3.5 rounded-xl bg-[#193225] border border-[#234735] text-xs flex flex-col gap-2">
             <div className="flex items-center gap-2 text-[#E5A84B] font-semibold">
               <ShieldAlert className="w-4 h-4" />
               <span>Provider Setup & Environment Configuration</span>
@@ -104,7 +104,7 @@ export const CreatorStudioPage: React.FC = () => {
             <p className="text-[#8E919C] text-[11px] leading-relaxed">
               To broadcast your own video directly without YouTube, configure managed streaming provider credentials in your server environment:
             </p>
-            <div className="p-2.5 rounded-lg bg-[#101114] font-mono text-[11px] text-[#A99BFF] border border-[#282A33]">
+            <div className="p-2.5 rounded-lg bg-[#09140F] font-mono text-[11px] text-[#A99BFF] border border-[#234735]">
               MUX_TOKEN_ID=your_mux_token_id<br />
               MUX_TOKEN_SECRET=your_mux_token_secret<br />
               # or AWS_IVS_ACCESS_KEY & AWS_IVS_SECRET_KEY
@@ -119,9 +119,9 @@ export const CreatorStudioPage: React.FC = () => {
       {/* Broadcast Session Panel */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {/* Creation Box */}
-        <div className="p-5 rounded-2xl bg-[#16171B] border border-[#282A33] flex flex-col gap-3">
+        <div className="p-5 rounded-2xl bg-[#11221A] border border-[#234735] flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-[#D6F279]" />
+            <Radio className="w-4 h-4 text-[#34D399]" />
             <h3 className="text-sm font-bold text-white">Create Broadcast Session</h3>
           </div>
 
@@ -135,13 +135,13 @@ export const CreatorStudioPage: React.FC = () => {
                 placeholder="e.g. Weekend Game Dev Live"
                 value={streamTitle}
                 onChange={(e) => setStreamTitle(e.target.value)}
-                className="w-full bg-[#101114] border border-[#282A33] rounded-xl px-3 py-2 text-xs text-[#F2F0E9] focus:outline-none focus:border-[#D6F279]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
               />
             </div>
 
             <button
               type="submit"
-              className="py-2.5 rounded-xl bg-[#D6F279] text-[#101114] font-bold text-xs hover:bg-[#c8e860] active:scale-95 transition-all shadow-md shadow-[#D6F279]/15 flex items-center justify-center gap-1.5"
+              className="py-2.5 rounded-xl bg-[#34D399] text-[#09140F] font-bold text-xs hover:bg-[#2BBF88] active:scale-95 transition-all shadow-md shadow-[#34D399]/15 flex items-center justify-center gap-1.5"
             >
               <Video className="w-4 h-4" />
               <span>Initialize Ingest Key</span>
@@ -150,7 +150,7 @@ export const CreatorStudioPage: React.FC = () => {
         </div>
 
         {/* Ingest Credentials & OBS Setup */}
-        <div className="p-5 rounded-2xl bg-[#16171B] border border-[#282A33] flex flex-col gap-3">
+        <div className="p-5 rounded-2xl bg-[#11221A] border border-[#234735] flex flex-col gap-3">
           <div className="flex items-center gap-2">
             <Key className="w-4 h-4 text-[#A99BFF]" />
             <h3 className="text-sm font-bold text-white">OBS Studio / RTMP Connection</h3>
@@ -159,33 +159,33 @@ export const CreatorStudioPage: React.FC = () => {
           <div className="flex flex-col gap-2.5 text-xs">
             <div>
               <span className="text-[10px] text-[#8E919C] font-semibold uppercase">RTMP Ingest Server URL</span>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[#101114] border border-[#282A33] font-mono text-[11px] text-white mt-1">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[#09140F] border border-[#234735] font-mono text-[11px] text-white mt-1">
                 <span className="truncate">{session?.ingestEndpoint || 'rtmps://global-live.mux.com:443/app'}</span>
                 <button
                   onClick={() => copyText(session?.ingestEndpoint || 'rtmps://global-live.mux.com:443/app', 'ingest')}
                   className="p-1 text-[#8E919C] hover:text-white"
                 >
-                  {copiedIngest ? <Check className="w-3.5 h-3.5 text-[#D6F279]" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copiedIngest ? <Check className="w-3.5 h-3.5 text-[#34D399]" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
               </div>
             </div>
 
             <div>
               <span className="text-[10px] text-[#8E919C] font-semibold uppercase">Stream Key</span>
-              <div className="flex items-center justify-between p-2 rounded-lg bg-[#101114] border border-[#282A33] font-mono text-[11px] text-white mt-1">
+              <div className="flex items-center justify-between p-2 rounded-lg bg-[#09140F] border border-[#234735] font-mono text-[11px] text-white mt-1">
                 <span className="truncate">{session?.streamKey || '••••••••••••••••••••••••'}</span>
                 {session?.streamKey && (
                   <button
                     onClick={() => copyText(session.streamKey, 'key')}
                     className="p-1 text-[#8E919C] hover:text-white"
                   >
-                    {copiedKey ? <Check className="w-3.5 h-3.5 text-[#D6F279]" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedKey ? <Check className="w-3.5 h-3.5 text-[#34D399]" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 )}
               </div>
             </div>
 
-            <div className="p-2.5 rounded-lg bg-[#1C1E24] text-[11px] text-[#8E919C] leading-relaxed">
+            <div className="p-2.5 rounded-lg bg-[#193225] text-[11px] text-[#8E919C] leading-relaxed">
               Open <strong>OBS Studio</strong> &gt; <strong>Settings</strong> &gt; <strong>Stream</strong>. Select Custom Service, paste the server URL and your private stream key, and start streaming.
             </div>
           </div>

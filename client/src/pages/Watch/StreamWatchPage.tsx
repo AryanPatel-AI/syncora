@@ -404,7 +404,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
           {/* Player Container */}
           <div
             ref={containerRef}
-            className="relative w-full aspect-video rounded-2xl bg-black border border-[#282A33] overflow-hidden group shadow-2xl flex items-center justify-center"
+            className="relative w-full aspect-video rounded-2xl bg-black border border-[#234735] overflow-hidden group shadow-2xl flex items-center justify-center"
           >
             <div id="solo-stream-player" className="w-full h-full" />
 
@@ -417,7 +417,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                   <button
                     onClick={() => navigateTo(`/watch/${DEFAULT_VIDEO_ID}`)}
-                    className="px-4 py-2 rounded-xl bg-[#D6F279] text-[#101114] text-xs font-semibold hover:bg-[#c3e065] flex items-center gap-2"
+                    className="px-4 py-2 rounded-xl bg-[#34D399] text-[#09140F] text-xs font-semibold hover:bg-[#2BBF88] flex items-center gap-2"
                   >
                     <span>Play Verified Stream</span>
                   </button>
@@ -425,7 +425,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                     href={`https://www.youtube.com/watch?v=${videoId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="px-4 py-2 rounded-xl bg-[#1C1E24] text-[#8E919C] hover:text-white border border-[#282A33] text-xs font-semibold flex items-center gap-2"
+                    className="px-4 py-2 rounded-xl bg-[#193225] text-[#8E919C] hover:text-white border border-[#234735] text-xs font-semibold flex items-center gap-2"
                   >
                     <span>Open on YouTube</span>
                     <ExternalLink className="w-3.5 h-3.5" />
@@ -445,7 +445,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   step={0.1}
                   value={currentTime}
                   onChange={handleSeek}
-                  className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-[#D6F279]"
+                  className="w-full h-1 bg-white/30 rounded-lg appearance-none cursor-pointer accent-[#34D399]"
                 />
               )}
 
@@ -497,7 +497,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   <button
                     onClick={() => setIsTheater((prev) => !prev)}
                     className={`p-1.5 rounded-lg hover:bg-white/20 text-xs flex items-center gap-1 ${
-                      isTheater ? 'text-[#D6F279]' : 'text-white'
+                      isTheater ? 'text-[#34D399]' : 'text-white'
                     }`}
                     title="Toggle theater mode"
                   >
@@ -524,7 +524,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               </h1>
 
               {/* Channel Row & Action Buttons */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#282A33]">
+              <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#234735]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-white shadow-md">
                     {video.channelTitle ? video.channelTitle.charAt(0).toUpperCase() : 'C'}
@@ -542,8 +542,8 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                     onClick={handleToggleFollow}
                     className={`ml-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all active:scale-95 ${
                       isFollowing
-                        ? 'bg-[#1C1E24] text-[#8E919C] border border-[#282A33]'
-                        : 'bg-white text-black hover:bg-[#D6F279]'
+                        ? 'bg-[#193225] text-[#8E919C] border border-[#234735]'
+                        : 'bg-white text-black hover:bg-[#34D399]'
                     }`}
                   >
                     {isFollowing ? 'Following' : 'Follow'}
@@ -562,20 +562,20 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   </button>
 
                   {/* Like & Dislike */}
-                  <div className="flex items-center rounded-xl bg-[#1C1E24] border border-[#282A33] overflow-hidden text-xs">
+                  <div className="flex items-center rounded-xl bg-[#193225] border border-[#234735] overflow-hidden text-xs">
                     <button
                       onClick={handleLike}
-                      className={`flex items-center gap-1.5 px-3 py-2 hover:bg-[#282A33] transition-colors ${
-                        isLiked ? 'text-[#D6F279]' : 'text-[#8E919C]'
+                      className={`flex items-center gap-1.5 px-3 py-2 hover:bg-[#234735] transition-colors ${
+                        isLiked ? 'text-[#34D399]' : 'text-[#8E919C]'
                       }`}
                     >
                       <ThumbsUp className="w-3.5 h-3.5" />
                       <span className="font-mono text-[11px]">{likeCount}</span>
                     </button>
-                    <div className="w-[1px] h-4 bg-[#282A33]" />
+                    <div className="w-[1px] h-4 bg-[#234735]" />
                     <button
                       onClick={handleDislike}
-                      className={`px-3 py-2 hover:bg-[#282A33] transition-colors ${
+                      className={`px-3 py-2 hover:bg-[#234735] transition-colors ${
                         isDisliked ? 'text-[#EF4444]' : 'text-[#8E919C]'
                       }`}
                     >
@@ -588,8 +588,8 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                     onClick={handleToggleSave}
                     className={`p-2 rounded-xl border text-xs transition-colors ${
                       isSaved
-                        ? 'bg-[#D6F279]/15 border-[#D6F279]/30 text-[#D6F279]'
-                        : 'bg-[#1C1E24] border-[#282A33] text-[#8E919C] hover:text-white'
+                        ? 'bg-[#34D399]/15 border-[#34D399]/30 text-[#34D399]'
+                        : 'bg-[#193225] border-[#234735] text-[#8E919C] hover:text-white'
                     }`}
                     title={isSaved ? 'Saved in library' : 'Save video'}
                   >
@@ -599,7 +599,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   {/* Share */}
                   <button
                     onClick={handleShare}
-                    className="p-2 rounded-xl bg-[#1C1E24] border border-[#282A33] text-[#8E919C] hover:text-white transition-colors"
+                    className="p-2 rounded-xl bg-[#193225] border border-[#234735] text-[#8E919C] hover:text-white transition-colors"
                     title="Share link"
                   >
                     <Share2 className="w-4 h-4" />
@@ -610,7 +610,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                     href={`https://www.youtube.com/watch?v=${videoId}`}
                     target="_blank"
                     rel="noreferrer"
-                    className="p-2 rounded-xl bg-[#1C1E24] border border-[#282A33] text-[#8E919C] hover:text-white transition-colors"
+                    className="p-2 rounded-xl bg-[#193225] border border-[#234735] text-[#8E919C] hover:text-white transition-colors"
                     title="Open on YouTube"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -619,7 +619,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               </div>
 
               {/* Description & Stats Box */}
-              <div className="p-4 rounded-2xl bg-[#16171B] border border-[#282A33] text-xs flex flex-col gap-2">
+              <div className="p-4 rounded-2xl bg-[#11221A] border border-[#234735] text-xs flex flex-col gap-2">
                 <div className="flex items-center gap-3 font-semibold text-[#8E919C]">
                   {video.isLive && typeof video.concurrentViewers === 'number' && (
                     <span className="text-[#EF4444] font-mono flex items-center gap-1">
@@ -636,7 +636,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
                 </div>
 
-                <div className={`text-[#F2F0E9] leading-relaxed whitespace-pre-wrap ${!isDescExpanded ? 'line-clamp-3' : ''}`}>
+                <div className={`text-[#D1FAE5] leading-relaxed whitespace-pre-wrap ${!isDescExpanded ? 'line-clamp-3' : ''}`}>
                   {video.description || 'No description provided by creator.'}
                 </div>
 
@@ -653,18 +653,18 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
         </div>
 
         {/* Right Column: Chat & Recommendations Panel */}
-        <div className="lg:col-span-4 flex flex-col h-[640px] rounded-2xl bg-[#16171B] border border-[#282A33] overflow-hidden shadow-xl">
+        <div className="lg:col-span-4 flex flex-col h-[640px] rounded-2xl bg-[#11221A] border border-[#234735] overflow-hidden shadow-xl">
           {/* Tabs */}
-          <div className="grid grid-cols-3 p-1 bg-[#101114] border-b border-[#282A33] text-xs font-medium">
+          <div className="grid grid-cols-3 p-1 bg-[#09140F] border-b border-[#234735] text-xs font-medium">
             <button
               onClick={() => setActiveTab('syncora')}
               className={`py-2 rounded-xl transition-colors flex items-center justify-center gap-1.5 ${
                 activeTab === 'syncora'
-                  ? 'bg-[#1C1E24] text-white shadow-sm'
+                  ? 'bg-[#193225] text-white shadow-sm'
                   : 'text-[#8E919C] hover:text-white'
               }`}
             >
-              <MessageSquare className="w-3.5 h-3.5 text-[#D6F279]" />
+              <MessageSquare className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Live Chat</span>
             </button>
 
@@ -672,7 +672,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               onClick={() => setActiveTab('youtube')}
               className={`py-2 rounded-xl transition-colors flex items-center justify-center gap-1.5 ${
                 activeTab === 'youtube'
-                  ? 'bg-[#1C1E24] text-white shadow-sm'
+                  ? 'bg-[#193225] text-white shadow-sm'
                   : 'text-[#8E919C] hover:text-white'
               }`}
             >
@@ -684,7 +684,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               onClick={() => setActiveTab('related')}
               className={`py-2 rounded-xl transition-colors flex items-center justify-center gap-1.5 ${
                 activeTab === 'related'
-                  ? 'bg-[#1C1E24] text-white shadow-sm'
+                  ? 'bg-[#193225] text-white shadow-sm'
                   : 'text-[#8E919C] hover:text-white'
               }`}
             >
@@ -705,25 +705,25 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                       </span>
                       <span className="text-[10px] text-[#5E606A]">{msg.time}</span>
                     </div>
-                    <span className="text-[#F2F0E9] break-words">{msg.text}</span>
+                    <span className="text-[#D1FAE5] break-words">{msg.text}</span>
                   </div>
                 ))}
               </div>
 
               {/* Chat Input */}
-              <form onSubmit={handleSendChat} className="p-3 bg-[#101114] border-t border-[#282A33] flex gap-2">
+              <form onSubmit={handleSendChat} className="p-3 bg-[#09140F] border-t border-[#234735] flex gap-2">
                 <input
                   type="text"
                   placeholder="Chat with other viewers..."
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   maxLength={300}
-                  className="flex-1 bg-[#16171B] border border-[#282A33] rounded-xl px-3 py-2 text-xs text-[#F2F0E9] placeholder-[#5E606A] focus:outline-none focus:border-[#D6F279]"
+                  className="flex-1 bg-[#11221A] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] placeholder-[#5E606A] focus:outline-none focus:border-[#34D399]"
                 />
                 <button
                   type="submit"
                   disabled={!inputMessage.trim()}
-                  className="px-3.5 py-2 rounded-xl bg-[#D6F279] text-[#101114] font-bold text-xs hover:bg-[#c8e860] active:scale-95 disabled:opacity-40 transition-all"
+                  className="px-3.5 py-2 rounded-xl bg-[#34D399] text-[#09140F] font-bold text-xs hover:bg-[#2BBF88] active:scale-95 disabled:opacity-40 transition-all"
                 >
                   Send
                 </button>
@@ -734,7 +734,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
           {/* Tab 2: YouTube Live Chat Embed */}
           {activeTab === 'youtube' && (
             <div className="flex-1 flex flex-col">
-              <div className="p-2 bg-[#1C1E24] text-[10px] text-[#8E919C] border-b border-[#282A33] text-center">
+              <div className="p-2 bg-[#193225] text-[10px] text-[#8E919C] border-b border-[#234735] text-center">
                 Official YouTube Live Chat Embed. Note: Chat embedding is subject to YouTube channel permissions.
               </div>
               <iframe
@@ -752,7 +752,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                 <div
                   key={item.id}
                   onClick={() => navigateTo(`/watch/${item.id}`)}
-                  className="flex gap-2.5 p-2 rounded-xl hover:bg-[#1C1E24] border border-transparent hover:border-[#282A33] cursor-pointer transition-colors"
+                  className="flex gap-2.5 p-2 rounded-xl hover:bg-[#193225] border border-transparent hover:border-[#234735] cursor-pointer transition-colors"
                 >
                   <img
                     src={item.thumbnailUrl}
@@ -760,7 +760,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                     className="w-24 aspect-video rounded-lg object-cover shrink-0"
                   />
                   <div className="flex flex-col overflow-hidden">
-                    <span className="text-xs font-semibold text-[#F2F0E9] line-clamp-2 leading-snug">
+                    <span className="text-xs font-semibold text-[#D1FAE5] line-clamp-2 leading-snug">
                       {item.title}
                     </span>
                     <span className="text-[10px] text-[#8E919C] truncate mt-1">

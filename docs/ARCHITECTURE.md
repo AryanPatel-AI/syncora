@@ -133,37 +133,37 @@ As illustrated in our demonstration architecture:
 
 ## 4. Authoritative Role-Based Access Control (RBAC)
 
-The platform enforces three distinct user roles:
+The platform enforces four user roles with strict server-authoritative validation:
 
 ```
               ┌───────────────┐
-              │    👑 HOST    │  Level 3 (Room Creator / Promoted)
+              │    👑 HOST    │  Auto (Room Creator / Transferred)
               └───────┬───────┘
                       │ Full Room Management & Playback
                       ▼
               ┌───────────────┐
-              │  🛡️ MODERATOR │  Level 2 (Promoted by Host)
+              │  🛡️ MODERATOR │  Assigned by Host
               └───────┬───────┘
                       │ Playback Control & Request Approval
                       ▼
-              ┌───────────────┐
-              │ 👤 PARTICIPANT│  Level 1 (Default for Joiners)
-              └───────────────┘
+        ┌─────────────────────────────┐
+        │  👤 PARTICIPANT / 👁️ VIEWER │  Assigned by Host (Joiner Default)
+        └─────────────────────────────┘
                       │ View-Only + Submit Requests
 ```
 
 ### Permission Matrix
 
-| Capability | Host | Moderator | Participant |
-| :--- | :---: | :---: | :---: |
-| Play, Pause, Seek | ✅ Allowed | ✅ Allowed | ❌ Rejected (Triggers Request Flow) |
-| Change Active Video | ✅ Allowed | ✅ Allowed | ❌ Rejected (Triggers Request Flow) |
-| Assign Roles (`assign_role`) | ✅ Allowed | ❌ Denied | ❌ Denied |
-| Remove Member (`remove_participant`) | ✅ Allowed | ❌ Denied | ❌ Denied |
-| Transfer Host (`transfer_host`) | ✅ Allowed | ❌ Denied | ❌ Denied |
-| Review Requests (`approve_request`, `reject_request`) | ✅ Allowed | ✅ Allowed | ❌ Denied |
-| Submit Playback Request (`request_playback_change`) | N/A | N/A | ✅ Allowed |
-| Send Chat Messages & Reactions | ✅ Allowed | ✅ Allowed | ✅ Allowed |
+| Capability | Host | Moderator | Participant | Viewer |
+| :--- | :---: | :---: | :---: | :---: |
+| Play, Pause, Seek | ✅ Allowed | ✅ Allowed | ❌ Rejected (Request Flow) | ❌ Rejected (Request Flow) |
+| Change Active Video | ✅ Allowed | ✅ Allowed | ❌ Rejected (Request Flow) | ❌ Rejected (Request Flow) |
+| Assign Roles (`assign_role`) | ✅ Allowed | ❌ Denied | ❌ Denied | ❌ Denied |
+| Remove Member (`remove_participant`) | ✅ Allowed | ❌ Denied | ❌ Denied | ❌ Denied |
+| Transfer Host (`transfer_host`) | ✅ Allowed | ❌ Denied | ❌ Denied | ❌ Denied |
+| Review Requests (`approve_request`) | ✅ Allowed | ✅ Allowed | ❌ Denied | ❌ Denied |
+| Submit Playback Request | N/A | N/A | ✅ Allowed | ✅ Allowed |
+| Send Chat Messages & Reactions | ✅ Allowed | ✅ Allowed | ✅ Allowed | ✅ Allowed |
 
 ---
 
