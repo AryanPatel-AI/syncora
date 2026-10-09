@@ -592,6 +592,39 @@ async function runTests() {
     );
     strangerSocket.disconnect();
 
+    // Verify user in a DIFFERENT room cannot perform privileged actions against Room A members
+    const otherRoomHostSocket = await createClient('OtherRoomHost');
+    await new Promise<void>((resolve, reject) => {
+      otherRoomHostSocket.emit(
+        SOCKET_EVENTS.CREATE_ROOM,
+        { username: 'OtherHost', initialVideoId: 'aqz-KE-bpKQ' },
+        (res: any) => {
+          if (!res.success) return reject(new Error('Failed to create other room'));
+          resolve();
+        }
+      );
+    });
+
+    await expectError(
+      otherRoomHostSocket,
+      () => otherRoomHostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { targetUserId: aryanUserId, newRole: 'MODERATOR' }),
+      'not found in this room',
+      'OtherRoomHost ASSIGN_ROLE against Room A participant'
+    );
+    await expectError(
+      otherRoomHostSocket,
+      () => otherRoomHostSocket.emit(SOCKET_EVENTS.REMOVE_PARTICIPANT, { targetUserId: aryanUserId }),
+      'not found',
+      'OtherRoomHost REMOVE_PARTICIPANT against Room A participant'
+    );
+    await expectError(
+      otherRoomHostSocket,
+      () => otherRoomHostSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { targetUserId: aryanUserId }),
+      'not found',
+      'OtherRoomHost TRANSFER_HOST against Room A participant'
+    );
+    otherRoomHostSocket.disconnect();
+
     // =========================================================================
     // REQUIREMENT 9: Creating, approving, and rejecting playback requests
     // =========================================================================
