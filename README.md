@@ -15,7 +15,7 @@
 
 | Service | Platform | Status | URL |
 | :--- | :--- | :--- | :--- |
-| **Frontend Client** | Vercel | 🟢 **Live in Production** | [https://client-lac-nu-17.vercel.app](https://client-lac-nu-17.vercel.app) <br> [https://client-aryanpatel-ais-projects.vercel.app](https://client-aryanpatel-ais-projects.vercel.app) |
+| **Frontend Client** | Vercel | 🟢 **Live in Production** | [https://syncora-kappa.vercel.app](https://syncora-kappa.vercel.app) <br> [https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app](https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app) |
 | **Backend API & WebSockets** | Render | 🟢 **Live in Production** | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) |
 
 > [!NOTE]
