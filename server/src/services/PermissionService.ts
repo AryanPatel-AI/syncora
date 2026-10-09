@@ -12,8 +12,12 @@ export class PermissionService {
   /**
    * Only the Host can assign or change roles (promote to moderator, demote to participant).
    */
-  public static canAssignRoles(participant: Participant | undefined): boolean {
+  public static canAssignRoles(
+    participant: Participant | undefined,
+    roomHostId?: string
+  ): boolean {
     if (!participant) return false;
+    if (roomHostId && participant.id !== roomHostId) return false;
     return participant.role === 'HOST' || participant.isHost;
   }
 
@@ -22,10 +26,12 @@ export class PermissionService {
    */
   public static canRemoveParticipant(
     actor: Participant | undefined,
-    target: Participant | undefined
+    target: Participant | undefined,
+    roomHostId?: string
   ): boolean {
     if (!actor || !target) return false;
     if (actor.id === target.id) return false; // cannot kick self
+    if (roomHostId && actor.id !== roomHostId) return false;
     return actor.role === 'HOST' || actor.isHost;
   }
 
@@ -34,10 +40,12 @@ export class PermissionService {
    */
   public static canTransferHost(
     actor: Participant | undefined,
-    target: Participant | undefined
+    target: Participant | undefined,
+    roomHostId?: string
   ): boolean {
     if (!actor || !target) return false;
-    if (actor.id === target.id) return false;
+    if (actor.id === target.id) return false; // cannot transfer to self
+    if (roomHostId && actor.id !== roomHostId) return false;
     return actor.role === 'HOST' || actor.isHost;
   }
 

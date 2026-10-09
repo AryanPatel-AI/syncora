@@ -177,6 +177,14 @@ export class RoomManager {
     };
   }
 
+  /**
+   * Cleans up socket-to-room and socket-to-user mappings when a participant is kicked or explicitly unmapped.
+   */
+  public unmapSocket(socketId: string): void {
+    this.socketToRoom.delete(socketId);
+    this.socketToUser.delete(socketId);
+  }
+
   public getRoomBySocketId(socketId: string): Room | undefined {
     const roomId = this.socketToRoom.get(socketId);
     if (!roomId) return undefined;

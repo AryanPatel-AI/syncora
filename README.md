@@ -7,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
 
-> **Syncora** is a real-time, collaborative YouTube watch party web application built with React, TypeScript, Vite, Node.js, Express, and Socket.IO. Designed around an intimate digital screening room aesthetic, Syncora delivers sub-second video synchronization, server-authoritative Role-Based Access Control (RBAC), host approval workflows for participant playback requests, and a moderated real-time chat with anti-spam protection.
+> **Syncora** is a real-time, collaborative YouTube watch party web application built with React, TypeScript, Vite, Node.js, Express, and Socket.IO. Designed around an intimate digital screening room aesthetic, Syncora delivers real-time video synchronization, server-authoritative Role-Based Access Control (RBAC), host approval workflows for participant playback requests, and a moderated real-time chat with anti-spam protection.
 
 ---
 
@@ -38,12 +38,12 @@ Syncora avoids generic dashboard templates in favor of a bespoke **intimate digi
 
 ## 🌟 Core Features
 
-### 1. 🔄 Sub-Second Real-Time Synchronization
+### 1. 🔄 Real-Time Playback Synchronization
 - **Server-Authoritative Clock**: The server tracks authoritative video ID, playback state (`playing`, `paused`, `buffering`), position in seconds, and timestamps.
 - **Elapsed Time Interpolation**: When a video is playing, the server computes exact playback position mathematically without flooding the network:
   $$\text{Current Position} = \text{currentTime} + \frac{\text{Date.now()} - \text{lastUpdatedAt}}{1000} \times \text{playbackRate}$$
 - **Anti-Echo Feedback Loop Protection**: Programmatic state guards prevent player event listeners from echoing updates back to the server when applying incoming socket changes.
-- **Smart Drift Correction**: If a client drifts $> 1.75\text{s}$ behind or ahead (due to network latency or browser tab suspension), it smoothly auto-corrects.
+- **Smart Drift Correction**: Clients continuously monitor playback drift against the authoritative server time. A 1.75-second threshold accommodates minor network jitter without triggering constant re-seek loops; if a client falls behind or moves ahead beyond this threshold, it automatically resynchronizes to the authoritative timestamp.
 - **Live Sync Badge**: Header status indicator displays real-time connection state (`In Sync`, `Syncing`, `Disconnected`).
 
 ### 2. 🛡️ Authoritative Role-Based Access Control (RBAC)
@@ -77,7 +77,7 @@ Server-side RBAC enforces permissions on every single sensitive action:
 
 ### 6. 🔗 1-Click Invites & Instant Rooms
 - Unique 6-character room codes (e.g., `SYNC-4A9B`).
-- Shareable invitation links (e.g., `https://syncora.vercel.app/room/SYNC-4A9B`).
+- Shareable invitation links (e.g., `https://syncora-kappa.vercel.app/room/SYNC-4A9B`).
 - Automatic pre-fill of room codes when opening invite URLs.
 
 ---
@@ -124,31 +124,31 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Host as 👑 Host (Alice)
-    participant Server as ⚡ Syncora Server
-    actor Participant as 👤 Participant (Bob)
+    actor Host as "Host (Alice)"
+    participant Server as "Syncora Server"
+    actor Aryan as "Participant (Aryan)"
 
     Host->>Server: create_room { username: "Alice" }
     Server-->>Host: room_snapshot (Room ID, Role: HOST)
 
-    Participant->>Server: join_room { roomId: "BFYCFK", username: "Bob" }
-    Server-->>Participant: room_snapshot (Current Video, Playback Time, Role: PARTICIPANT)
-    Server-->>Host: user_joined { username: "Bob", role: "participant" }
+    Aryan->>Server: join_room { roomId: "BFYCFK", username: "Aryan" }
+    Server-->>Aryan: room_snapshot (Current Video, Playback Time, Role: PARTICIPANT)
+    Server-->>Host: user_joined { username: "Aryan", role: "participant" }
 
-    Note over Participant: Bob attempts to pause video directly
-    Participant->>Server: pause { currentTime: 42 }
-    Server-->>Participant: error_message ("Permission denied: Only Host or Moderator can pause video.")
+    Note over Aryan: Aryan attempts to pause video directly
+    Aryan->>Server: pause { currentTime: 42 }
+    Server-->>Aryan: error_message ("Permission denied: Only Host or Moderator can pause video.")
 
-    Note over Participant: Bob submits a playback change request
-    Participant->>Server: request_playback_change { actionType: "change_video", requestedVideoId: "M7lc1UVf-VE" }
-    Server-->>Host: control_request_submitted { request: Bob (change_video) }
+    Note over Aryan: Aryan submits a playback change request
+    Aryan->>Server: request_playback_change { actionType: "change_video", requestedVideoId: "M7lc1UVf-VE" }
+    Server-->>Host: control_request_submitted { request: Aryan (change_video) }
 
     Note over Host: Host reviews and approves request
     Host->>Server: approve_request { requestId: "req_123" }
     Server->>Server: Room.setVideo("M7lc1UVf-VE")
     Server-->>Host: sync_state { videoId: "M7lc1UVf-VE", playState: "playing", currentTime: 0 }
-    Server-->>Participant: sync_state { videoId: "M7lc1UVf-VE", playState: "playing", currentTime: 0 }
-    Server-->>Participant: control_request_updated { requestId: "req_123", status: "approved" }
+    Server-->>Aryan: sync_state { videoId: "M7lc1UVf-VE", playState: "playing", currentTime: 0 }
+    Server-->>Aryan: control_request_updated { requestId: "req_123", status: "approved" }
 ```
 
 ---
@@ -156,7 +156,7 @@ sequenceDiagram
 ## 📁 Repository Structure
 
 ```
-watchparty/
+syncora/
 ├── client/                     # Frontend Application (React + Vite + TypeScript)
 │   ├── public/                 # Static assets & icons
 │   ├── src/
@@ -184,7 +184,7 @@ watchparty/
 │   │   ├── routes/             # REST API endpoints & room info routes
 │   │   ├── services/           # RoomManager, PermissionService, ChatRateLimiter
 │   │   ├── sockets/            # Socket.IO connection & event handlers
-│   │   ├── test-sync.ts        # Comprehensive 12-test automated integration suite
+│   │   ├── test-sync.ts        # Automated integration test suite validating real-time synchronization and RBAC
 │   │   └── server.ts           # Express HTTP + Socket.IO server entrypoint
 │   ├── .env.example            # Backend environment variable template
 │   └── package.json            # Server dependencies and scripts
@@ -212,6 +212,7 @@ watchparty/
 | `change_video` | `{ videoId: string }` | Host / Mod | Changes the active YouTube video. |
 | `assign_role` | `{ targetUserId: string, newRole: "moderator" \| "participant" }` | Host Only | Updates role of a participant. |
 | `remove_participant`| `{ targetUserId: string }` | Host Only | Kicks a participant from the room. |
+| `transfer_host` | `{ targetUserId: string }` | Host Only | Authoritatively transfers room ownership to another participant. |
 | `request_playback_change` | `{ actionType: string, requestedTime?: number, requestedVideoId?: string }` | Participant | Submits a playback request for review. |
 | `approve_request` | `{ requestId: string }` | Host / Mod | Approves and executes a pending request. |
 | `reject_request` | `{ requestId: string }` | Host / Mod | Declines a pending playback request. |
@@ -230,6 +231,7 @@ watchparty/
 | `user_left` | `{ userId, username, message: string }` | Room Broadcast | Broadcast when a participant exits or disconnects. |
 | `role_assigned` | `{ targetUserId, newRole, updatedBy }` | Room Broadcast | Broadcast when a participant's role changes. |
 | `participant_removed` | `{ targetUserId, message: string }` | Room Broadcast | Notifies room and target user of removal. |
+| `host_transferred` | `{ previousHostId, newHostId, updatedBy }` | Room Broadcast | Broadcast when room Host ownership is transferred. |
 | `control_request_submitted` | `{ request: PlaybackRequest }` | Host & Mods | Notifies reviewers of a new pending request. |
 | `control_request_updated` | `{ requestId, status, reviewerName }` | Room Broadcast | Notifies room of request approval/rejection. |
 | `chat_message` | `{ id, userId, username, role, text, timestamp }` | Room Broadcast | New chat message from a room member. |
@@ -247,8 +249,8 @@ watchparty/
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/your-username/watchparty.git
-cd watchparty
+git clone https://github.com/AryanPatel-AI/syncora.git
+cd syncora
 
 # Install root orchestrator, backend, and frontend dependencies in one command
 npm run install:all
@@ -267,6 +269,8 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 CLIENT_URL=http://localhost:5173
 ```
+- `FRONTEND_URL`: Primary setting defining the allowed frontend origin for Express and Socket.IO CORS. Supports comma-separated origins.
+- `CLIENT_URL`: Supported as an optional fallback alias matching `FRONTEND_URL`.
 
 **Frontend (`client/.env`):**
 ```bash
@@ -276,8 +280,10 @@ Default values in `client/.env`:
 ```env
 VITE_API_URL=http://localhost:4000
 VITE_SOCKET_URL=http://localhost:4000
-VITE_SERVER_URL=http://localhost:4000
 ```
+- `VITE_API_URL`: Backend HTTP API base URL.
+- `VITE_SOCKET_URL`: Backend Socket.IO connection URL.
+- *Note*: Both variables share the same backend origin (`http://localhost:4000` in local development) because HTTP API endpoints and Socket.IO WebSockets are served by the same backend server. `VITE_SERVER_URL` and `VITE_BACKEND_URL` remain supported in the code as fallbacks, but are not required when `VITE_API_URL` and `VITE_SOCKET_URL` are set.
 
 ### 3. Start Development Servers Concurrently
 ```bash
@@ -303,7 +309,7 @@ npm test
 2. ✅ **Participant Joining**: Join flow and automatic state synchronization.
 3. ✅ **Validation**: Rejection of empty usernames, non-existent rooms, and invalid YouTube video IDs.
 4. ✅ **Broadcasts**: Multi-client notification of joins and departures.
-5. ✅ **Playback Sync**: Sub-second synchronization of play, pause, seek, and video changes.
+5. ✅ **Playback Sync**: Real-time synchronization of play, pause, seek, and video changes.
 6. ✅ **RBAC Enforcement**: Rejection of unauthorized participant play/pause/seek commands.
 7. ✅ **Moderator Capabilities**: Authorized playback control by promoted moderators.
 8. ✅ **Administrative Control**: Host-only role management and participant kicking.
@@ -334,10 +340,11 @@ Deploying Syncora involves hosting the Express + Socket.IO backend on **Render**
    | Key | Value | Notes |
    | :--- | :--- | :--- |
    | `NODE_ENV` | `production` | Enables strict CORS and production optimizations |
-   | `FRONTEND_URL` | `https://<your-vercel-app>.vercel.app` | Your frontend Vercel URL (can be updated after Step 2) |
+   | `FRONTEND_URL` | `https://syncora-kappa.vercel.app` | Primary allowed frontend origin (or your Vercel deployment URL; comma-separated for multiple origins) |
+   | `CLIENT_URL` | `https://syncora-kappa.vercel.app` | Optional fallback alias matching `FRONTEND_URL` |
    | `PORT` | `10000` | Render injects `PORT` automatically; our server reads `process.env.PORT` |
 5. Click **Create Web Service**.
-6. Once deployed, copy your Render service URL (e.g., `https://syncora-backend.onrender.com`).
+6. Once deployed, copy your Render service URL (e.g., `https://syncora-backend-rfs0.onrender.com`).
 
 ---
 
@@ -358,13 +365,15 @@ Deploying Syncora involves hosting the Express + Socket.IO backend on **Render**
      - **Build Command**: `npm run build:client`
      - **Output Directory**: `client/dist`
 4. Add **Environment Variables**:
-   | Key | Value |
-   | :--- | :--- |
-   | `VITE_API_URL` | `https://<your-render-service>.onrender.com` *(from Step 1)* |
-   | `VITE_SOCKET_URL` | `https://<your-render-service>.onrender.com` *(from Step 1)* |
-   | `VITE_SERVER_URL` | `https://<your-render-service>.onrender.com` *(from Step 1)* |
+   | Key | Value | Notes |
+   | :--- | :--- | :--- |
+   | `VITE_API_URL` | `https://syncora-backend-rfs0.onrender.com` | Backend HTTP API base URL (or your Render service URL) |
+   | `VITE_SOCKET_URL` | `https://syncora-backend-rfs0.onrender.com` | Backend Socket.IO URL (shares the same origin as `VITE_API_URL`) |
+
+   > [!NOTE]
+   > `VITE_API_URL` and `VITE_SOCKET_URL` share the same backend server origin because HTTP requests and Socket.IO use the same server. `VITE_SERVER_URL` and `VITE_BACKEND_URL` remain supported as optional fallbacks in the URL resolver, but are not required when the primary variables are defined.
 5. Click **Deploy**.
-6. Once deployed, note your Vercel deployment URL (e.g., `https://syncora.vercel.app`).
+6. Once deployed, note your Vercel deployment URL (e.g., `https://syncora-kappa.vercel.app`).
 
 ---
 
@@ -373,9 +382,8 @@ Deploying Syncora involves hosting the Express + Socket.IO backend on **Render**
 1. Return to your Render Web Service dashboard -> **Environment**.
 2. Update `FRONTEND_URL` with your exact Vercel production URL:
    ```env
-   FRONTEND_URL=https://syncora.vercel.app
+   FRONTEND_URL=https://syncora-kappa.vercel.app
    ```
-   *(If you also use a custom domain, you can provide comma-separated values: `https://syncora.vercel.app,https://yourdomain.com`)*
 3. Render will automatically redeploy the service with the updated CORS policy.
 4. Open your Vercel app in two different browser windows to enjoy your synchronized watch party!
 
@@ -454,4 +462,4 @@ Before finalizing deployment, perform these verification checks:
 ---
 
 ## 📄 License
-This project is open-source and available under the [MIT License](LICENSE).
+It is under the developer.

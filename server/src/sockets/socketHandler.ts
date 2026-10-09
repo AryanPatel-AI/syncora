@@ -11,6 +11,7 @@ import {
   validateChatMessage,
 } from '../validation';
 import { ChatRateLimiter } from '../services/ChatRateLimiter';
+import { RoomRepository } from '../database/roomRepository';
 
 export function registerSocketHandlers(io: Server) {
   const roomManager = RoomManager.getInstance();
@@ -77,9 +78,16 @@ export function registerSocketHandlers(io: Server) {
 
           const stateSnapshot = room.getStateSnapshot();
           const participantsList = room.getAllParticipants();
+          const hostJson = host.toJSON();
 
           // Contract emissions: room_snapshot, sync_state, participants_updated, user_joined
-          socket.emit(SOCKET_EVENTS.ROOM_SNAPSHOT, stateSnapshot);
+          socket.emit(SOCKET_EVENTS.ROOM_SNAPSHOT, {
+            ...stateSnapshot,
+            room: stateSnapshot,
+            user: hostJson,
+            participant: hostJson,
+            role: host.role,
+          });
           socket.emit(SOCKET_EVENTS.SYNC_STATE, room.getPlaybackState());
           socket.emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
             participants: participantsList,
@@ -172,9 +180,16 @@ export function registerSocketHandlers(io: Server) {
           io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
 
           const stateSnapshot = room.getStateSnapshot();
+          const participantJson = participant.toJSON();
 
           // Send authoritative room snapshot & sync state to newly joined client
-          socket.emit(SOCKET_EVENTS.ROOM_SNAPSHOT, stateSnapshot);
+          socket.emit(SOCKET_EVENTS.ROOM_SNAPSHOT, {
+            ...stateSnapshot,
+            room: stateSnapshot,
+            user: participantJson,
+            participant: participantJson,
+            role: participant.role,
+          });
           socket.emit(SOCKET_EVENTS.SYNC_STATE, room.getPlaybackState());
 
           if (callback) {
@@ -208,7 +223,10 @@ export function registerSocketHandlers(io: Server) {
     // 4. PLAY EVENT
     socket.on(SOCKET_EVENTS.PLAY, (data: { time?: number; currentTime?: number } = {}) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to play video.');
+        return;
+      }
 
       if (!PermissionService.canControlPlayback(participant)) {
         emitError('Permission denied: Only Host or Moderator can play video.');
@@ -226,7 +244,10 @@ export function registerSocketHandlers(io: Server) {
     // 5. PAUSE EVENT
     socket.on(SOCKET_EVENTS.PAUSE, (data: { time?: number; currentTime?: number } = {}) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to pause video.');
+        return;
+      }
 
       if (!PermissionService.canControlPlayback(participant)) {
         emitError('Permission denied: Only Host or Moderator can pause video.');
@@ -244,7 +265,10 @@ export function registerSocketHandlers(io: Server) {
     // 6. SEEK EVENT
     socket.on(SOCKET_EVENTS.SEEK, (data: { time?: number; currentTime?: number }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to seek video.');
+        return;
+      }
 
       if (!PermissionService.canControlPlayback(participant)) {
         emitError('Permission denied: Only Host or Moderator can seek video.');
@@ -262,7 +286,10 @@ export function registerSocketHandlers(io: Server) {
     // 7. CHANGE VIDEO EVENT
     socket.on(SOCKET_EVENTS.CHANGE_VIDEO, (data: { videoId: string }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to change video.');
+        return;
+      }
 
       if (!PermissionService.canControlPlayback(participant)) {
         emitError('Permission denied: Only Host or Moderator can change video.');
@@ -290,149 +317,213 @@ export function registerSocketHandlers(io: Server) {
     });
 
     // 8. ASSIGN ROLE (Host Only)
-    socket.on(SOCKET_EVENTS.ASSIGN_ROLE, (data: { userId: string; role: Role }) => {
-      const { room, participant: actor } = getContext();
-      if (!room || !actor) return;
+    socket.on(
+      SOCKET_EVENTS.ASSIGN_ROLE,
+      (data: { userId?: string; targetUserId?: string; role?: Role; newRole?: Role }) => {
+        const { room, participant: actor } = getContext();
+        if (!room || !actor) {
+          emitError('You must be an active member of a room to assign roles.');
+          return;
+        }
 
-      if (!PermissionService.canAssignRoles(actor)) {
-        emitError('Permission denied: Only the Host can assign roles.');
-        return;
+        if (!PermissionService.canAssignRoles(actor, room.hostId)) {
+          emitError('Permission denied: Only the Host can assign roles.');
+          return;
+        }
+
+        const targetId = data?.targetUserId || data?.userId;
+        if (!targetId) {
+          emitError('Target user ID is required.');
+          return;
+        }
+
+        const target = room.getParticipant(targetId);
+        if (!target) {
+          emitError('Target user not found in this room.');
+          return;
+        }
+
+        if (target.id === actor.id) {
+          emitError('Host cannot modify their own role directly.');
+          return;
+        }
+
+        const rawRole = String(data?.newRole || data?.role || '').toUpperCase();
+        let targetRole: Role | undefined;
+        if (rawRole === 'MODERATOR') {
+          targetRole = 'MODERATOR';
+          target.promoteToModerator();
+        } else if (rawRole === 'PARTICIPANT' || rawRole === 'VIEWER') {
+          targetRole = 'PARTICIPANT';
+          target.demoteToParticipant();
+        } else {
+          emitError('Invalid role assignment: Only Moderator or Participant can be assigned.');
+          return;
+        }
+
+        // Persist updated role in SQLite repository
+        RoomRepository.updateParticipantRole(target.id, target.role);
+
+        const sysMsg = room.addChatMessage(
+          'system',
+          'System',
+          `${target.username} was updated to ${target.role} by Host ${actor.username}.`,
+          'system'
+        );
+
+        const updatedParticipants = room.getAllParticipants();
+
+        io.to(room.id).emit(SOCKET_EVENTS.ROLE_ASSIGNED, {
+          userId: target.id,
+          targetUserId: target.id,
+          username: target.username,
+          role: target.role,
+          newRole: target.role,
+          participants: updatedParticipants,
+        });
+        io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
+          participants: updatedParticipants,
+        });
+        emitPresenceUpdated(room);
+        io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
+        console.log(`[Role Assigned] ${target.username} -> ${target.role} by ${actor.username}`);
       }
-
-      const target = room.getParticipant(data.userId);
-      if (!target) {
-        emitError('Target user not found in this room.');
-        return;
-      }
-
-      if (target.id === actor.id) {
-        emitError('Host cannot modify their own role directly.');
-        return;
-      }
-
-      const targetRole = String(data?.role || '').toUpperCase();
-      if (targetRole === 'MODERATOR') {
-        target.promoteToModerator();
-      } else if (targetRole === 'PARTICIPANT') {
-        target.demoteToParticipant();
-      } else {
-        emitError('Invalid role assignment: Only Moderator or Participant can be assigned.');
-        return;
-      }
-
-      const sysMsg = room.addChatMessage(
-        'system',
-        'System',
-        `${target.username} was updated to ${target.role} by Host ${actor.username}.`,
-        'system'
-      );
-
-      const updatedParticipants = room.getAllParticipants();
-
-      io.to(room.id).emit(SOCKET_EVENTS.ROLE_ASSIGNED, {
-        userId: target.id,
-        username: target.username,
-        role: target.role,
-        participants: updatedParticipants,
-      });
-      io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
-        participants: updatedParticipants,
-      });
-      emitPresenceUpdated(room);
-      io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
-      console.log(`[Role Assigned] ${target.username} -> ${target.role} by ${actor.username}`);
-    });
+    );
 
     // 9. REMOVE PARTICIPANT (Host Only)
-    socket.on(SOCKET_EVENTS.REMOVE_PARTICIPANT, (data: { userId: string }) => {
-      const { room, participant: actor } = getContext();
-      if (!room || !actor) return;
+    socket.on(
+      SOCKET_EVENTS.REMOVE_PARTICIPANT,
+      (data: { userId?: string; targetUserId?: string }) => {
+        const { room, participant: actor } = getContext();
+        if (!room || !actor) {
+          emitError('You must be an active member of a room to remove participants.');
+          return;
+        }
 
-      const target = room.getParticipant(data.userId);
-      if (!target) {
-        emitError('Target participant not found.');
-        return;
-      }
+        const targetId = data?.targetUserId || data?.userId;
+        if (!targetId) {
+          emitError('Target participant ID is required.');
+          return;
+        }
 
-      if (!PermissionService.canRemoveParticipant(actor, target)) {
-        emitError('Permission denied: Only the Host can remove participants.');
-        return;
-      }
+        const target = room.getParticipant(targetId);
+        if (!target) {
+          emitError('Target participant not found.');
+          return;
+        }
 
-      const targetSocket = io.sockets.sockets.get(target.socketId);
-      if (targetSocket) {
-        targetSocket.emit(SOCKET_EVENTS.ERROR_MESSAGE, {
-          message: 'You have been removed from the watch party by the host.',
+        if (!PermissionService.canRemoveParticipant(actor, target, room.hostId)) {
+          emitError('Permission denied: Only the Host can remove participants.');
+          return;
+        }
+
+        const targetSocketId = target.socketId;
+        const targetUserId = target.id;
+        const targetUsername = target.username;
+
+        const targetSocket = io.sockets.sockets.get(targetSocketId);
+        if (targetSocket) {
+          targetSocket.emit(SOCKET_EVENTS.PARTICIPANT_REMOVED, {
+            userId: targetUserId,
+            targetUserId: targetUserId,
+            message: 'You have been removed from the watch party by the host.',
+          });
+          targetSocket.emit(SOCKET_EVENTS.ERROR_MESSAGE, {
+            message: 'You have been removed from the watch party by the host.',
+          });
+          targetSocket.leave(room.id);
+        }
+
+        room.removeParticipant(targetUserId);
+        RoomRepository.removeParticipant(targetUserId);
+        roomManager.unmapSocket(targetSocketId);
+        lastReactionTimes.delete(targetUserId);
+        lastChatTimes.delete(targetUserId);
+
+        const sysMsg = room.addChatMessage(
+          'system',
+          'System',
+          `${targetUsername} was removed from the party by ${actor.username}.`,
+          'system'
+        );
+
+        const updatedParticipants = room.getAllParticipants();
+
+        io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANT_REMOVED, {
+          userId: targetUserId,
+          targetUserId: targetUserId,
+          participants: updatedParticipants,
         });
-        targetSocket.leave(room.id);
+        io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
+          participants: updatedParticipants,
+        });
+        emitPresenceUpdated(room);
+        io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
+        console.log(`[Participant Removed] ${targetUsername} removed by ${actor.username}`);
       }
-
-      room.removeParticipant(target.id);
-
-      const sysMsg = room.addChatMessage(
-        'system',
-        'System',
-        `${target.username} was removed from the party by ${actor.username}.`,
-        'system'
-      );
-
-      const updatedParticipants = room.getAllParticipants();
-
-      io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANT_REMOVED, {
-        userId: target.id,
-        participants: updatedParticipants,
-      });
-      io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
-        participants: updatedParticipants,
-      });
-      emitPresenceUpdated(room);
-      io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
-      console.log(`[Participant Removed] ${target.username} removed by ${actor.username}`);
-    });
+    );
 
     // 10. TRANSFER HOST (Host Only)
-    socket.on(SOCKET_EVENTS.TRANSFER_HOST, (data: { userId: string }) => {
-      const { room, participant: actor } = getContext();
-      if (!room || !actor) return;
+    socket.on(
+      SOCKET_EVENTS.TRANSFER_HOST,
+      (data: { userId?: string; targetUserId?: string; newHostId?: string }) => {
+        const { room, participant: actor } = getContext();
+        if (!room || !actor) {
+          emitError('You must be an active member of a room to transfer host rights.');
+          return;
+        }
 
-      const target = room.getParticipant(data.userId);
-      if (!target) {
-        emitError('Target participant not found.');
-        return;
+        const targetId = data?.targetUserId || data?.userId || data?.newHostId;
+        if (!targetId) {
+          emitError('Target participant ID is required.');
+          return;
+        }
+
+        const target = room.getParticipant(targetId);
+        if (!target) {
+          emitError('Target participant not found.');
+          return;
+        }
+
+        if (target.id === actor.id) {
+          emitError('You cannot transfer host ownership to yourself.');
+          return;
+        }
+
+        if (!PermissionService.canTransferHost(actor, target, room.hostId)) {
+          emitError('Permission denied: Only current Host can transfer host rights.');
+          return;
+        }
+
+        const success = room.transferHost(actor.id, target.id);
+        if (!success) {
+          emitError('Failed to transfer host.');
+          return;
+        }
+
+        const sysMsg = room.addChatMessage(
+          'system',
+          'System',
+          `${actor.username} transferred Host ownership to ${target.username}.`,
+          'system'
+        );
+
+        const updatedParticipants = room.getAllParticipants();
+
+        io.to(room.id).emit(SOCKET_EVENTS.HOST_TRANSFERRED, {
+          previousHostId: actor.id,
+          newHostId: target.id,
+          targetUserId: target.id,
+          participants: updatedParticipants,
+        });
+        io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
+          participants: updatedParticipants,
+        });
+        emitPresenceUpdated(room);
+        io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
+        console.log(`[Host Transferred] ${actor.username} -> ${target.username}`);
       }
-
-      if (!PermissionService.canTransferHost(actor, target)) {
-        emitError('Permission denied: Only current Host can transfer host rights.');
-        return;
-      }
-
-      const success = room.transferHost(actor.id, target.id);
-      if (!success) {
-        emitError('Failed to transfer host.');
-        return;
-      }
-
-      const sysMsg = room.addChatMessage(
-        'system',
-        'System',
-        `${actor.username} transferred Host ownership to ${target.username}.`,
-        'system'
-      );
-
-      const updatedParticipants = room.getAllParticipants();
-
-      io.to(room.id).emit(SOCKET_EVENTS.HOST_TRANSFERRED, {
-        previousHostId: actor.id,
-        newHostId: target.id,
-        participants: updatedParticipants,
-      });
-      io.to(room.id).emit(SOCKET_EVENTS.PARTICIPANTS_UPDATED, {
-        participants: updatedParticipants,
-      });
-      emitPresenceUpdated(room);
-      io.to(room.id).emit(SOCKET_EVENTS.CHAT_MESSAGE, sysMsg);
-      console.log(`[Host Transferred] ${actor.username} -> ${target.username}`);
-    });
+    );
 
     // 11. REQUEST CONTROL & REQUEST PLAYBACK CHANGE (Participant workflow)
     const handlePlaybackChangeRequest = (data: {
@@ -443,7 +534,10 @@ export function registerSocketHandlers(io: Server) {
       requestedTime?: number;
     }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to request playback changes.');
+        return;
+      }
 
       if (participant.role === 'HOST' || participant.role === 'MODERATOR') {
         emitError('You already have playback control privileges.');
@@ -521,7 +615,10 @@ export function registerSocketHandlers(io: Server) {
     // 12. APPROVE / REJECT REQUEST (Host / Moderator review)
     const handleResolveRequest = (requestId: string, action: 'approved' | 'rejected') => {
       const { room, participant: actor } = getContext();
-      if (!room || !actor) return;
+      if (!room || !actor) {
+        emitError('You must be an active member of a room to handle control requests.');
+        return;
+      }
 
       if (!PermissionService.canHandleControlRequest(actor)) {
         emitError('Permission denied: Only Host or Moderator can approve requests.');
@@ -643,7 +740,10 @@ export function registerSocketHandlers(io: Server) {
     // 13b. DELETE MESSAGE (Host / Moderator only)
     socket.on(SOCKET_EVENTS.DELETE_MESSAGE, (data: { messageId: string }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to delete messages.');
+        return;
+      }
 
       if (!PermissionService.canModerateChat(participant)) {
         emitError('Permission denied: Only Host or Moderator can delete messages.');
@@ -663,7 +763,10 @@ export function registerSocketHandlers(io: Server) {
     // 13c. PIN MESSAGE (Host / Moderator only)
     socket.on(SOCKET_EVENTS.PIN_MESSAGE, (data: { messageId: string; pinned?: boolean }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to pin messages.');
+        return;
+      }
 
       if (!PermissionService.canModerateChat(participant)) {
         emitError('Permission denied: Only Host or Moderator can pin messages.');
@@ -685,7 +788,10 @@ export function registerSocketHandlers(io: Server) {
     // 13d. TIMEOUT USER (Host / Moderator only)
     socket.on(SOCKET_EVENTS.TIMEOUT_USER, (data: { userId: string; durationSeconds?: number }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to timeout participants.');
+        return;
+      }
 
       if (!PermissionService.canModerateChat(participant)) {
         emitError('Permission denied: Only Host or Moderator can timeout participants.');
@@ -725,7 +831,10 @@ export function registerSocketHandlers(io: Server) {
     // 13e. TOGGLE SLOW MODE (Host only)
     socket.on(SOCKET_EVENTS.TOGGLE_SLOW_MODE, (data: { seconds: number }) => {
       const { room, participant } = getContext();
-      if (!room || !participant) return;
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to change room settings.');
+        return;
+      }
 
       if (!PermissionService.canManageSettings(participant)) {
         emitError('Permission denied: Only the Host can change room settings.');
@@ -750,8 +859,11 @@ export function registerSocketHandlers(io: Server) {
 
     // 13f. UPDATE QUEUE (Notify room of queue modification)
     socket.on(SOCKET_EVENTS.UPDATE_QUEUE, () => {
-      const { room } = getContext();
-      if (!room) return;
+      const { room, participant } = getContext();
+      if (!room || !participant) {
+        emitError('You must be an active member of a room to update the queue.');
+        return;
+      }
       io.to(room.id).emit(SOCKET_EVENTS.QUEUE_UPDATED, { roomId: room.id });
     });
 

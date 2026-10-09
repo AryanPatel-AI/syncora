@@ -290,27 +290,30 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       console.warn('[Socket] Connection error:', err?.message);
     };
 
-    const onRoomSnapshot = (snapshot: RoomStateSnapshot) => {
+    const onRoomSnapshot = (snapshot: any) => {
       if (!snapshot) return;
-      if (snapshot.roomId) setRoomId(snapshot.roomId);
-      if (typeof snapshot.likeCount === 'number') setLikeCount(snapshot.likeCount);
-      if (typeof snapshot.audienceCount === 'number') setAudienceCount(snapshot.audienceCount);
-      else if (Array.isArray(snapshot.participants)) setAudienceCount(snapshot.participants.length);
-      if (snapshot.playback) {
-        setPlayback(snapshot.playback);
-        setLocalPlayState(snapshot.playback.playState);
+      const actualRoom = snapshot.room || snapshot;
+      if (actualRoom.roomId) setRoomId(actualRoom.roomId);
+      if (typeof actualRoom.likeCount === 'number') setLikeCount(actualRoom.likeCount);
+      if (typeof actualRoom.audienceCount === 'number') setAudienceCount(actualRoom.audienceCount);
+      else if (Array.isArray(actualRoom.participants)) setAudienceCount(actualRoom.participants.length);
+      if (actualRoom.playback) {
+        setPlayback(actualRoom.playback);
+        setLocalPlayState(actualRoom.playback.playState);
       }
-      if (typeof snapshot.slowModeSeconds === 'number') setSlowModeSeconds(snapshot.slowModeSeconds);
-      if (Array.isArray(snapshot.participants)) {
-        setParticipants(snapshot.participants);
+      if (typeof actualRoom.slowModeSeconds === 'number') setSlowModeSeconds(actualRoom.slowModeSeconds);
+      if (Array.isArray(actualRoom.participants)) {
+        setParticipants(actualRoom.participants);
         setCurrentUser((prev) => {
+          if (snapshot.user) return snapshot.user;
+          if (snapshot.participant) return snapshot.participant;
           if (!prev) return null;
-          const matching = snapshot.participants.find((p) => p.id === prev.id);
+          const matching = actualRoom.participants.find((p: any) => p.id === prev.id);
           return matching || prev;
         });
       }
-      if (Array.isArray(snapshot.pendingRequests)) setPendingRequests(snapshot.pendingRequests);
-      if (Array.isArray(snapshot.chatHistory)) setChatHistory(snapshot.chatHistory);
+      if (Array.isArray(actualRoom.pendingRequests)) setPendingRequests(actualRoom.pendingRequests);
+      if (Array.isArray(actualRoom.chatHistory)) setChatHistory(actualRoom.chatHistory);
     };
 
     const onParticipantsUpdated = (data: { participants: Participant[]; count?: number }) => {
@@ -409,6 +412,17 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       }
       setCurrentUser((prev) => {
         if (!prev) return null;
+        if (Array.isArray(data.participants)) {
+          const matching = data.participants.find((p) => p.id === prev.id);
+          if (matching) {
+            if (prev.id === data.newHostId) {
+              showToast('You are now the room Host!', 'success');
+            } else if (prev.id === data.previousHostId) {
+              showToast('Host ownership transferred.', 'info');
+            }
+            return matching;
+          }
+        }
         if (prev.id === data.newHostId) {
           showToast('You are now the room Host!', 'success');
           return { ...prev, role: 'HOST', isHost: true };

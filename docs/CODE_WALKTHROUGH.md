@@ -91,7 +91,7 @@ A friend receives an invite link (e.g. `https://syncora.vercel.app/room/RE7AC5`)
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Viewer as Viewer (Bob)
+    actor Viewer as Viewer (Aryan)
     participant Home as HomePage.tsx
     participant Context as WatchPartyContext.tsx
     participant Server as socketHandler.ts
@@ -99,16 +99,16 @@ sequenceDiagram
     participant Room as Room.ts
     actor Host as Host (Alice)
 
-    Viewer->>Home: Enters "Bob", Room Code "RE7AC5"
-    Home->>Context: joinRoom("RE7AC5", "Bob")
-    Context->>Server: socket.emit('join_room', { roomId: "RE7AC5", username: "Bob" })
+    Viewer->>Home: Enters "Aryan", Room Code "RE7AC5"
+    Home->>Context: joinRoom("RE7AC5", "Aryan")
+    Context->>Server: socket.emit('join_room', { roomId: "RE7AC5", username: "Aryan" })
     Server->>Server: validateRoomCode() & validateUsername()
-    Server->>Manager: roomManager.joinRoom("RE7AC5", "Bob", socket.id)
-    Manager->>Room: room.addParticipant(bobParticipant)
-    Room->>Room: Appends system chat message ("Bob joined as Viewer")
+    Server->>Manager: roomManager.joinRoom("RE7AC5", "Aryan", socket.id)
+    Manager->>Room: room.addParticipant(aryanParticipant)
+    Room->>Room: Appends system chat message ("Aryan joined as Viewer")
     Server->>Server: socket.join("RE7AC5")
     Server-->>Viewer: room_snapshot (current videoId, playState, playbackTime)
-    Server-->>Host: user_joined & participants_updated (Bob added to list)
+    Server-->>Host: user_joined & participants_updated (Aryan added to list)
     Server-->>Viewer: ackCallback({ success: true, user, roomState })
     Viewer->>Viewer: Video loads & synchronizes immediately to Host frame
 ```
@@ -131,7 +131,7 @@ sequenceDiagram
    - **File**: [`server/src/services/RoomManager.ts`](file:///Users/aryanpatel/CODE/project/watchparty/server/src/services/RoomManager.ts) and [`server/src/models/Room.ts`](file:///Users/aryanpatel/CODE/project/watchparty/server/src/models/Room.ts)
    - Instantiates participant with role `PARTICIPANT` (`isHost: false`).
    - Appends participant to `room.participants` map.
-   - Creates a server-authored system chat event announcement: `"Bob joined the room as Viewer."`.
+   - Creates a server-authored system chat event announcement: `"Aryan joined the room as Viewer."`.
 5. **Immediate Snapshot Delivery**:
    - The backend attaches the new socket to the room channel.
    - Emits full room snapshot to the new joiner so they immediately have the current video ID, elapsed playback time, and active participant roster.
@@ -271,7 +271,7 @@ When a Participant wants to change the video or take control, they submit an app
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Viewer as Viewer (Bob)
+    actor Viewer as Viewer (Aryan)
     participant Context as WatchPartyContext.tsx
     participant Server as socketHandler.ts
     participant Room as Room.ts
@@ -282,7 +282,7 @@ sequenceDiagram
     Server->>Room: room.createControlRequest(...)
     Room->>Room: Stored in Map with status = 'pending'
     Server-->>Host: control_request_submitted (Request badge lights up)
-    Server-->>Room: System chat: "Bob requested video change. Host review required."
+    Server-->>Room: System chat: "Aryan requested video change. Host review required."
     Note over Host: Host opens ApprovalQueue modal and clicks "Approve"
     Host->>Server: socket.emit('approve_request', { requestId })
     Server->>Server: PermissionService.canHandleControlRequest(Host)

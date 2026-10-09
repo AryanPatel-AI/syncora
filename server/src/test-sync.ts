@@ -68,11 +68,11 @@ async function runTests() {
 
   try {
     const hostSocket = await createClient('Alice (Host)');
-    const participantSocket = await createClient('Bob (Participant)');
+    const participantSocket = await createClient('Aryan (Participant)');
 
     let roomId = '';
     let hostUserId = '';
-    let bobUserId = '';
+    let aryanUserId = '';
 
     // =========================================================================
     // REQUIREMENT 1: Creating a room and assigning Host
@@ -102,14 +102,14 @@ async function runTests() {
     await new Promise<void>((resolve, reject) => {
       participantSocket.emit(
         SOCKET_EVENTS.JOIN_ROOM,
-        { roomId, username: 'Bob' },
+        { roomId, username: 'Aryan' },
         (res: any) => {
           if (!res.success) return reject(new Error('Failed to join room'));
-          bobUserId = res.user.id;
+          aryanUserId = res.user.id;
           if (res.user.role !== 'PARTICIPANT' || res.user.isHost) {
             return reject(new Error(`Expected role PARTICIPANT, got ${res.user.role}`));
           }
-          console.log(`  ✓ Bob joined room "${roomId}" as PARTICIPANT (User ID: ${bobUserId})`);
+          console.log(`  ✓ Aryan joined room "${roomId}" as PARTICIPANT (User ID: ${aryanUserId})`);
           resolve();
         }
       );
@@ -320,30 +320,36 @@ async function runTests() {
       'Permission denied',
       'Participant CHANGE_VIDEO'
     );
+    await expectError(
+      participantSocket,
+      () => participantSocket.emit(SOCKET_EVENTS.PLAY, { time: 10, role: 'HOST', userId: hostUserId } as any),
+      'Permission denied',
+      'Participant attempting to bypass permissions with forged role/userId'
+    );
 
     // =========================================================================
     // REQUIREMENT 7: Allowing authorized Moderator controls
     // =========================================================================
     console.log('\n▶ Test 7: Allowing authorized Moderator controls...');
 
-    // Host promotes Bob to MODERATOR
+    // Host promotes Aryan to MODERATOR
     await new Promise<void>((resolve, reject) => {
       participantSocket.once(SOCKET_EVENTS.ROLE_ASSIGNED, (data: any) => {
-        if (data.userId === bobUserId && data.role === 'MODERATOR') {
-          console.log(`  ✓ Bob promoted to MODERATOR via assign_role`);
+        if (data.userId === aryanUserId && data.role === 'MODERATOR') {
+          console.log(`  ✓ Aryan promoted to MODERATOR via assign_role`);
           resolve();
         } else {
           reject(new Error(`Failed to assign MODERATOR: ${JSON.stringify(data)}`));
         }
       });
-      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: bobUserId, role: 'MODERATOR' });
+      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'MODERATOR' });
     });
 
-    // Moderator Bob can now pause playback
+    // Moderator Aryan can now pause playback
     await new Promise<void>((resolve, reject) => {
       hostSocket.once(SOCKET_EVENTS.SYNC_STATE, (state: any) => {
         if (state.playState === 'paused' && state.currentTime === 88) {
-          console.log(`  ✓ Moderator Bob successfully executed pause at 88s`);
+          console.log(`  ✓ Moderator Aryan successfully executed pause at 88s`);
           resolve();
         } else {
           reject(new Error(`Moderator playback command failed: ${JSON.stringify(state)}`));
@@ -352,11 +358,11 @@ async function runTests() {
       participantSocket.emit(SOCKET_EVENTS.PAUSE, { time: 88 });
     });
 
-    // Moderator Bob can change video
+    // Moderator Aryan can change video
     await new Promise<void>((resolve, reject) => {
       hostSocket.once(SOCKET_EVENTS.SYNC_STATE, (state: any) => {
         if (state.videoId === 'aqz-KE-bpKQ') {
-          console.log(`  ✓ Moderator Bob successfully changed video to "aqz-KE-bpKQ"`);
+          console.log(`  ✓ Moderator Aryan successfully changed video to "aqz-KE-bpKQ"`);
           resolve();
         } else {
           reject(new Error(`Moderator change video failed: ${state.videoId}`));
@@ -365,25 +371,25 @@ async function runTests() {
       participantSocket.emit(SOCKET_EVENTS.CHANGE_VIDEO, { videoId: 'aqz-KE-bpKQ' });
     });
 
-    // Host demotes Bob back to PARTICIPANT
+    // Host demotes Aryan back to PARTICIPANT
     await new Promise<void>((resolve, reject) => {
       participantSocket.once(SOCKET_EVENTS.ROLE_ASSIGNED, (data: any) => {
-        if (data.userId === bobUserId && data.role === 'PARTICIPANT') {
-          console.log(`  ✓ Bob demoted back to PARTICIPANT`);
+        if (data.userId === aryanUserId && data.role === 'PARTICIPANT') {
+          console.log(`  ✓ Aryan demoted back to PARTICIPANT`);
           resolve();
         } else {
-          reject(new Error(`Failed to demote Bob: ${JSON.stringify(data)}`));
+          reject(new Error(`Failed to demote Aryan: ${JSON.stringify(data)}`));
         }
       });
-      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: bobUserId, role: 'PARTICIPANT' });
+      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'PARTICIPANT' });
     });
 
-    // Demoted Bob can no longer pause
+    // Demoted Aryan can no longer pause
     await expectError(
       participantSocket,
       () => participantSocket.emit(SOCKET_EVENTS.PAUSE, { time: 90 }),
       'Permission denied',
-      'Demoted Bob PAUSE'
+      'Demoted Aryan PAUSE'
     );
 
     // =========================================================================
@@ -391,7 +397,7 @@ async function runTests() {
     // =========================================================================
     console.log('\n▶ Test 8: Allowing role assignments and participant removal only by Host...');
 
-    // Non-host Bob cannot assign role
+    // Non-host Aryan cannot assign role
     await expectError(
       participantSocket,
       () => participantSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: hostUserId, role: 'MODERATOR' }),
@@ -399,7 +405,7 @@ async function runTests() {
       'Participant ASSIGN_ROLE'
     );
 
-    // Non-host Bob cannot remove participant
+    // Non-host Aryan cannot remove participant
     await expectError(
       participantSocket,
       () => participantSocket.emit(SOCKET_EVENTS.REMOVE_PARTICIPANT, { userId: hostUserId }),
@@ -407,10 +413,18 @@ async function runTests() {
       'Participant REMOVE_PARTICIPANT'
     );
 
+    // Non-host Aryan cannot transfer host
+    await expectError(
+      participantSocket,
+      () => participantSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { userId: hostUserId }),
+      'Permission denied',
+      'Participant TRANSFER_HOST'
+    );
+
     // Host cannot assign role HOST
     await expectError(
       hostSocket,
-      () => hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: bobUserId, role: 'HOST' as any }),
+      () => hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'HOST' as any }),
       'Invalid role assignment',
       'Host assigning invalid role HOST'
     );
@@ -431,6 +445,14 @@ async function runTests() {
       'Host removing self'
     );
 
+    // Host cannot transfer host to self
+    await expectError(
+      hostSocket,
+      () => hostSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { userId: hostUserId }),
+      'cannot transfer host ownership to yourself',
+      'Host transferring host to self'
+    );
+
     // Host kicks a participant
     const frankSocket = await createClient('Frank');
     let frankUserId = '';
@@ -442,17 +464,133 @@ async function runTests() {
     });
 
     await new Promise<void>((resolve, reject) => {
-      frankSocket.once(SOCKET_EVENTS.ERROR_MESSAGE, (err: any) => {
-        if (err.message.includes('removed from the watch party')) {
+      frankSocket.once(SOCKET_EVENTS.PARTICIPANT_REMOVED, (data: any) => {
+        if (data.userId === frankUserId) {
           console.log(`  ✓ Frank was kicked by Host Alice and received removal notification`);
           resolve();
         } else {
-          reject(new Error(`Unexpected kick message: ${err.message}`));
+          reject(new Error(`Unexpected kick message: ${JSON.stringify(data)}`));
         }
       });
       hostSocket.emit(SOCKET_EVENTS.REMOVE_PARTICIPANT, { userId: frankUserId });
     });
+
+    // Verify kicked participant cannot continue using the room
+    await expectError(
+      frankSocket,
+      () => frankSocket.emit(SOCKET_EVENTS.PLAY, { time: 10 }),
+      'active member',
+      'Kicked participant PLAY'
+    );
     frankSocket.disconnect();
+
+    // =========================================================================
+    // REQUIREMENT 8b: Host Transfer & Permission Migration
+    // =========================================================================
+    console.log('\n▶ Test 8b: Host transfer updates ownership and permissions correctly...');
+    await new Promise<void>((resolve, reject) => {
+      participantSocket.once(SOCKET_EVENTS.HOST_TRANSFERRED, (data: any) => {
+        if (data.previousHostId === hostUserId && data.newHostId === aryanUserId) {
+          console.log(`  ✓ Host transferred from Alice to Aryan`);
+          resolve();
+        } else {
+          reject(new Error(`Unexpected host_transferred payload: ${JSON.stringify(data)}`));
+        }
+      });
+      hostSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { targetUserId: aryanUserId });
+    });
+
+    // Previous Host Alice can NO LONGER assign roles
+    await expectError(
+      hostSocket,
+      () => hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'PARTICIPANT' }),
+      'Permission denied',
+      'Previous Host (Alice) ASSIGN_ROLE'
+    );
+
+    // Previous Host Alice can NO LONGER remove participants
+    await expectError(
+      hostSocket,
+      () => hostSocket.emit(SOCKET_EVENTS.REMOVE_PARTICIPANT, { userId: aryanUserId }),
+      'Permission denied',
+      'Previous Host (Alice) REMOVE_PARTICIPANT'
+    );
+
+    // Previous Host Alice can NO LONGER transfer host
+    await expectError(
+      hostSocket,
+      () => hostSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { userId: aryanUserId }),
+      'Permission denied',
+      'Previous Host (Alice) TRANSFER_HOST'
+    );
+
+    // New Host Aryan CAN perform host actions: Aryan transfers host back to Alice
+    await new Promise<void>((resolve, reject) => {
+      hostSocket.once(SOCKET_EVENTS.HOST_TRANSFERRED, (data: any) => {
+        if (data.previousHostId === aryanUserId && data.newHostId === hostUserId) {
+          console.log(`  ✓ Host transferred back from Aryan to Alice`);
+          resolve();
+        } else {
+          reject(new Error(`Unexpected host_transferred return: ${JSON.stringify(data)}`));
+        }
+      });
+      participantSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { targetUserId: hostUserId });
+    });
+
+    // Ensure Aryan is demoted back to PARTICIPANT for subsequent participant approval workflow tests
+    await new Promise<void>((resolve) => {
+      participantSocket.once(SOCKET_EVENTS.ROLE_ASSIGNED, () => resolve());
+      hostSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { targetUserId: aryanUserId, newRole: 'PARTICIPANT' });
+    });
+
+    // =========================================================================
+    // REQUIREMENT 8c: Rejecting commands from users not belonging to a room
+    // =========================================================================
+    console.log('\n▶ Test 8c: Rejecting privileged commands from users not belonging to a room...');
+    const strangerSocket = await createClient('Stranger');
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.PLAY, { time: 5 }),
+      'active member',
+      'Stranger PLAY'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.PAUSE, { time: 5 }),
+      'active member',
+      'Stranger PAUSE'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.SEEK, { time: 5 }),
+      'active member',
+      'Stranger SEEK'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.CHANGE_VIDEO, { videoId: 'aqz-KE-bpKQ' }),
+      'active member',
+      'Stranger CHANGE_VIDEO'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.ASSIGN_ROLE, { userId: aryanUserId, role: 'MODERATOR' }),
+      'active member',
+      'Stranger ASSIGN_ROLE'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.REMOVE_PARTICIPANT, { userId: aryanUserId }),
+      'active member',
+      'Stranger REMOVE_PARTICIPANT'
+    );
+    await expectError(
+      strangerSocket,
+      () => strangerSocket.emit(SOCKET_EVENTS.TRANSFER_HOST, { userId: aryanUserId }),
+      'active member',
+      'Stranger TRANSFER_HOST'
+    );
+    strangerSocket.disconnect();
 
     // =========================================================================
     // REQUIREMENT 9: Creating, approving, and rejecting playback requests
@@ -464,7 +602,7 @@ async function runTests() {
     await new Promise<void>((resolve) => {
       hostSocket.once(SOCKET_EVENTS.CONTROL_REQUEST_SUBMITTED, (data: any) => {
         reqVideoId = data.request.id;
-        console.log(`  ✓ Host received playback change request #${reqVideoId} from Bob`);
+        console.log(`  ✓ Host received playback change request #${reqVideoId} from Aryan`);
         resolve();
       });
       participantSocket.emit(SOCKET_EVENTS.REQUEST_PLAYBACK_CHANGE, {
@@ -504,7 +642,7 @@ async function runTests() {
     await new Promise<void>((resolve) => {
       hostSocket.once(SOCKET_EVENTS.CONTROL_REQUEST_SUBMITTED, (data: any) => {
         reqSeekId = data.request.id;
-        console.log(`  ✓ Host received seek request #${reqSeekId} from Bob`);
+        console.log(`  ✓ Host received seek request #${reqSeekId} from Aryan`);
         resolve();
       });
       participantSocket.emit(SOCKET_EVENTS.REQUEST_PLAYBACK_CHANGE, {
@@ -540,7 +678,7 @@ async function runTests() {
       });
     });
 
-    // Bob attempts to approve his own pending request
+    // Aryan attempts to approve his own pending request
     await expectError(
       participantSocket,
       () => participantSocket.emit(SOCKET_EVENTS.APPROVE_REQUEST, { requestId: selfReqId }),
@@ -556,7 +694,7 @@ async function runTests() {
       'Participant approving own request via handle_control_request'
     );
 
-    // Clean up Bob's pending request by having Host reject it
+    // Clean up Aryan's pending request by having Host reject it
     await new Promise<void>((resolve) => {
       participantSocket.once(SOCKET_EVENTS.CONTROL_REQUEST_UPDATED, () => resolve());
       hostSocket.emit(SOCKET_EVENTS.REJECT_REQUEST, { requestId: selfReqId });
@@ -669,7 +807,7 @@ async function runTests() {
       hostSocket.once(SOCKET_EVENTS.CHAT_MESSAGE, (msg: any) => {
         if (
           msg.id &&
-          msg.senderName === 'Bob' &&
+          msg.senderName === 'Aryan' &&
           msg.senderRole === 'PARTICIPANT' &&
           (msg.content === 'Hello Alice, watching together!' || msg.text === 'Hello Alice, watching together!') &&
           typeof msg.timestamp === 'number'
@@ -730,7 +868,7 @@ async function runTests() {
       }, 1500);
     });
 
-    ChatRateLimiter.getInstance().reset(bobUserId);
+    ChatRateLimiter.getInstance().reset(aryanUserId);
 
     // =========================================================================
     // REQUIREMENT 13: Live Audience Presence & Like Reactions System
@@ -752,14 +890,14 @@ async function runTests() {
       };
 
       const hostHandler = (payload: any) => {
-        if (payload.type === 'like' && payload.likeCount === 1 && payload.senderName === 'Bob') {
+        if (payload.type === 'like' && payload.likeCount === 1 && payload.senderName === 'Aryan') {
           hostReceived = true;
           checkDone();
         }
       };
 
       const participantHandler = (payload: any) => {
-        if (payload.type === 'like' && payload.likeCount === 1 && payload.senderName === 'Bob') {
+        if (payload.type === 'like' && payload.likeCount === 1 && payload.senderName === 'Aryan') {
           participantReceived = true;
           checkDone();
         }

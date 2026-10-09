@@ -71,6 +71,7 @@ export class Room {
         nextHost.makeHost();
         this.hostId = nextHost.id;
         RoomRepository.updateHost(this.id, nextHost.id);
+        RoomRepository.updateParticipantRole(nextHost.id, nextHost.role);
       }
     }
 
@@ -110,6 +111,8 @@ export class Room {
     target.makeHost();
     this.hostId = target.id;
     RoomRepository.updateHost(this.id, target.id);
+    RoomRepository.updateParticipantRole(currentHost.id, currentHost.role);
+    RoomRepository.updateParticipantRole(target.id, target.role);
     return true;
   }
 

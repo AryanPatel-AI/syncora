@@ -72,12 +72,12 @@ sequenceDiagram
 ## 2. Room Joining Flow (Code or Invite Link)
 
 ### Overview
-A second user (e.g. `"Bob"`) arrives via an invite link (`/room/LC4KJW`) or enters the room code on the Home page.
+A second user (e.g. `"Aryan"`) arrives via an invite link (`/room/LC4KJW`) or enters the room code on the Home page.
 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Bob as User (Bob)
+    actor Aryan as User (Aryan)
     participant Home as HomePage.tsx
     participant Context as WatchPartyContext.tsx
     participant Socket as socket.ts
@@ -85,12 +85,12 @@ sequenceDiagram
     participant Manager as RoomManager.ts
     participant Alice as Alice (Host)
 
-    Bob->>Home: Enters "Bob" + Code "LC4KJW", clicks Join
-    Home->>Context: joinRoom("Bob", "LC4KJW")
+    Aryan->>Home: Enters "Aryan" + Code "LC4KJW", clicks Join
+    Home->>Context: joinRoom("Aryan", "LC4KJW")
     Context->>Socket: socket.emit('join_room', payload, callback)
     Socket->>Server: socket.on('join_room')
     Server->>Server: validateUsername() & validateRoomId()
-    Server->>Manager: roomManager.joinRoom("LC4KJW", "Bob", socket.id)
+    Server->>Manager: roomManager.joinRoom("LC4KJW", "Aryan", socket.id)
     Manager->>Manager: Creates Participant(role='PARTICIPANT')
     Server->>Server: socket.join("LC4KJW")
     Server-->>Socket: Callback({ success: true, roomState, user })
@@ -108,14 +108,14 @@ sequenceDiagram
    - **File**: [`server/src/services/RoomManager.ts`](file:///Users/aryanpatel/CODE/project/watchparty/server/src/services/RoomManager.ts)
    - **Function**: `joinRoom(roomId: string, username: string, socketId: string)`
    - Looks up room in `this.rooms.get(roomId)`. If missing, returns `{ error: 'Room does not exist' }`.
-   - Adds Bob as a `PARTICIPANT`.
+   - Adds Aryan as a `PARTICIPANT`.
    - Generates authoritative `room.getStateSnapshot()` containing `playback`, `participants`, `likeCount`, and `pendingRequests`.
 
 3. **Room-Wide Presence Broadcast**:
    - The server calls `emitPresenceUpdated(room)` in [`socketHandler.ts`](file:///Users/aryanpatel/CODE/project/watchparty/server/src/sockets/socketHandler.ts):
      - Broadcasts `user_joined` to everyone in the room.
      - Broadcasts `presence_updated` (`{ count: 2, participants }`).
-     - Alice’s UI automatically reflects `Watching now · 2` with Bob’s avatar.
+     - Alice’s UI automatically reflects `Watching now · 2` with Aryan’s avatar.
 
 ---
 
@@ -192,7 +192,7 @@ Authorization is strictly server-enforced in [`PermissionService.ts`](file:///Us
 ### Detailed Code Execution
 
 1. **Unauthorized Command Attempt**:
-   - Bob (Participant) opens browser console and runs:
+   - Aryan (Participant) opens browser console and runs:
      ```javascript
      socket.emit('pause', { time: 10 });
      ```
@@ -205,7 +205,7 @@ Authorization is strictly server-enforced in [`PermissionService.ts`](file:///Us
      }
      ```
    - Command is stopped immediately before touching `room` state.
-   - An `error_message` packet is sent only to Bob's socket.
+   - An `error_message` packet is sent only to Aryan's socket.
    - Alice’s playback is completely unaffected.
 
 ---
@@ -218,13 +218,13 @@ Participants cannot modify playback directly, but they can request changes from 
 ```mermaid
 sequenceDiagram
     autonumber
-    actor Bob as Bob (Participant)
+    actor Aryan as Aryan (Participant)
     participant Context as WatchPartyContext.tsx
     participant Server as socketHandler.ts
     participant Room as Room.ts
     actor Alice as Alice (Host)
 
-    Bob->>Context: requestPlaybackChange('pause', undefined, 30.5)
+    Aryan->>Context: requestPlaybackChange('pause', undefined, 30.5)
     Context->>Server: socket.emit('request_playback_change', payload)
     Server->>Server: Validates action & timestamp
     Server->>Room: room.addControlRequest(req)
@@ -234,7 +234,7 @@ sequenceDiagram
     Server->>Server: PermissionService.canReviewRequests(Alice.role)
     Server->>Room: room.resolveControlRequest(requestId, 'approved')
     Server->>Room: Executes requested action (pause at 30.5s)
-    Server-->>Bob: Emits control_request_updated & sync_state
+    Server-->>Aryan: Emits control_request_updated & sync_state
 ```
 
 ### Detailed Code Execution
@@ -290,7 +290,7 @@ When a Host disconnects or reloads their page, the room must not break or leave 
 
 3. **Room Broadcast**:
    - Emits `host_transferred` (`{ previousHostId, newHostId, participants }`).
-   - Appends a system chat message: `"Host left. Bob is now the room Host."`
+   - Appends a system chat message: `"Host left. Aryan is now the room Host."`
    - Emits `presence_updated` with updated counts.
 
 4. **Empty Room Deletion**:
