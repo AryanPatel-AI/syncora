@@ -2,6 +2,13 @@
 
 This guide provides end-to-end instructions for deploying the **Syncora YouTube Watch Party** system with the **frontend hosted on Vercel** and the **backend hosted on Render**.
 
+## 🌐 Current Production Deployment
+
+| Service | Platform | Live URL | Health Status |
+| :--- | :--- | :--- | :--- |
+| **Frontend Client** | Vercel | [https://client-lac-nu-17.vercel.app](https://client-lac-nu-17.vercel.app) | 🟢 200 OK |
+| **Backend API & WebSockets** | Render | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) | 🟢 200 OK (`/health`) |
+
 ---
 
 ## 1. System Architecture Overview

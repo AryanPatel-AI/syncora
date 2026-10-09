@@ -42,6 +42,10 @@ const isOriginAllowed = (origin?: string): boolean => {
   if (!isProduction || allowedOrigins.includes('*') || allowedOrigins.includes(normalized)) {
     return true;
   }
+  // Seamlessly allow all Vercel deployment domains (production & preview URLs)
+  if (/^https:\/\/[a-zA-Z0-9_\-.]+\.vercel\.app$/.test(normalized)) {
+    return true;
+  }
   return false;
 };
 

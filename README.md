@@ -15,8 +15,8 @@
 
 | Service | Platform | Status | URL |
 | :--- | :--- | :--- | :--- |
-| **Frontend Client** | Vercel | 🟡 *Deployment Ready (Pending User Trigger)* | `https://<your-vercel-project>.vercel.app` *(Target)* |
-| **Backend API & WebSockets** | Render | 🟡 *Deployment Ready (Pending User Trigger)* | `https://<your-render-service>.onrender.com` *(Target)* |
+| **Frontend Client** | Vercel | 🟢 **Live in Production** | [https://client-lac-nu-17.vercel.app](https://client-lac-nu-17.vercel.app) |
+| **Backend API & WebSockets** | Render | 🟢 **Live in Production** | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) |
 
 > [!NOTE]
 > The codebase is fully configured with production environment variable adapters, SPA route rewrite rules (`vercel.json`), Render Web Service manifests (`render.yaml`), and strict CORS handlers.
