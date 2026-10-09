@@ -19,8 +19,8 @@ export const CategoryPills: React.FC<CategoryPillsProps> = ({
           onClick={() => onSelectCategory(cat.id)}
           className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all active:scale-95 ${
             selectedCategory === cat.id
-              ? 'bg-[#D1FAE5] text-[#09140F] shadow-md shadow-white/5'
-              : 'bg-[#193225] text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#234735] border border-[#234735]'
+              ? 'bg-[#F2F0E9] text-[#101114] shadow-md shadow-white/5'
+              : 'bg-[#1C1E24] text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#282A33] border border-[#282A33]'
           }`}
         >
           {cat.name}

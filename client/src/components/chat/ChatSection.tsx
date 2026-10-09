@@ -81,14 +81,14 @@ export const ChatSection: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col h-full rounded-xl bg-[#11221A] border border-[#234735] overflow-hidden shadow-cinema"
+      className="flex flex-col h-full rounded-xl bg-[#16171B] border border-[#282A33] overflow-hidden shadow-cinema"
       aria-label="Room Discussion"
     >
       {/* Header */}
-      <div className="p-3 border-b border-[#234735] flex items-center justify-between">
+      <div className="p-3 border-b border-[#282A33] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-[#34D399]" />
-          <span className="text-xs font-mono uppercase tracking-wider text-[#D1FAE5] font-medium">
+          <MessageSquare className="w-4 h-4 text-[#D6F279]" />
+          <span className="text-xs font-mono uppercase tracking-wider text-[#F2F0E9] font-medium">
             Room Discussion
           </span>
           {slowModeSeconds > 0 && (
@@ -105,14 +105,14 @@ export const ChatSection: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsSlowModeMenuOpen((p) => !p)}
-                className="p-1 rounded text-[#8E919C] hover:text-white hover:bg-[#234735] transition-colors"
+                className="p-1 rounded text-[#8E919C] hover:text-white hover:bg-[#282A33] transition-colors"
                 title="Configure Slow Mode"
               >
                 <Sliders className="w-3.5 h-3.5" />
               </button>
 
               {isSlowModeMenuOpen && (
-                <div className="absolute right-0 mt-1 w-36 bg-[#193225] border border-[#234735] rounded-xl shadow-2xl p-1 z-30 flex flex-col gap-0.5 text-[11px]">
+                <div className="absolute right-0 mt-1 w-36 bg-[#1C1E24] border border-[#282A33] rounded-xl shadow-2xl p-1 z-30 flex flex-col gap-0.5 text-[11px]">
                   <span className="px-2 py-1 text-[9px] font-bold uppercase text-[#5E606A]">
                     Slow Mode
                   </span>
@@ -126,8 +126,8 @@ export const ChatSection: React.FC = () => {
                       }}
                       className={`px-2 py-1.5 rounded text-left transition-colors ${
                         slowModeSeconds === sec
-                          ? 'bg-[#34D399]/15 text-[#34D399] font-bold'
-                          : 'text-[#8E919C] hover:text-white hover:bg-[#234735]'
+                          ? 'bg-[#D6F279]/15 text-[#D6F279] font-bold'
+                          : 'text-[#8E919C] hover:text-white hover:bg-[#282A33]'
                       }`}
                     >
                       {sec === 0 ? 'Off (Normal)' : `${sec} seconds`}
@@ -152,9 +152,9 @@ export const ChatSection: React.FC = () => {
 
       {/* Pinned Messages Banner */}
       {pinnedMessages.length > 0 && (
-        <div className="px-3 py-1.5 bg-[#34D399]/10 border-b border-[#34D399]/20 flex items-center justify-between text-xs text-[#2BBF88]">
+        <div className="px-3 py-1.5 bg-[#8067F5]/10 border-b border-[#8067F5]/20 flex items-center justify-between text-xs text-[#A99BFF]">
           <div className="flex items-center gap-2 truncate">
-            <Pin className="w-3.5 h-3.5 shrink-0 text-[#34D399]" />
+            <Pin className="w-3.5 h-3.5 shrink-0 text-[#D6F279]" />
             <span className="truncate text-[11px] font-medium">
               <strong>{pinnedMessages[0].senderName}:</strong> {pinnedMessages[0].content}
             </span>
@@ -180,15 +180,15 @@ export const ChatSection: React.FC = () => {
       >
         {!isConnected && chatHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8 text-[#8E919C] gap-2">
-            <Loader2 className="w-5 h-5 text-[#34D399] animate-spin" />
-            <p className="text-xs font-medium text-[#D1FAE5]">Connecting to chat...</p>
+            <Loader2 className="w-5 h-5 text-[#D6F279] animate-spin" />
+            <p className="text-xs font-medium text-[#F2F0E9]">Connecting to chat...</p>
           </div>
         ) : chatHistory.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8 text-[#8E919C] gap-1.5">
-            <div className="w-9 h-9 rounded-full bg-[#193225] border border-[#234735] flex items-center justify-center text-[#5E606A] mb-1">
+            <div className="w-9 h-9 rounded-full bg-[#1C1E24] border border-[#282A33] flex items-center justify-center text-[#5E606A] mb-1">
               <MessageSquare className="w-4 h-4" />
             </div>
-            <p className="text-xs font-medium text-[#D1FAE5]">Discussion is quiet</p>
+            <p className="text-xs font-medium text-[#F2F0E9]">Discussion is quiet</p>
             <p className="text-[11px] text-[#5E606A] max-w-[200px]">
               Notes and messages sent during the screening will appear here.
             </p>
@@ -199,7 +199,7 @@ export const ChatSection: React.FC = () => {
               return (
                 <div
                   key={msg.id}
-                  className="self-center px-2.5 py-1 rounded bg-[#193225]/80 border border-[#234735] text-[10px] font-mono text-[#8E919C] text-center max-w-[90%]"
+                  className="self-center px-2.5 py-1 rounded bg-[#1C1E24]/80 border border-[#282A33] text-[10px] font-mono text-[#8E919C] text-center max-w-[90%]"
                 >
                   {msg.content || msg.text}
                 </div>
@@ -242,11 +242,11 @@ export const ChatSection: React.FC = () => {
 
                   {/* Moderator Quick Actions overlay */}
                   {canModerate && !msg.isDeleted && (
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-1 bg-[#09140F] border border-[#234735] rounded px-1 py-0.5">
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 ml-1 bg-[#101114] border border-[#282A33] rounded px-1 py-0.5">
                       <button
                         type="button"
                         onClick={() => pinMessage(msg.id, !msg.isPinned)}
-                        className={`p-0.5 hover:text-white ${msg.isPinned ? 'text-[#34D399]' : 'text-[#8E919C]'}`}
+                        className={`p-0.5 hover:text-white ${msg.isPinned ? 'text-[#D6F279]' : 'text-[#8E919C]'}`}
                         title={msg.isPinned ? 'Unpin' : 'Pin message'}
                       >
                         <Pin className="w-2.5 h-2.5" />
@@ -278,10 +278,10 @@ export const ChatSection: React.FC = () => {
                 <div
                   className={`px-3 py-2 rounded-lg text-xs leading-relaxed break-words whitespace-pre-wrap ${
                     msg.isDeleted
-                      ? 'bg-[#193225]/30 text-[#5E606A] italic border border-dashed border-[#234735]'
+                      ? 'bg-[#1C1E24]/30 text-[#5E606A] italic border border-dashed border-[#282A33]'
                       : isMe
-                      ? 'bg-[#193225] text-[#D1FAE5] border border-[#2A5540]'
-                      : 'bg-[#193225]/60 text-[#D1FAE5] border border-[#234735]'
+                      ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#3E4250]'
+                      : 'bg-[#1C1E24]/60 text-[#F2F0E9] border border-[#282A33]'
                   }`}
                 >
                   {msg.content || msg.text}
@@ -309,7 +309,7 @@ export const ChatSection: React.FC = () => {
       )}
 
       {/* Input Form */}
-      <form onSubmit={handleSend} className="p-2.5 border-t border-[#234735] bg-[#11221A] flex flex-col gap-1.5">
+      <form onSubmit={handleSend} className="p-2.5 border-t border-[#282A33] bg-[#16171B] flex flex-col gap-1.5">
         <div className="flex items-center gap-1 pb-1">
           <span className="text-[10px] font-mono text-[#5E606A] mr-1 uppercase">React</span>
           {['❤️', '🔥', '👏', '🎉', '🍿'].map((emoji) => (
@@ -318,7 +318,7 @@ export const ChatSection: React.FC = () => {
               type="button"
               disabled={!isConnected}
               onClick={() => sendReaction(emoji, emoji === '❤️' ? 'like' : 'emoji')}
-              className="px-1.5 py-0.5 rounded text-xs hover:bg-[#224433] active:scale-90 transition-transform disabled:opacity-40"
+              className="px-1.5 py-0.5 rounded text-xs hover:bg-[#24262E] active:scale-90 transition-transform disabled:opacity-40"
               aria-label={`Send ${emoji} reaction`}
             >
               {emoji}
@@ -334,12 +334,12 @@ export const ChatSection: React.FC = () => {
             maxLength={500}
             disabled={!isConnected}
             onChange={handleInputChange}
-            className="flex-1 px-3 py-2 rounded-md bg-[#09140F] border border-[#234735] focus:border-[#34D399] text-xs text-[#D1FAE5] placeholder:text-[#5E606A] outline-none transition-colors disabled:opacity-40"
+            className="flex-1 px-3 py-2 rounded-md bg-[#101114] border border-[#282A33] focus:border-[#D6F279] text-xs text-[#F2F0E9] placeholder:text-[#5E606A] outline-none transition-colors disabled:opacity-40"
           />
           <button
             type="submit"
             disabled={!inputText.trim() || !isConnected}
-            className="px-3.5 py-2 min-h-[34px] rounded-md bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] font-medium text-xs disabled:opacity-30 transition-colors flex items-center justify-center shrink-0"
+            className="px-3.5 py-2 min-h-[34px] rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] font-medium text-xs disabled:opacity-30 transition-colors flex items-center justify-center shrink-0"
           >
             <Send className="w-3.5 h-3.5" />
           </button>

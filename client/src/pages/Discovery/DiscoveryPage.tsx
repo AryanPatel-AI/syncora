@@ -131,11 +131,11 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
 
       {/* Search Header Banner */}
       {searchQuery && (
-        <div className="flex items-center justify-between pb-2 border-b border-[#234735]">
+        <div className="flex items-center justify-between pb-2 border-b border-[#282A33]">
           <div className="flex items-center gap-2">
             <Search className="w-4 h-4 text-[#8E919C]" />
             <h2 className="text-base font-bold text-white">
-              Search Results for <span className="text-[#34D399]">"{searchQuery}"</span>
+              Search Results for <span className="text-[#D6F279]">"{searchQuery}"</span>
             </h2>
           </div>
           <span className="text-xs text-[#8E919C] font-mono">
@@ -167,7 +167,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
         {!searchQuery && (
           <div className="flex items-center justify-between">
             <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#34D399]" />
+              <TrendingUp className="w-4 h-4 text-[#8067F5]" />
               <span>
                 {filterType === 'live' ? 'All Live Broadcasts' : 'Recommended & Trending'}
               </span>
@@ -181,14 +181,14 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
             {Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
-                className="rounded-2xl bg-[#11221A] border border-[#234735] overflow-hidden flex flex-col gap-3 animate-pulse p-3"
+                className="rounded-2xl bg-[#16171B] border border-[#282A33] overflow-hidden flex flex-col gap-3 animate-pulse p-3"
               >
-                <div className="aspect-video w-full rounded-xl bg-[#234735]/50" />
+                <div className="aspect-video w-full rounded-xl bg-[#282A33]/50" />
                 <div className="flex gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#234735]" />
+                  <div className="w-8 h-8 rounded-full bg-[#282A33]" />
                   <div className="flex-1 flex flex-col gap-1.5">
-                    <div className="h-3.5 w-3/4 rounded bg-[#234735]" />
-                    <div className="h-2.5 w-1/2 rounded bg-[#234735]" />
+                    <div className="h-3.5 w-3/4 rounded bg-[#282A33]" />
+                    <div className="h-2.5 w-1/2 rounded bg-[#282A33]" />
                   </div>
                 </div>
               </div>
@@ -197,7 +197,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
         ) : videos.length === 0 ? (
           /* Empty State */
           <div className="py-16 text-center flex flex-col items-center justify-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#193225] border border-[#234735] flex items-center justify-center text-[#8E919C]">
+            <div className="w-12 h-12 rounded-2xl bg-[#1C1E24] border border-[#282A33] flex items-center justify-center text-[#8E919C]">
               <Film className="w-6 h-6" />
             </div>
             <div className="text-sm font-semibold text-white">No streams found</div>

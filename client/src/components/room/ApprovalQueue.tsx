@@ -34,11 +34,11 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({ onClose, isInline 
     <div className={`flex flex-col gap-3 ${isInline ? 'w-full' : ''}`}>
       {/* Header if modal */}
       {!isInline && (
-        <div className="flex items-center justify-between pb-3 border-b border-[#234735]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#282A33]">
           <div className="flex items-center gap-2.5">
-            <Shield className="w-4 h-4 text-[#34D399]" />
+            <Shield className="w-4 h-4 text-[#D6F279]" />
             <div>
-              <h3 className="text-sm font-serif font-semibold text-[#D1FAE5]">
+              <h3 className="text-sm font-serif font-semibold text-[#F2F0E9]">
                 Playback Control Queue
               </h3>
               <p className="text-xs text-[#8E919C]">
@@ -50,7 +50,7 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({ onClose, isInline 
             <button
               onClick={onClose}
               aria-label="Close request queue"
-              className="p-1 rounded text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
+              className="p-1 rounded text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -62,24 +62,24 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({ onClose, isInline 
       <div className="flex flex-col gap-2 max-h-72 overflow-y-auto pr-0.5">
         {pendingRequests.length === 0 ? (
           <div className="text-center py-6 text-[#8E919C] flex flex-col items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-[#34D399]" />
-            <p className="text-xs font-medium text-[#D1FAE5]">No pending requests</p>
+            <CheckCircle2 className="w-5 h-5 text-[#D6F279]" />
+            <p className="text-xs font-medium text-[#F2F0E9]">No pending requests</p>
             <p className="text-[11px] text-[#5E606A]">All participant actions are up to date.</p>
           </div>
         ) : (
           pendingRequests.map((req) => (
             <div
               key={req.id}
-              className="p-3 rounded-lg bg-[#193225] border border-[#234735] flex flex-col gap-2"
+              className="p-3 rounded-lg bg-[#1C1E24] border border-[#282A33] flex flex-col gap-2"
             >
               <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2 min-w-0">
-                  <div className="p-1.5 rounded bg-[#09140F] text-[#34D399] border border-[#234735]">
+                  <div className="p-1.5 rounded bg-[#101114] text-[#D6F279] border border-[#282A33]">
                     {getRequestIcon(req.action || req.type)}
                   </div>
                   <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-[#D1FAE5] truncate">
+                      <span className="text-xs font-medium text-[#F2F0E9] truncate">
                         {req.username}
                       </span>
                       <span className="text-[10px] text-[#5E606A] font-mono">
@@ -97,18 +97,18 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({ onClose, isInline 
               </div>
 
               {canControl && (
-                <div className="flex items-center justify-end gap-2 pt-1.5 border-t border-[#234735]/60">
+                <div className="flex items-center justify-end gap-2 pt-1.5 border-t border-[#282A33]/60">
                   <button
                     onClick={() => handleControlRequest(req.id, 'rejected')}
                     aria-label={`Decline request from ${req.username}`}
-                    className="px-2.5 py-1 rounded text-xs text-[#8E919C] hover:text-[#F87171] hover:bg-[#F87171]/10 border border-[#234735] transition-colors"
+                    className="px-2.5 py-1 rounded text-xs text-[#8E919C] hover:text-[#F87171] hover:bg-[#F87171]/10 border border-[#282A33] transition-colors"
                   >
                     Decline
                   </button>
                   <button
                     onClick={() => handleControlRequest(req.id, 'approved')}
                     aria-label={`Approve request from ${req.username}`}
-                    className="flex items-center gap-1 px-3 py-1 rounded bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] text-xs font-semibold transition-colors"
+                    className="flex items-center gap-1 px-3 py-1 rounded bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-semibold transition-colors"
                   >
                     <Check className="w-3 h-3" />
                     <span>Approve</span>
@@ -128,11 +128,11 @@ export const ApprovalQueue: React.FC<ApprovalQueueProps> = ({ onClose, isInline 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#09140F]/90 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101114]/90 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
     >
-      <div className="relative w-full max-w-md bg-[#11221A] rounded-xl p-5 shadow-cinema border border-[#234735]">
+      <div className="relative w-full max-w-md bg-[#16171B] rounded-xl p-5 shadow-cinema border border-[#282A33]">
         {content}
       </div>
     </div>

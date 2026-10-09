@@ -395,8 +395,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
   return (
     <div
-      className={`relative w-full rounded-xl overflow-hidden bg-[#060D0A] border transition-colors duration-200 shadow-cinema group ${
-        isPlaying ? 'border-[#2A5540]' : 'border-[#234735]'
+      className={`relative w-full rounded-xl overflow-hidden bg-[#0B0C0E] border transition-colors duration-200 shadow-cinema group ${
+        isPlaying ? 'border-[#3E4250]' : 'border-[#282A33]'
       }`}
     >
       {/* 16:9 Aspect Frame */}
@@ -406,11 +406,11 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
       {/* Stream Error Recovery Overlay */}
       {hasPlaybackError && (
-        <div className="absolute inset-0 z-40 bg-[#09140F]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-          <div className="p-3 rounded-lg bg-[#224433] border border-[#F59E0B]/40 text-[#F59E0B] mb-3">
+        <div className="absolute inset-0 z-40 bg-[#101114]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+          <div className="p-3 rounded-lg bg-[#24262E] border border-[#F59E0B]/40 text-[#F59E0B] mb-3">
             <AlertTriangle className="w-6 h-6" />
           </div>
-          <h4 className="text-sm font-semibold text-[#D1FAE5] mb-1">Stream Unavailable for Embedding</h4>
+          <h4 className="text-sm font-semibold text-[#F2F0E9] mb-1">Stream Unavailable for Embedding</h4>
           <p className="text-xs text-[#8E919C] max-w-sm mb-4">
             The video owner has disabled external playback, or the stream has ended. Select a verified screening stream:
           </p>
@@ -419,7 +419,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
               <button
                 key={preset.id}
                 onClick={() => handleFallbackRecover(preset.id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] text-xs font-semibold transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-semibold transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
                 <span>Switch to {preset.title.split(' ')[0]}</span>
@@ -433,7 +433,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       {(isMuted || needsUserGesture) && !hasPlaybackError && (
         <button
           onClick={handleUnmute}
-          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#34D399] text-[#09140F] text-xs font-semibold shadow-fine hover:bg-[#2BBF88] transition-colors"
+          className="absolute top-3 left-3 z-30 flex items-center gap-2 px-3 py-1.5 rounded-md bg-[#D6F279] text-[#101114] text-xs font-semibold shadow-fine hover:bg-[#C3E065] transition-colors"
         >
           <VolumeX className="w-4 h-4" />
           <span>Click to Unmute Stream Audio</span>

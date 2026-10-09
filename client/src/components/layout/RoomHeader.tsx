@@ -38,15 +38,15 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#09140F]/95 border-b border-[#234735] px-4 lg:px-6 py-2.5 flex items-center justify-between backdrop-blur-sm">
+    <header className="sticky top-0 z-40 w-full bg-[#101114]/95 border-b border-[#282A33] px-4 lg:px-6 py-2.5 flex items-center justify-between backdrop-blur-sm">
       {/* Brand & Room Title */}
       <div className="flex items-center gap-3">
         <a href="/" className="flex items-center gap-2.5 group">
-          <div className="w-2.5 h-2.5 rounded-sm bg-[#34D399] group-hover:scale-110 transition-transform" />
-          <span className="font-serif text-lg tracking-tight font-medium text-[#D1FAE5] group-hover:text-[#34D399] transition-colors">
+          <div className="w-2.5 h-2.5 rounded-sm bg-[#D6F279] group-hover:scale-110 transition-transform" />
+          <span className="font-serif text-lg tracking-tight font-medium text-[#F2F0E9] group-hover:text-[#D6F279] transition-colors">
             Syncora
           </span>
-          <span className="text-[10px] font-mono uppercase tracking-widest text-[#8E919C] border-l border-[#234735] pl-2.5 hidden sm:inline">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-[#8E919C] border-l border-[#282A33] pl-2.5 hidden sm:inline">
             Screening Room
           </span>
         </a>
@@ -64,18 +64,18 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
           <AudiencePresence />
 
           {/* Room Code & Copy Button */}
-          <div className="flex items-center gap-1.5 bg-[#11221A] border border-[#234735] px-2.5 py-1 rounded-md text-xs">
-            <Radio className="w-3 h-3 text-[#34D399] hidden md:inline" />
+          <div className="flex items-center gap-1.5 bg-[#16171B] border border-[#282A33] px-2.5 py-1 rounded-md text-xs">
+            <Radio className="w-3 h-3 text-[#D6F279] hidden md:inline" />
             <span className="text-[10px] text-[#8E919C] uppercase font-mono tracking-wider hidden md:inline">Room</span>
-            <span className="font-mono font-medium text-[#D1FAE5] tracking-wider text-xs">{roomId}</span>
+            <span className="font-mono font-medium text-[#F2F0E9] tracking-wider text-xs">{roomId}</span>
             <button
               onClick={handleCopyLink}
-              className="p-1 rounded text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors ml-0.5"
+              className="p-1 rounded text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors ml-0.5"
               title="Copy invite link to clipboard"
               aria-label="Copy invite link"
             >
               {copied ? (
-                <Check className="w-3.5 h-3.5 text-[#34D399]" />
+                <Check className="w-3.5 h-3.5 text-[#D6F279]" />
               ) : (
                 <Copy className="w-3.5 h-3.5" />
               )}
@@ -84,8 +84,8 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
 
           {/* User Presence & Role Pill */}
           {currentUser && (
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#11221A] border border-[#234735] text-xs">
-              <span className="text-xs font-medium text-[#D1FAE5] max-w-[100px] truncate">
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#16171B] border border-[#282A33] text-xs">
+              <span className="text-xs font-medium text-[#F2F0E9] max-w-[100px] truncate">
                 {currentUser.username}
               </span>
               {isHost ? (
@@ -99,7 +99,7 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
                   <span className="hidden lg:inline">Mod</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#234735]/50 text-[#8E919C] border border-[#234735]" title="Viewer">
+                <span className="inline-flex items-center gap-1 text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-[#282A33]/50 text-[#8E919C] border border-[#282A33]" title="Viewer">
                   <User className="w-3 h-3" />
                   <span className="hidden lg:inline">Viewer</span>
                 </span>

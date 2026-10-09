@@ -42,24 +42,24 @@ export const LikeButton: React.FC<LikeButtonProps> = ({ className = '' }) => {
       disabled={!isConnected}
       aria-label={`Like this screening. Current total: ${likeCount} likes`}
       title={isCooldown ? 'Cooldown (500ms)' : 'Send a like to the room'}
-      className={`group relative inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[34px] rounded-md border transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#34D399] ${
+      className={`group relative inline-flex items-center gap-1.5 px-3 py-1.5 min-h-[34px] rounded-md border transition-all select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D6F279] ${
         isAnimating
-          ? 'bg-[#34D399]/15 border-[#34D399] text-[#34D399]'
-          : 'bg-[#11221A] hover:bg-[#193225] border-[#234735] hover:border-[#2A5540] text-[#8E919C] hover:text-[#D1FAE5]'
+          ? 'bg-[#D6F279]/15 border-[#D6F279] text-[#D6F279]'
+          : 'bg-[#16171B] hover:bg-[#1C1E24] border-[#282A33] hover:border-[#3E4250] text-[#8E919C] hover:text-[#F2F0E9]'
       } disabled:opacity-40 disabled:cursor-not-allowed ${className}`}
     >
       <Heart
         className={`w-4 h-4 transition-transform ${
           isAnimating
-            ? 'animate-heart-pulse fill-[#34D399] text-[#34D399]'
-            : 'text-[#8E919C] group-hover:text-[#34D399] group-hover:scale-110'
+            ? 'animate-heart-pulse fill-[#D6F279] text-[#D6F279]'
+            : 'text-[#8E919C] group-hover:text-[#D6F279] group-hover:scale-110'
         }`}
         aria-hidden="true"
       />
 
       <span
         className={`font-mono text-xs font-semibold tabular-nums transition-colors ${
-          isAnimating ? 'text-[#34D399]' : 'text-[#D1FAE5]'
+          isAnimating ? 'text-[#D6F279]' : 'text-[#F2F0E9]'
         }`}
         aria-live="polite"
       >

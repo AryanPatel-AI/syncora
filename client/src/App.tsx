@@ -54,7 +54,7 @@ const WatchPartyApp: React.FC = () => {
   }, [roomId, joinRoom, currentUserAccount]);
 
   return (
-    <div className="min-h-screen bg-[#09140F] text-[#D1FAE5] flex flex-col font-sans selection:bg-[#34D399] selection:text-[#09140F]">
+    <div className="min-h-screen bg-[#101114] text-[#F2F0E9] flex flex-col font-sans selection:bg-[#D6F279] selection:text-[#101114]">
       {/* Top Header: RoomHeader when in room, AppNavbar when browsing platform */}
       {roomId ? (
         <RoomHeader />
@@ -77,22 +77,22 @@ const WatchPartyApp: React.FC = () => {
       {toastMessage && (
         <div
           role="status"
-          className="fixed top-18 right-4 z-50 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-[#193225] shadow-2xl border border-[#234735] text-xs font-medium max-w-sm animate-fade-in"
+          className="fixed top-18 right-4 z-50 flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-[#1C1E24] shadow-2xl border border-[#282A33] text-xs font-medium max-w-sm animate-fade-in"
         >
           {toastMessage.type === 'error' && (
             <AlertCircle className="w-4 h-4 text-[#F87171] shrink-0" />
           )}
           {toastMessage.type === 'success' && (
-            <CheckCircle2 className="w-4 h-4 text-[#34D399] shrink-0" />
+            <CheckCircle2 className="w-4 h-4 text-[#D6F279] shrink-0" />
           )}
           {toastMessage.type === 'info' && (
             <Info className="w-4 h-4 text-[#8E919C] shrink-0" />
           )}
-          <span className="flex-1 text-[#D1FAE5] leading-tight">{toastMessage.text}</span>
+          <span className="flex-1 text-[#F2F0E9] leading-tight">{toastMessage.text}</span>
           <button
             onClick={clearToast}
             aria-label="Dismiss notification"
-            className="p-1 rounded text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
+            className="p-1 rounded text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
           >
             <X className="w-3.5 h-3.5" />
           </button>

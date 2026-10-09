@@ -53,18 +53,18 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#09140F]/90 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#101114]/90 backdrop-blur-sm"
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-stream-selector-title"
     >
-      <div className="relative w-full max-w-xl bg-[#11221A] rounded-xl p-5 sm:p-6 shadow-cinema border border-[#234735] flex flex-col gap-5 text-[#D1FAE5] max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-[#16171B] rounded-xl p-5 sm:p-6 shadow-cinema border border-[#282A33] flex flex-col gap-5 text-[#F2F0E9] max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[#234735]">
+        <div className="flex items-center justify-between pb-3 border-b border-[#282A33]">
           <div className="flex items-center gap-2.5">
-            <Film className="w-5 h-5 text-[#34D399]" />
+            <Film className="w-5 h-5 text-[#D6F279]" />
             <div>
-              <h2 id="modal-stream-selector-title" className="text-base font-serif font-semibold text-[#D1FAE5]">
+              <h2 id="modal-stream-selector-title" className="text-base font-serif font-semibold text-[#F2F0E9]">
                 Change Screening Stream
               </h2>
               <p className="text-xs text-[#8E919C]">
@@ -77,7 +77,7 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            className="p-1.5 rounded-md text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#224433] transition-colors"
+            className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -104,11 +104,11 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
                 setUrlInput(e.target.value);
                 setError(null);
               }}
-              className="flex-1 px-3.5 py-2.5 rounded-md bg-[#09140F] border border-[#234735] focus:border-[#34D399] text-xs text-[#D1FAE5] placeholder:text-[#5E606A] outline-none transition-colors"
+              className="flex-1 px-3.5 py-2.5 rounded-md bg-[#101114] border border-[#282A33] focus:border-[#D6F279] text-xs text-[#F2F0E9] placeholder:text-[#5E606A] outline-none transition-colors"
             />
             <button
               type="submit"
-              className="px-4 py-2.5 rounded-md bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] text-xs font-semibold transition-colors flex items-center gap-1.5 flex-shrink-0"
+              className="px-4 py-2.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-semibold transition-colors flex items-center gap-1.5 flex-shrink-0"
             >
               <Search className="w-3.5 h-3.5" />
               <span>{canControl ? 'Load Stream' : 'Request Stream'}</span>
@@ -117,15 +117,15 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
 
           {/* Quick Preview Thumbnail if Valid URL */}
           {previewId && (
-            <div className="flex items-center gap-3 p-2.5 rounded-md bg-[#193225] border border-[#234735] mt-1">
+            <div className="flex items-center gap-3 p-2.5 rounded-md bg-[#1C1E24] border border-[#282A33] mt-1">
               <img
                 src={getYouTubeThumbnail(previewId)}
                 alt="Stream Preview"
-                className="w-16 h-11 rounded object-cover border border-[#234735]"
+                className="w-16 h-11 rounded object-cover border border-[#282A33]"
               />
               <div className="flex flex-col">
-                <span className="text-xs font-medium text-[#D1FAE5]">YouTube Stream ID Detected</span>
-                <span className="text-[11px] font-mono text-[#34D399]">{previewId}</span>
+                <span className="text-xs font-medium text-[#F2F0E9]">YouTube Stream ID Detected</span>
+                <span className="text-[11px] font-mono text-[#D6F279]">{previewId}</span>
               </div>
             </div>
           )}
@@ -153,8 +153,8 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
                   onClick={() => setActiveCategory(cat)}
                   className={`text-[11px] px-2.5 py-0.5 rounded-md transition-colors ${
                     activeCategory === cat
-                      ? 'bg-[#34D399] text-[#09140F] font-semibold'
-                      : 'bg-[#193225] text-[#8E919C] hover:text-[#D1FAE5] border border-[#234735]'
+                      ? 'bg-[#D6F279] text-[#101114] font-semibold'
+                      : 'bg-[#1C1E24] text-[#8E919C] hover:text-[#F2F0E9] border border-[#282A33]'
                   }`}
                 >
                   {cat}
@@ -169,21 +169,21 @@ export const VideoSelectorModal: React.FC<VideoSelectorModalProps> = ({ isOpen, 
                 key={preset.id}
                 type="button"
                 onClick={() => handleApply(preset.id)}
-                className="group flex items-center gap-2.5 p-2 rounded-md bg-[#193225] hover:bg-[#224433] border border-[#234735] hover:border-[#2A5540] cursor-pointer transition-colors text-left"
+                className="group flex items-center gap-2.5 p-2 rounded-md bg-[#1C1E24] hover:bg-[#24262E] border border-[#282A33] hover:border-[#3A3D4A] cursor-pointer transition-colors text-left"
               >
-                <div className="relative w-14 h-11 rounded overflow-hidden bg-black flex-shrink-0 border border-[#234735]">
+                <div className="relative w-14 h-11 rounded overflow-hidden bg-black flex-shrink-0 border border-[#282A33]">
                   <img
                     src={preset.thumbnail}
                     alt={preset.title}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute inset-0 bg-[#09140F]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-3.5 h-3.5 fill-[#34D399] text-[#34D399]" />
+                  <div className="absolute inset-0 bg-[#101114]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-3.5 h-3.5 fill-[#D6F279] text-[#D6F279]" />
                   </div>
                 </div>
 
                 <div className="flex flex-col min-w-0">
-                  <span className="text-xs font-medium text-[#D1FAE5] truncate group-hover:text-[#34D399] transition-colors">
+                  <span className="text-xs font-medium text-[#F2F0E9] truncate group-hover:text-[#D6F279] transition-colors">
                     {preset.title}
                   </span>
                   <div className="flex items-center gap-1.5 text-[10px] text-[#8E919C] mt-0.5 font-mono">

@@ -31,21 +31,21 @@ export const VideoStage: React.FC<VideoStageProps> = ({
       </div>
 
       {/* Under-Player Metadata Bar */}
-      <div className="flex items-center justify-between px-3.5 py-2 rounded-lg bg-[#11221A] border border-[#234735] text-xs">
+      <div className="flex items-center justify-between px-3.5 py-2 rounded-lg bg-[#16171B] border border-[#282A33] text-xs">
         <div className="flex items-center gap-2.5 min-w-0">
-          <Film className="w-3.5 h-3.5 text-[#34D399] flex-shrink-0" />
+          <Film className="w-3.5 h-3.5 text-[#D6F279] flex-shrink-0" />
           <div className="flex items-center gap-2 min-w-0">
             <span className="text-[#8E919C] text-[11px] font-mono uppercase tracking-wider hidden sm:inline">
               Stream
             </span>
-            <span className="font-mono text-xs text-[#D1FAE5] font-medium truncate">
+            <span className="font-mono text-xs text-[#F2F0E9] font-medium truncate">
               {playback.videoId}
             </span>
             <span className="text-[#5E606A]">&bull;</span>
             <span className="inline-flex items-center gap-1 text-[11px] text-[#8E919C]">
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
-                  isPlaying ? 'bg-[#34D399]' : 'bg-[#5E606A]'
+                  isPlaying ? 'bg-[#D6F279]' : 'bg-[#5E606A]'
                 }`}
               />
               <span className="capitalize">{playback.playState}</span>
@@ -53,15 +53,15 @@ export const VideoStage: React.FC<VideoStageProps> = ({
 
             {/* Live Status Pill */}
             {isLiveSynced ? (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/30">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#D6F279]/10 text-[#D6F279] border border-[#D6F279]/30">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#D6F279] animate-pulse" />
                 LIVE
               </span>
             ) : (
               <button
                 type="button"
                 onClick={() => returnToLive()}
-                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/40 hover:bg-[#34D399] hover:text-[#09140F] hover:border-[#34D399] transition-all cursor-pointer"
+                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/40 hover:bg-[#D6F279] hover:text-[#101114] hover:border-[#D6F279] transition-all cursor-pointer"
                 title="Click to jump to live room playback"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-[#E5A84B]" />
@@ -75,7 +75,7 @@ export const VideoStage: React.FC<VideoStageProps> = ({
           {canControl && (
             <button
               onClick={onOpenSelector}
-              className="text-[11px] font-medium text-[#34D399] hover:text-[#2BBF88] px-2.5 py-1 rounded border border-[#234735] hover:border-[#234735] bg-[#193225] transition-colors"
+              className="text-[11px] font-medium text-[#D6F279] hover:text-[#C3E065] px-2.5 py-1 rounded border border-[#282A33] hover:border-[#383B47] bg-[#1C1E24] transition-colors"
             >
               Change Video
             </button>

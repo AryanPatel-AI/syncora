@@ -75,10 +75,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
   return (
     <div
       onClick={handleWatchSolo}
-      className="group relative flex flex-col rounded-2xl bg-[#11221A] border border-[#234735] overflow-hidden hover:border-[#2A5540] hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-pointer"
+      className="group relative flex flex-col rounded-2xl bg-[#16171B] border border-[#282A33] overflow-hidden hover:border-[#3E4250] hover:shadow-xl hover:shadow-black/40 transition-all duration-200 cursor-pointer"
     >
       {/* Thumbnail Container */}
-      <div className="relative aspect-video w-full overflow-hidden bg-[#09140F]">
+      <div className="relative aspect-video w-full overflow-hidden bg-[#101114]">
         <img
           src={video.thumbnailUrl}
           alt={video.title}
@@ -103,7 +103,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
 
         {/* Live concurrent viewers when available */}
         {video.isLive && typeof video.concurrentViewers === 'number' && (
-          <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-sm text-[10px] font-mono text-[#D1FAE5] flex items-center gap-1">
+          <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/80 backdrop-blur-sm text-[10px] font-mono text-[#F2F0E9] flex items-center gap-1">
             <Radio className="w-3 h-3 text-[#EF4444]" />
             <span>{video.concurrentViewers.toLocaleString()} watching</span>
           </div>
@@ -113,7 +113,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-3">
           <button
             onClick={handleWatchSolo}
-            className="p-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-[#34D399] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
+            className="p-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-[#D6F279] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
             title="Watch stream"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
@@ -134,7 +134,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
             onClick={handleSave}
             className={`p-2 rounded-xl border backdrop-blur-md active:scale-95 transition-all shadow-lg ${
               isSaved
-                ? 'bg-[#34D399] text-[#09140F] border-[#34D399]'
+                ? 'bg-[#D6F279] text-[#101114] border-[#D6F279]'
                 : 'bg-black/60 text-white border-white/20 hover:bg-black/80'
             }`}
             title={isSaved ? 'Saved' : 'Save for later'}
@@ -153,7 +153,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
           </div>
 
           <div className="flex-1 min-w-0">
-            <h3 className="text-xs sm:text-sm font-semibold text-[#D1FAE5] line-clamp-2 leading-snug group-hover:text-white transition-colors">
+            <h3 className="text-xs sm:text-sm font-semibold text-[#F2F0E9] line-clamp-2 leading-snug group-hover:text-white transition-colors">
               {video.title}
             </h3>
 
@@ -166,7 +166,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
                 <span>{video.viewCount.toLocaleString()} views</span>
               )}
               {video.category && (
-                <span className="capitalize px-1.5 py-0.2 rounded bg-[#193225] text-[#8E919C] border border-[#234735]">
+                <span className="capitalize px-1.5 py-0.2 rounded bg-[#1C1E24] text-[#8E919C] border border-[#282A33]">
                   {video.category}
                 </span>
               )}

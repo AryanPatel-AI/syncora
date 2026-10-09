@@ -33,8 +33,8 @@ export const FollowingPage: React.FC = () => {
 
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
-      <div className="flex items-center gap-3 pb-3 border-b border-[#234735]">
-        <div className="w-10 h-10 rounded-2xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
+      <div className="flex items-center gap-3 pb-3 border-b border-[#282A33]">
+        <div className="w-10 h-10 rounded-2xl bg-[#38BDF8]/15 text-[#38BDF8] flex items-center justify-center">
           <Users className="w-5 h-5" />
         </div>
         <div>
@@ -47,7 +47,7 @@ export const FollowingPage: React.FC = () => {
         <div className="py-12 text-center text-xs text-[#8E919C]">Loading channels...</div>
       ) : channels.length === 0 ? (
         <div className="py-20 text-center flex flex-col items-center justify-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#193225] border border-[#234735] flex items-center justify-center text-[#8E919C]">
+          <div className="w-12 h-12 rounded-2xl bg-[#1C1E24] border border-[#282A33] flex items-center justify-center text-[#8E919C]">
             <Radio className="w-6 h-6" />
           </div>
           <div className="text-sm font-semibold text-white">No followed channels</div>
@@ -58,10 +58,10 @@ export const FollowingPage: React.FC = () => {
           {channels.map((ch) => (
             <div
               key={ch.id}
-              className="p-4 rounded-2xl bg-[#11221A] border border-[#234735] flex items-center justify-between gap-3"
+              className="p-4 rounded-2xl bg-[#16171B] border border-[#282A33] flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-sm text-white shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-sm text-white shrink-0">
                   {ch.channelTitle.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col overflow-hidden">
@@ -74,7 +74,7 @@ export const FollowingPage: React.FC = () => {
 
               <button
                 onClick={() => handleUnfollow(ch.channelId)}
-                className="px-3 py-1.5 rounded-xl border border-[#234735] text-xs font-semibold text-[#8E919C] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors shrink-0"
+                className="px-3 py-1.5 rounded-xl border border-[#282A33] text-xs font-semibold text-[#8E919C] hover:text-[#EF4444] hover:bg-[#EF4444]/10 transition-colors shrink-0"
               >
                 Unfollow
               </button>

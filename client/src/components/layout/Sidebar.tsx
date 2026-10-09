@@ -56,13 +56,13 @@ export const Sidebar: React.FC = () => {
     flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all
     ${
       currentRoute === path
-        ? 'bg-[#193225] text-[#D1FAE5] border border-[#234735] shadow-sm'
-        : 'text-[#8E919C] hover:text-[#D1FAE5] hover:bg-[#193225]/50'
+        ? 'bg-[#1C1E24] text-[#F2F0E9] border border-[#282A33] shadow-sm'
+        : 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#1C1E24]/50'
     }
   `;
 
   return (
-    <aside className="w-60 h-[calc(100vh-4rem)] sticky top-16 bg-[#11221A]/60 border-r border-[#234735] p-3 flex flex-col justify-between hidden md:flex shrink-0 select-none">
+    <aside className="w-60 h-[calc(100vh-4rem)] sticky top-16 bg-[#16171B]/60 border-r border-[#282A33] p-3 flex flex-col justify-between hidden md:flex shrink-0 select-none">
       <div className="flex flex-col gap-5 overflow-y-auto pr-1">
         {/* Main Feeds */}
         <div className="flex flex-col gap-1">
@@ -70,7 +70,7 @@ export const Sidebar: React.FC = () => {
             Browse
           </div>
           <button onClick={() => navigateTo('/')} className={navItemClass('/')}>
-            <Compass className={`w-4 h-4 ${currentRoute === '/' ? 'text-[#34D399]' : ''}`} />
+            <Compass className={`w-4 h-4 ${currentRoute === '/' ? 'text-[#D6F279]' : ''}`} />
             <span>Discover</span>
           </button>
 
@@ -140,7 +140,7 @@ export const Sidebar: React.FC = () => {
             }}
             className={navItemClass('/saved')}
           >
-            <Bookmark className={`w-4 h-4 ${currentRoute === '/saved' ? 'text-[#34D399]' : ''}`} />
+            <Bookmark className={`w-4 h-4 ${currentRoute === '/saved' ? 'text-[#D6F279]' : ''}`} />
             <span>Saved Videos</span>
           </button>
         </div>
@@ -151,17 +151,17 @@ export const Sidebar: React.FC = () => {
             Broadcasting
           </div>
           <button onClick={() => navigateTo('/studio')} className={navItemClass('/studio')}>
-            <Tv className={`w-4 h-4 ${currentRoute === '/studio' ? 'text-[#34D399]' : ''}`} />
+            <Tv className={`w-4 h-4 ${currentRoute === '/studio' ? 'text-[#D6F279]' : ''}`} />
             <span>Creator Studio</span>
           </button>
         </div>
       </div>
 
       {/* Quick Join Watch Party Card */}
-      <div className="pt-3 border-t border-[#234735]">
-        <div className="p-3 rounded-xl bg-gradient-to-br from-[#193225] to-[#11221A] border border-[#234735] shadow-inner flex flex-col gap-2">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#D1FAE5]">
-            <Sparkles className="w-3.5 h-3.5 text-[#34D399]" />
+      <div className="pt-3 border-t border-[#282A33]">
+        <div className="p-3 rounded-xl bg-gradient-to-br from-[#1C1E24] to-[#16171B] border border-[#282A33] shadow-inner flex flex-col gap-2">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#F2F0E9]">
+            <Sparkles className="w-3.5 h-3.5 text-[#D6F279]" />
             <span>Join Watch Room</span>
           </div>
           <form onSubmit={handleQuickJoin} className="flex gap-1.5">
@@ -171,12 +171,12 @@ export const Sidebar: React.FC = () => {
               value={quickRoomCode}
               onChange={(e) => setQuickRoomCode(e.target.value.toUpperCase())}
               maxLength={10}
-              className="w-full bg-[#09140F] border border-[#234735] rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase text-[#D1FAE5] placeholder-[#5E606A] focus:outline-none focus:border-[#34D399]"
+              className="w-full bg-[#101114] border border-[#282A33] rounded-lg px-2.5 py-1.5 text-xs font-mono uppercase text-[#F2F0E9] placeholder-[#5E606A] focus:outline-none focus:border-[#D6F279]"
             />
             <button
               type="submit"
               disabled={isJoining || !quickRoomCode.trim()}
-              className="p-2 rounded-lg bg-[#34D399] text-[#09140F] hover:bg-[#2BBF88] active:scale-95 disabled:opacity-40 transition-all shrink-0"
+              className="p-2 rounded-lg bg-[#D6F279] text-[#101114] hover:bg-[#c8e860] active:scale-95 disabled:opacity-40 transition-all shrink-0"
               aria-label="Submit room code"
             >
               <ArrowRight className="w-3.5 h-3.5" />
