@@ -4,14 +4,14 @@ import { api } from '../../services/api';
 import { X, Lock, User, Sparkles, Check } from 'lucide-react';
 
 const AVATAR_OPTIONS = [
-  '#8067F5',
-  '#A99BFF',
-  '#06B6D4',
-  '#3B82F6',
-  '#10B981',
-  '#F59E0B',
-  '#EC4899',
-  '#8B5CF6',
+  '#34D399', // emerald
+  '#2BBF88', // teal-green
+  '#D1FAE5', // mint
+  '#193225', // forest
+  '#E5A84B', // gold
+  '#F59E0B', // amber
+  '#F87171', // soft red
+  '#82A8F8', // slate-blue (kept for variety)
 ];
 
 export const AuthModal: React.FC = () => {
@@ -84,8 +84,8 @@ export const AuthModal: React.FC = () => {
 
         {/* Modal Header */}
         <div className="flex flex-col gap-1 text-center">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center mx-auto shadow-lg shadow-[#8067F5]/20">
-            <Sparkles className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center mx-auto shadow-lg shadow-[#34D399]/20">
+            <Sparkles className="w-5 h-5 text-[#09140F]" />
           </div>
           <h2 className="text-lg font-bold text-white tracking-tight mt-1">
             {authModalMode === 'login' ? 'Sign in to Syncora' : 'Create an Account'}
@@ -149,7 +149,7 @@ export const AuthModal: React.FC = () => {
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
                 required
-                className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl px-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
               />
             </div>
           )}
@@ -166,7 +166,7 @@ export const AuthModal: React.FC = () => {
                 value={username}
                 onChange={(e) => setUsername(e.target.value.toLowerCase())}
                 required
-                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
               />
             </div>
           </div>
@@ -184,7 +184,7 @@ export const AuthModal: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#8067F5]"
+                className="w-full bg-[#09140F] border border-[#234735] rounded-xl pl-9 pr-3 py-2 text-xs text-[#D1FAE5] focus:outline-none focus:border-[#34D399]"
               />
             </div>
           </div>
@@ -215,7 +215,7 @@ export const AuthModal: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#8067F5] to-[#A99BFF] text-white font-bold text-xs hover:opacity-95 active:scale-95 disabled:opacity-50 transition-all shadow-md shadow-[#8067F5]/25 mt-1"
+            className="w-full py-2.5 rounded-xl bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] font-bold text-xs active:scale-95 disabled:opacity-50 transition-all shadow-md shadow-[#34D399]/20 mt-1"
           >
             {loading ? 'Please wait...' : authModalMode === 'login' ? 'Sign In' : 'Create Account'}
           </button>

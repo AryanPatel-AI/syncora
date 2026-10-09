@@ -167,7 +167,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ filterType = 'all'
         {!searchQuery && (
           <div className="flex items-center justify-between">
             <h2 className="text-sm sm:text-base font-bold text-white tracking-tight flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#8067F5]" />
+              <TrendingUp className="w-4 h-4 text-[#34D399]" />
               <span>
                 {filterType === 'live' ? 'All Live Broadcasts' : 'Recommended & Trending'}
               </span>

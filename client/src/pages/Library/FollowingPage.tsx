@@ -34,7 +34,7 @@ export const FollowingPage: React.FC = () => {
   return (
     <div className="flex-1 max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
       <div className="flex items-center gap-3 pb-3 border-b border-[#234735]">
-        <div className="w-10 h-10 rounded-2xl bg-[#38BDF8]/15 text-[#38BDF8] flex items-center justify-center">
+        <div className="w-10 h-10 rounded-2xl bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
           <Users className="w-5 h-5" />
         </div>
         <div>
@@ -61,7 +61,7 @@ export const FollowingPage: React.FC = () => {
               className="p-4 rounded-2xl bg-[#11221A] border border-[#234735] flex items-center justify-between gap-3"
             >
               <div className="flex items-center gap-3 overflow-hidden">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-sm text-white shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-sm text-white shrink-0">
                   {ch.channelTitle.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex flex-col overflow-hidden">

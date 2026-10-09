@@ -54,7 +54,7 @@ export const ParticipantAvatar: React.FC<ParticipantAvatarProps> = ({
       {/* Subtle green indicator dot for connected participants */}
       {showOnlineDot && (
         <span
-          className={`absolute ${dotSizes[size]} rounded-full bg-[#10B981] border border-[#09140F]`}
+          className={`absolute ${dotSizes[size]} rounded-full bg-[#34D399] border border-[#09140F]`}
           aria-hidden="true"
         />
       )}

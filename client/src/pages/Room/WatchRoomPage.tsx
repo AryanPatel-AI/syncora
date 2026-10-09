@@ -109,10 +109,10 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                   : 'text-[#8E919C] hover:text-[#D1FAE5]'
               }`}
             >
-              <ListVideo className="w-3.5 h-3.5 text-[#A99BFF]" />
+              <ListVideo className="w-3.5 h-3.5 text-[#34D399]" />
               <span>Queue</span>
               {roomQueue.length > 0 && (
-                <span className="w-3.5 h-3.5 rounded-full bg-[#A99BFF] text-[#09140F] text-[9px] font-bold font-mono flex items-center justify-center">
+                <span className="w-3.5 h-3.5 rounded-full bg-[#34D399] text-[#09140F] text-[9px] font-bold font-mono flex items-center justify-center">
                   {roomQueue.length}
                 </span>
               )}
@@ -154,12 +154,12 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
               <div className="h-full rounded-xl bg-[#11221A] border border-[#234735] p-3.5 flex flex-col justify-between overflow-hidden">
                 <div className="flex items-center justify-between pb-2.5 border-b border-[#234735]">
                   <div className="flex items-center gap-2">
-                    <ListVideo className="w-4 h-4 text-[#A99BFF]" />
+                    <ListVideo className="w-4 h-4 text-[#2BBF88]" />
                     <span className="text-xs font-mono uppercase tracking-wider text-[#D1FAE5] font-medium">
                       Shared Room Queue
                     </span>
                   </div>
-                  <span className="text-[11px] font-mono text-[#A99BFF]">
+                  <span className="text-[11px] font-mono text-[#2BBF88]">
                     {roomQueue.length} Videos
                   </span>
                 </div>
@@ -223,7 +223,7 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
                   {canControl && roomQueue.length > 0 && (
                     <button
                       onClick={playNextInQueue}
-                      className="px-3.5 py-2 rounded-xl bg-[#A99BFF] hover:bg-[#9887f5] text-[#09140F] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                      className="px-3.5 py-2 rounded-xl bg-[#34D399] hover:bg-[#2BBF88] text-[#09140F] text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
                       <span>Play Next</span>

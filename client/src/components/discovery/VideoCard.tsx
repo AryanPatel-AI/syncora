@@ -123,7 +123,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
           <button
             onClick={handleStartParty}
             disabled={isStartingParty}
-            className="p-2 rounded-xl bg-[#8067F5] text-white font-semibold text-xs hover:bg-[#6c51ee] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
+            className="p-2 rounded-xl bg-[#34D399] text-[#09140F] font-semibold text-xs hover:bg-[#2BBF88] active:scale-95 transition-all shadow-lg flex items-center gap-1.5"
             title="Start Watch Party"
           >
             <Users className="w-3.5 h-3.5" />
@@ -148,7 +148,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video }) => {
       <div className="p-3.5 flex flex-col gap-2">
         <div className="flex gap-2.5 items-start">
           {/* Channel avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-xs text-white shrink-0 mt-0.5">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-xs text-[#09140F] shrink-0 mt-0.5">
             {video.channelTitle ? video.channelTitle.charAt(0).toUpperCase() : 'Y'}
           </div>
 

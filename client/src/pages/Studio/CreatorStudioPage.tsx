@@ -79,12 +79,12 @@ export const CreatorStudioPage: React.FC = () => {
       <div className="p-5 rounded-2xl bg-[#11221A] border border-[#234735] flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Server className="w-4 h-4 text-[#8067F5]" />
+            <Server className="w-4 h-4 text-[#34D399]" />
             <h2 className="text-sm font-bold text-white">Managed Ingest Architecture</h2>
           </div>
           <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
             status?.isConfigured
-              ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
+              ? 'bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30'
               : 'bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/30'
           }`}>
             {status?.isConfigured ? 'Provider Active' : 'Configuration Required'}
@@ -104,7 +104,7 @@ export const CreatorStudioPage: React.FC = () => {
             <p className="text-[#8E919C] text-[11px] leading-relaxed">
               To broadcast your own video directly without YouTube, configure managed streaming provider credentials in your server environment:
             </p>
-            <div className="p-2.5 rounded-lg bg-[#09140F] font-mono text-[11px] text-[#A99BFF] border border-[#234735]">
+            <div className="p-2.5 rounded-lg bg-[#09140F] font-mono text-[11px] text-[#2BBF88] border border-[#234735]">
               MUX_TOKEN_ID=your_mux_token_id<br />
               MUX_TOKEN_SECRET=your_mux_token_secret<br />
               # or AWS_IVS_ACCESS_KEY & AWS_IVS_SECRET_KEY
@@ -152,7 +152,7 @@ export const CreatorStudioPage: React.FC = () => {
         {/* Ingest Credentials & OBS Setup */}
         <div className="p-5 rounded-2xl bg-[#11221A] border border-[#234735] flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Key className="w-4 h-4 text-[#A99BFF]" />
+            <Key className="w-4 h-4 text-[#2BBF88]" />
             <h3 className="text-sm font-bold text-white">OBS Studio / RTMP Connection</h3>
           </div>
 

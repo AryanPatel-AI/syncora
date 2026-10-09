@@ -75,7 +75,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
       sender: 'Syncora Bot',
       text: 'Welcome to the live viewing room! Feel free to chat with other viewers.',
       time: 'Now',
-      color: '#8067F5',
+      color: '#34D399',
     },
   ]);
   const [inputMessage, setInputMessage] = useState<string>('');
@@ -389,7 +389,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
         sender,
         text,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        color: currentUserAccount?.avatarColor || '#8067F5',
+        color: currentUserAccount?.avatarColor || '#34D399',
       },
     ]);
     setInputMessage('');
@@ -526,7 +526,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
               {/* Channel Row & Action Buttons */}
               <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#234735]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-white shadow-md">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-white shadow-md">
                     {video.channelTitle ? video.channelTitle.charAt(0).toUpperCase() : 'C'}
                   </div>
                   <div className="flex flex-col">
@@ -555,7 +555,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   {/* Start Watch Party Button */}
                   <button
                     onClick={handleStartWatchParty}
-                    className="px-3.5 py-2 rounded-xl bg-[#8067F5] text-white text-xs font-bold hover:bg-[#6e53f0] active:scale-95 transition-all shadow-md shadow-[#8067F5]/25 flex items-center gap-1.5"
+                    className="px-3.5 py-2 rounded-xl bg-[#34D399] text-white text-xs font-bold hover:bg-[#2BBF88] active:scale-95 transition-all shadow-md shadow-[#34D399]/25 flex items-center gap-1.5"
                   >
                     <Users className="w-3.5 h-3.5" />
                     <span>Start Watch Party</span>
@@ -642,7 +642,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
 
                 <button
                   onClick={() => setIsDescExpanded((prev) => !prev)}
-                  className="text-xs font-semibold text-[#8067F5] hover:text-[#A99BFF] self-start flex items-center gap-1 mt-1"
+                  className="text-xs font-semibold text-[#34D399] hover:text-[#2BBF88] self-start flex items-center gap-1 mt-1"
                 >
                   <span>{isDescExpanded ? 'Show less' : 'Show more'}</span>
                   {isDescExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
@@ -688,7 +688,7 @@ export const StreamWatchPage: React.FC<StreamWatchPageProps> = ({ videoId }) => 
                   : 'text-[#8E919C] hover:text-white'
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#A99BFF]" />
+              <Sparkles className="w-3.5 h-3.5 text-[#2BBF88]" />
               <span>Related</span>
             </button>
           </div>

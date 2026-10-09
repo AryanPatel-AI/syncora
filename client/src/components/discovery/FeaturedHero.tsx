@@ -47,7 +47,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
               FEATURED LIVE STREAM
             </div>
           ) : (
-            <div className="px-2.5 py-1 rounded-md bg-[#8067F5]/20 text-[#A99BFF] border border-[#8067F5]/30 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5">
+            <div className="px-2.5 py-1 rounded-md bg-[#34D399]/15 text-[#34D399] border border-[#34D399]/30 text-[10px] font-bold tracking-wider uppercase flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-[#34D399]" />
               FEATURED PREMIERE
             </div>
@@ -72,7 +72,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
         {/* Channel Details & Actions */}
         <div className="flex flex-wrap items-center gap-4 pt-2">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center font-bold text-xs text-white">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center font-bold text-xs text-[#09140F]">
               {featuredVideo.channelTitle.charAt(0).toUpperCase()}
             </div>
             <span className="text-xs font-semibold text-[#D1FAE5]">
@@ -91,7 +91,7 @@ export const FeaturedHero: React.FC<FeaturedHeroProps> = ({ featuredVideo }) => 
 
             <button
               onClick={handleStartParty}
-              className="px-4 py-2 rounded-xl bg-[#8067F5] text-white font-bold text-xs hover:bg-[#6e53f0] active:scale-95 transition-all shadow-lg shadow-[#8067F5]/25 flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-[#34D399] text-[#09140F] font-bold text-xs hover:bg-[#2BBF88] active:scale-95 transition-all shadow-lg shadow-[#34D399]/20 flex items-center gap-1.5"
             >
               <Users className="w-3.5 h-3.5" />
               <span>Host Watch Party</span>

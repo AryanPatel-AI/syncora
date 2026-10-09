@@ -115,8 +115,8 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
           className="flex items-center gap-2.5 text-left group transition-transform active:scale-95"
           aria-label="Syncora Home"
         >
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#8067F5] to-[#5842C3] flex items-center justify-center shadow-lg shadow-[#8067F5]/20 group-hover:shadow-[#8067F5]/40 transition-all">
-            <Radio className="w-5 h-5 text-white animate-pulse" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#34D399] to-[#193225] flex items-center justify-center shadow-lg shadow-[#34D399]/20 group-hover:shadow-[#34D399]/40 transition-all">
+            <Radio className="w-5 h-5 text-[#09140F] animate-pulse" />
           </div>
           <div className="flex flex-col">
             <div className="flex items-center gap-1.5">
@@ -178,7 +178,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
             placeholder="Search streams, videos, channels..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full bg-[#09140F] border border-[#234735] rounded-full pl-9 pr-9 py-2 text-xs sm:text-sm text-[#D1FAE5] placeholder-[#5E606A] focus:outline-none focus:border-[#8067F5] focus:ring-1 focus:ring-[#8067F5] transition-all"
+            className="w-full bg-[#09140F] border border-[#234735] rounded-full pl-9 pr-9 py-2 text-xs sm:text-sm text-[#D1FAE5] placeholder-[#5E606A] focus:outline-none focus:border-[#34D399] focus:ring-1 focus:ring-[#34D399] transition-all"
           />
           {searchInput && (
             <button
@@ -217,7 +217,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                 }}
                 className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
-                <div className="w-7 h-7 rounded-md bg-[#8067F5]/20 text-[#A99BFF] flex items-center justify-center">
+                <div className="w-7 h-7 rounded-md bg-[#34D399]/15 text-[#34D399] flex items-center justify-center">
                   <Tv className="w-4 h-4" />
                 </div>
                 <div>
@@ -303,12 +303,12 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
           {currentUserAccount ? (
             <button
               onClick={() => setIsProfileOpen((prev) => !prev)}
-              className="flex items-center gap-2 p-1.5 rounded-lg bg-[#193225] border border-[#234735] hover:border-[#8067F5] transition-all"
+              className="flex items-center gap-2 p-1.5 rounded-lg bg-[#193225] border border-[#234735] hover:border-[#34D399] transition-all"
               aria-label="User Profile Menu"
             >
               <div
-                className="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs text-white"
-                style={{ backgroundColor: currentUserAccount.avatarColor || '#8067F5' }}
+                className="w-7 h-7 rounded-md flex items-center justify-center font-bold text-xs text-[#09140F]"
+                style={{ backgroundColor: currentUserAccount.avatarColor || '#34D399' }}
               >
                 {(currentUserAccount.displayName || currentUserAccount.username).charAt(0).toUpperCase()}
               </div>
@@ -358,7 +358,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                 }}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
-                <History className="w-3.5 h-3.5 text-[#A99BFF]" />
+                <History className="w-3.5 h-3.5 text-[#34D399]" />
                 <span>Watch History</span>
               </button>
 
@@ -369,7 +369,7 @@ export const AppNavbar: React.FC<AppNavbarProps> = ({ onToggleSidebar }) => {
                 }}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-left text-[#D1FAE5] hover:bg-[#234735] transition-colors"
               >
-                <Users className="w-3.5 h-3.5 text-[#38BDF8]" />
+                <Users className="w-3.5 h-3.5 text-[#34D399]" />
                 <span>Followed Channels</span>
               </button>
 

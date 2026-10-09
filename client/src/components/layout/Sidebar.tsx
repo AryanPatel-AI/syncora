@@ -86,12 +86,12 @@ export const Sidebar: React.FC = () => {
           </button>
 
           <button onClick={() => navigateTo('/explore')} className={navItemClass('/explore')}>
-            <Grid className={`w-4 h-4 ${currentRoute === '/explore' ? 'text-[#A99BFF]' : ''}`} />
+            <Grid className={`w-4 h-4 ${currentRoute === '/explore' ? 'text-[#34D399]' : ''}`} />
             <span>Explore All</span>
           </button>
 
           <button onClick={() => navigateTo('/categories')} className={navItemClass('/categories')}>
-            <Layers className={`w-4 h-4 ${currentRoute === '/categories' ? 'text-[#38BDF8]' : ''}`} />
+            <Layers className={`w-4 h-4 ${currentRoute === '/categories' ? 'text-[#34D399]' : ''}`} />
             <span>Categories</span>
           </button>
         </div>
@@ -112,7 +112,7 @@ export const Sidebar: React.FC = () => {
             }}
             className={navItemClass('/following')}
           >
-            <Users className={`w-4 h-4 ${currentRoute === '/following' ? 'text-[#38BDF8]' : ''}`} />
+            <Users className={`w-4 h-4 ${currentRoute === '/following' ? 'text-[#34D399]' : ''}`} />
             <span>Following</span>
           </button>
 
@@ -126,7 +126,7 @@ export const Sidebar: React.FC = () => {
             }}
             className={navItemClass('/history')}
           >
-            <History className={`w-4 h-4 ${currentRoute === '/history' ? 'text-[#A99BFF]' : ''}`} />
+            <History className={`w-4 h-4 ${currentRoute === '/history' ? 'text-[#34D399]' : ''}`} />
             <span>Watch History</span>
           </button>
 

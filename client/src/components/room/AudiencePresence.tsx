@@ -75,7 +75,7 @@ export const AudiencePresence: React.FC = () => {
 
         {/* Live Audience Count Label */}
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#10B981] animate-pulse" aria-hidden="true" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" aria-hidden="true" />
           <span className="text-[11px] font-medium text-[#D1FAE5]">
             Watching now <span className="font-mono text-[#8E919C]">&middot;</span>{' '}
             <span className="font-mono text-[#34D399] font-semibold">{count}</span>
