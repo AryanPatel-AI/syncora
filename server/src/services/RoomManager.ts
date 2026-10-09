@@ -2,6 +2,8 @@ import { Room } from '../models/Room';
 import { Participant } from '../models/Participant';
 import { generateRoomId, generateId } from '../utils/helpers';
 
+import { SERVER_CONFIG } from '../config/constants';
+
 export class RoomManager {
   private static instance: RoomManager;
   private rooms: Map<string, Room> = new Map(); // roomId -> Room
@@ -32,7 +34,7 @@ export class RoomManager {
       roomId = generateRoomId();
     }
 
-    const room = new Room(roomId, initialVideoId || 'jfKfPfyJRdk');
+    const room = new Room(roomId, initialVideoId || SERVER_CONFIG.DEFAULT_VIDEO_ID);
     const hostId = generateId('user');
     const host = new Participant(hostId, creatorUsername.trim() || 'Host', 'HOST', socketId, true);
 

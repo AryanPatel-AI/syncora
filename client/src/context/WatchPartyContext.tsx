@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import confetti from 'canvas-confetti';
 import { socket, SOCKET_EVENTS } from '../services/socket';
+import { DEFAULT_VIDEO_ID } from '../utils/constants';
 import {
   Role,
   PlaybackState,
@@ -45,7 +47,7 @@ interface WatchPartyContextType {
 }
 
 const initialPlayback: PlaybackState = {
-  videoId: 'jfKfPfyJRdk',
+  videoId: DEFAULT_VIDEO_ID,
   playState: 'paused',
   currentTime: 0,
   lastUpdatedAt: Date.now(),
@@ -176,6 +178,7 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
         setPlayback(data.playback);
       }
       if (data.request.status === 'approved') {
+        confetti({ particleCount: 60, spread: 60, origin: { y: 0.6 } });
         showToast(`Request by ${data.request.username} approved!`, 'success');
       } else {
         showToast(`Request by ${data.request.username} declined.`, 'info');
@@ -258,6 +261,7 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
                 setPendingRequests(response.roomState.pendingRequests);
                 setChatHistory(response.roomState.chatHistory);
               }
+              confetti({ particleCount: 75, spread: 70, origin: { y: 0.6 } });
               showToast(`Watch room created! Share code: ${response.roomId}`, 'success');
               resolve(response.roomId);
             } else {

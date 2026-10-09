@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { useWatchParty } from '../context/WatchPartyContext';
-import { VolumeX, Volume2, ShieldAlert } from 'lucide-react';
+import { useWatchParty } from '../../context/WatchPartyContext';
+import { VERIFIED_PRESETS } from '../../utils/constants';
+import { VolumeX, ShieldAlert, AlertTriangle, RefreshCw } from 'lucide-react';
 
 declare global {
   interface Window {
@@ -20,20 +21,20 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     canControl,
     playVideo,
     pauseVideo,
-    seekVideo,
+    changeVideo,
     requestControl,
     updateLocalPlaybackTime,
   } = useWatchParty();
 
-  const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   const isApiReady = useRef<boolean>(false);
   const isProgrammaticUpdate = useRef<boolean>(false);
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
+  const [hasPlaybackError, setHasPlaybackError] = useState<boolean>(false);
 
-  // Helper: compute server authoritative time
+  // Authoritative server timestamp calculation
   const getAuthoritativeTime = useCallback(() => {
     if (playback.playState === 'playing') {
       const elapsed = (Date.now() - playback.lastUpdatedAt) / 1000;
@@ -64,13 +65,9 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       const firstScriptTag = document.getElementsByTagName('script')[0];
       firstScriptTag?.parentNode?.insertBefore(tag, firstScriptTag);
     }
-
-    return () => {
-      // Keep script cached
-    };
   }, []);
 
-  // 2. Initialize Player
+  // 2. Initialize Player instance
   const initPlayer = useCallback(() => {
     if (!window.YT || !window.YT.Player || playerRef.current) return;
 
@@ -78,8 +75,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       videoId: playback.videoId,
       playerVars: {
         autoplay: playback.playState === 'playing' ? 1 : 0,
-        controls: 0, // We render custom synchronized controls
-        disablekb: 1, // Prevent native keyboard shortcut desync
+        controls: 0,
+        disablekb: 1,
         enablejsapi: 1,
         modestbranding: 1,
         rel: 0,
@@ -90,15 +87,18 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       events: {
         onReady: (event: any) => {
           setIsPlayerReady(true);
+          setHasPlaybackError(false);
           if (playerRefCallback) playerRefCallback(event.target);
 
-          // Initial seek & state sync
           const targetTime = getAuthoritativeTime();
           isProgrammaticUpdate.current = true;
           event.target.seekTo(targetTime, true);
 
           if (playback.playState === 'playing') {
-            event.target.playVideo();
+            const playPromise = event.target.playVideo();
+            if (playPromise && typeof playPromise.catch === 'function') {
+              playPromise.catch(() => setNeedsUserGesture(true));
+            }
           } else {
             event.target.pauseVideo();
           }
@@ -111,26 +111,26 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
           handlePlayerStateChange(event.data);
         },
         onError: (e: any) => {
-          console.warn('[YouTube Player Error]:', e.data);
+          console.warn('[YouTube Player Notice]: Code', e.data);
+          // Error codes 100, 101, 150 mean video not found or owner disabled embedding
+          if ([2, 5, 100, 101, 150].includes(e.data)) {
+            setHasPlaybackError(true);
+          }
         },
       },
     });
   }, [playback.videoId, getAuthoritativeTime, playerRefCallback]);
 
-  // Handle Player State Changes from YouTube
+  // Handle Player State Changes
   const handlePlayerStateChange = (state: number) => {
-    if (isProgrammaticUpdate.current) {
-      return;
-    }
+    if (isProgrammaticUpdate.current) return;
 
     const player = playerRef.current;
     if (!player) return;
 
-    // YT.PlayerState.PLAYING = 1, PAUSED = 2, BUFFERING = 3, ENDED = 0
+    // YT.PlayerState: PLAYING = 1, PAUSED = 2
     if (state === 1) {
-      // User pressed play
       if (!canControl) {
-        // Participant not authorized -> revert immediately
         isProgrammaticUpdate.current = true;
         if (playback.playState === 'paused') {
           player.pauseVideo();
@@ -143,9 +143,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       const currentTime = player.getCurrentTime() || 0;
       playVideo(currentTime);
     } else if (state === 2) {
-      // User pressed pause
       if (!canControl) {
-        // Participant not authorized -> revert immediately
         isProgrammaticUpdate.current = true;
         if (playback.playState === 'playing') {
           player.playVideo();
@@ -160,14 +158,14 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   };
 
-  // 3. React to server playback changes (Video ID change)
+  // 3. React to video ID changes
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
 
-    // Check if video ID changed
-    const currentVideoUrl = player.getVideoUrl ? player.getVideoUrl() : '';
-    if (playback.videoId && !currentVideoUrl.includes(playback.videoId)) {
+    const currentUrl = player.getVideoUrl ? player.getVideoUrl() : '';
+    if (playback.videoId && !currentUrl.includes(playback.videoId)) {
+      setHasPlaybackError(false);
       isProgrammaticUpdate.current = true;
       if (player.loadVideoById) {
         player.loadVideoById({
@@ -181,7 +179,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   }, [playback.videoId, isPlayerReady]);
 
-  // 4. React to server play/pause/seek state updates
+  // 4. React to server play/pause/seek
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
@@ -192,18 +190,14 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     isProgrammaticUpdate.current = true;
 
-    // Correct time if drifted
-    if (diff > 1.5) {
+    if (diff > 1.6) {
       player.seekTo(authoritativeTime, true);
     }
 
-    // Sync play/pause
     if (playback.playState === 'playing') {
       const playPromise = player.playVideo();
       if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {
-          setNeedsUserGesture(true);
-        });
+        playPromise.catch(() => setNeedsUserGesture(true));
       }
     } else if (playback.playState === 'paused') {
       player.pauseVideo();
@@ -216,7 +210,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     return () => clearTimeout(timer);
   }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime]);
 
-  // 5. Periodic drift monitor and progress tick
+  // 5. Periodic drift and progress monitoring
   useEffect(() => {
     if (!isPlayerReady || !playerRef.current) return;
 
@@ -231,12 +225,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         onProgress(currentTime, duration);
       }
 
-      // Check drift against server authoritative time
       const authTime = getAuthoritativeTime();
       const drift = Math.abs(currentTime - authTime);
 
       if (playback.playState === 'playing' && drift > 2.0 && !isProgrammaticUpdate.current) {
-        console.log(`[Auto-Sync] Drift detected (${drift.toFixed(2)}s). Resyncing to ${authTime.toFixed(1)}s`);
         isProgrammaticUpdate.current = true;
         player.seekTo(authTime, true);
         setTimeout(() => {
@@ -244,10 +236,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         }, 500);
       }
 
-      // Update sync heartbeat in context
       updateLocalPlaybackTime(currentTime);
 
-      // Check mute status
       if (player.isMuted) {
         setIsMuted(player.isMuted());
       }
@@ -256,7 +246,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     return () => clearInterval(interval);
   }, [isPlayerReady, playback.playState, getAuthoritativeTime, onProgress, updateLocalPlaybackTime]);
 
-  // Handle user unmute click
   const handleUnmute = () => {
     if (playerRef.current) {
       playerRef.current.unMute();
@@ -269,36 +258,72 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   };
 
+  const handleFallbackRecover = (videoId: string) => {
+    setHasPlaybackError(false);
+    changeVideo(videoId);
+  };
+
+  const isPlaying = playback.playState === 'playing';
+
   return (
-    <div ref={containerRef} className="relative w-full rounded-2xl overflow-hidden bg-brand-surface border border-brand-border/60 shadow-2xl group">
-      {/* 16:9 Video Aspect Container */}
+    <div
+      className={`relative w-full rounded-3xl overflow-hidden bg-brand-surface border transition-all duration-700 shadow-2xl group ${
+        isPlaying
+          ? 'border-brand-primary/40 shadow-[0_0_50px_-10px_rgba(128,103,245,0.35)]'
+          : 'border-brand-border/70 shadow-lg'
+      }`}
+    >
+      {/* 16:9 Aspect Frame */}
       <div className="video-container relative bg-black">
         <div id="syncora-yt-player-frame" className="w-full h-full" />
       </div>
 
-      {/* Floating Unmute Banner if Browser Autoplay Was Muted */}
-      {(isMuted || needsUserGesture) && (
+      {/* Playback Error Fallback Overlay */}
+      {hasPlaybackError && (
+        <div className="absolute inset-0 z-40 bg-brand-dark/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+          <div className="p-3.5 rounded-2xl bg-amber-950/60 border border-amber-500/30 text-amber-400 mb-3 shadow-glow-sm">
+            <AlertTriangle className="w-8 h-8" />
+          </div>
+          <h4 className="text-base font-bold text-white mb-1">Stream Unavailable on YouTube</h4>
+          <p className="text-xs text-brand-muted max-w-sm mb-5">
+            This YouTube video is either restricted by its uploader or its live stream ended. Switch to one of our verified 4K streams:
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {VERIFIED_PRESETS.slice(0, 3).map((preset) => (
+              <button
+                key={preset.id}
+                onClick={() => handleFallbackRecover(preset.id)}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-brand-primary hover:bg-brand-hover text-white text-xs font-semibold shadow-glow-sm transition-all hover:scale-105 active:scale-95"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Play {preset.title.split(' ')[0]} {preset.title.split(' ')[1]}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Unmute floating banner */}
+      {(isMuted || needsUserGesture) && !hasPlaybackError && (
         <button
           onClick={handleUnmute}
-          className="absolute top-4 left-4 z-30 flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-primary/90 hover:bg-brand-hover text-white text-xs font-semibold shadow-glow backdrop-blur-md transition-all animate-bounce"
+          className="absolute top-4 left-4 z-30 flex items-center gap-2 px-3.5 py-2 rounded-full bg-brand-primary hover:bg-brand-hover text-white text-xs font-bold shadow-glow-sm backdrop-blur-md transition-all animate-bounce"
         >
           <VolumeX className="w-4 h-4" />
           <span>Click to Unmute Audio</span>
         </button>
       )}
 
-      {/* Overlay for non-controllers to prompt request permission if they try to click directly */}
-      {!canControl && (
+      {/* Watch-Only Mode Hover Overlay */}
+      {!canControl && !hasPlaybackError && (
         <div
-          onClick={() => {
-            requestControl('REQUEST_CONTROL');
-          }}
-          className="absolute inset-0 z-10 bg-transparent cursor-pointer flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-brand-dark/30 backdrop-blur-[1px]"
+          onClick={() => requestControl('REQUEST_CONTROL')}
+          className="absolute inset-0 z-10 bg-transparent cursor-pointer flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-brand-dark/40 backdrop-blur-[2px]"
           title="Watch-only mode. Click to request control."
         >
-          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-surface/90 border border-brand-primary/40 text-brand-text shadow-glow-sm">
+          <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-brand-surface/90 border border-brand-primary/40 text-brand-text shadow-glow">
             <ShieldAlert className="w-4 h-4 text-brand-highlight" />
-            <span className="text-sm font-medium">Watch-Only Mode · Click to Request Control</span>
+            <span className="text-xs font-bold">Watch-Only Mode &bull; Click to Request Playback Control</span>
           </div>
         </div>
       )}

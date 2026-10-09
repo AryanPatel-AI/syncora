@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { WatchPartyProvider, useWatchParty } from './context/WatchPartyContext';
-import { Navbar } from './components/Navbar';
-import { HomePage } from './pages/HomePage';
-import { RoomPage } from './pages/RoomPage';
+import { Navbar } from './components/layout/Navbar';
+import { HomePage } from './pages/Home/HomePage';
+import { RoomPage } from './pages/Room/RoomPage';
 import { AlertCircle, CheckCircle2, Info, X } from 'lucide-react';
 
 const WatchPartyApp: React.FC = () => {

@@ -46,7 +46,7 @@ async function runTests() {
     await new Promise<void>((resolve, reject) => {
       hostSocket.emit(
         SOCKET_EVENTS.CREATE_ROOM,
-        { username: 'Alice', initialVideoId: 'jfKfPfyJRdk' },
+        { username: 'Alice', initialVideoId: 'aqz-KE-bpKQ' },
         (res: any) => {
           if (!res.success) return reject(new Error('Failed to create room'));
           roomId = res.roomId;

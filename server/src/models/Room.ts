@@ -10,6 +10,8 @@ import {
 } from '../types';
 import { generateId } from '../utils/helpers';
 
+import { SERVER_CONFIG } from '../config/constants';
+
 export class Room {
   public readonly id: string;
   public hostId: string;
@@ -18,9 +20,9 @@ export class Room {
   private playback: PlaybackState;
   private controlRequests: Map<string, ControlRequest> = new Map(); // requestId -> ControlRequest
   private chatHistory: ChatMessage[] = [];
-  private static readonly MAX_CHAT_HISTORY = 100;
+  private static readonly MAX_CHAT_HISTORY = SERVER_CONFIG.MAX_CHAT_HISTORY;
 
-  constructor(id: string, initialVideoId: string = 'jfKfPfyJRdk') {
+  constructor(id: string, initialVideoId: string = SERVER_CONFIG.DEFAULT_VIDEO_ID) {
     this.id = id;
     this.hostId = '';
     this.createdAt = Date.now();
