@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import { WatchPartyProvider, useWatchParty } from './context/WatchPartyContext';
 import { RoomHeader } from './components/layout/RoomHeader';
 import { AppNavbar } from './components/layout/AppNavbar';
@@ -142,6 +143,7 @@ export default function App() {
   return (
     <WatchPartyProvider>
       <WatchPartyApp />
+      <Analytics />
     </WatchPartyProvider>
   );
 }
