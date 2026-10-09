@@ -20,9 +20,10 @@ export function getBackendUrl(): string {
     if (window.location.port === '5173' || window.location.port === '3000') {
       return 'http://localhost:4000';
     }
-    return window.location.origin;
+    // In production on Vercel or any public domain, target the live Render backend
+    return 'https://syncora-backend-rfs0.onrender.com';
   }
-  return 'http://localhost:4000';
+  return 'https://syncora-backend-rfs0.onrender.com';
 }
 
 export const BACKEND_URL = getBackendUrl();

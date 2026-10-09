@@ -1,9 +1,18 @@
 {
+  "name": "syncora",
   "framework": "vite",
   "installCommand": "npm --prefix client install",
   "buildCommand": "npm --prefix client install && npm --prefix client run build",
   "outputDirectory": "client/dist",
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://syncora-backend-rfs0.onrender.com/api/:path*"
+    },
+    {
+      "source": "/socket.io/:path*",
+      "destination": "https://syncora-backend-rfs0.onrender.com/socket.io/:path*"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"

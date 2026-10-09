@@ -21,6 +21,13 @@ function getAuthHeader(): Record<string, string> {
 }
 
 async function handleResponse<T>(res: Response): Promise<T> {
+  const contentType = res.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await res.text().catch(() => '');
+    throw new Error(
+      `Server responded with non-JSON (${res.status}): ${text.slice(0, 100)}`
+    );
+  }
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
     throw new Error(errorData.error || errorData.message || `Request failed with status ${res.status}`);

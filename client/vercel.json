@@ -1,6 +1,15 @@
 {
+  "name": "syncora",
   "framework": "vite",
   "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://syncora-backend-rfs0.onrender.com/api/:path*"
+    },
+    {
+      "source": "/socket.io/:path*",
+      "destination": "https://syncora-backend-rfs0.onrender.com/socket.io/:path*"
+    },
     {
       "source": "/(.*)",
       "destination": "/index.html"
