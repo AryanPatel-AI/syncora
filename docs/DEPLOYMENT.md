@@ -6,7 +6,7 @@ This guide provides end-to-end instructions for deploying the **Syncora YouTube 
 
 | Service | Platform | Live URL | Health Status |
 | :--- | :--- | :--- | :--- |
-| **Frontend Client** | Vercel | [https://client-lac-nu-17.vercel.app](https://client-lac-nu-17.vercel.app) | 🟢 200 OK |
+| **Frontend Client** | Vercel | [https://client-lac-nu-17.vercel.app](https://client-lac-nu-17.vercel.app) <br> [https://client-aryanpatel-ais-projects.vercel.app](https://client-aryanpatel-ais-projects.vercel.app) | 🟢 200 OK |
 | **Backend API & WebSockets** | Render | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) | 🟢 200 OK (`/health`) |
 
 ---
