@@ -27,7 +27,6 @@ The project is structured as an organized full-stack TypeScript monorepo with cl
 ```
 watchparty/
 ├── .gitignore                    # Production git ignore definitions (build artifacts, env, databases)
-├── LICENSE                       # MIT open source license
 ├── PROJECT_RULES.md              # Core assignment guidelines and architectural decisions
 ├── README.md                     # Comprehensive documentation, setup guide, and feature highlights
 ├── package.json                  # Root monorepo scripts (concurrent dev, multi-package builds)

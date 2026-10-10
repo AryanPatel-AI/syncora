@@ -19,7 +19,6 @@
     "socket.io"
   ],
   "author": "Aryan Patel",
-  "license": "MIT",
   "dependencies": {
     "@types/better-sqlite3": "^9.6.0",
     "@types/cors": "^2.8.17",

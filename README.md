@@ -459,8 +459,3 @@ Before finalizing deployment, perform these verification checks:
 - **Horizontal Scaling & Clustering**: In multi-instance deployments, Socket.IO requires `@socket.io/redis-adapter` and Redis Pub/Sub so events broadcast across nodes.
 - **YouTube Embed Restrictions**: Certain commercial music videos or restricted broadcasts disable third-party iframe embedding. Syncora gracefully displays an alert with a direct "Open on YouTube" fallback.
 - **YouTube Mobile Autoplay**: Mobile browsers require user interaction before playing unmuted audio. A user gesture button is displayed when audio playback is initially restricted.
-
----
-
-## 📄 License
-It is under the developer.
