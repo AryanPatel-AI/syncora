@@ -110,6 +110,8 @@ interface WatchPartyContextType {
   setIsCreateRoomModalOpen: (open: boolean) => void;
   isScheduleModalOpen: boolean;
   setIsScheduleModalOpen: (open: boolean) => void;
+  isRequestsModalOpen: boolean;
+  setIsRequestsModalOpen: (open: boolean) => void;
 }
 
 const initialPlayback: PlaybackState = {
@@ -178,6 +180,7 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState<boolean>(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
+  const [isRequestsModalOpen, setIsRequestsModalOpen] = useState<boolean>(false);
 
   // User account
   const [currentUserAccount, setCurrentUserAccount] = useState<UserAccount | null>(null);
@@ -452,17 +455,35 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       }
       if (Array.isArray(data.participants)) {
         setParticipants(data.participants);
+        setCurrentUser((prev) => {
+          if (!prev) return null;
+          const matching = data.participants.find((p) => p.id === prev.id);
+          return matching || prev;
+        });
       }
       if (data.playback) {
         setPlayback(data.playback);
       }
       if (data.request.status === 'approved') {
+        if (currentUser?.id === data.request.userId) {
+          setCurrentUser((prev) => (prev ? { ...prev, role: 'MODERATOR' } : null));
+        }
         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
           confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 } });
         }
-        showToast(`Request by ${data.request.username} approved!`, 'success');
+        showToast(
+          currentUser?.id === data.request.userId
+            ? 'Host approved your request! Playback control is now unlocked.'
+            : `Request by ${data.request.username} approved!`,
+          'success'
+        );
       } else {
-        showToast(`Request by ${data.request.username} declined.`, 'info');
+        showToast(
+          currentUser?.id === data.request.userId
+            ? 'Your playback control request was declined by the host.'
+            : `Request by ${data.request.username} declined.`,
+          'info'
+        );
       }
     };
 
@@ -962,6 +983,8 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
         setIsCreateRoomModalOpen,
         isScheduleModalOpen,
         setIsScheduleModalOpen,
+        isRequestsModalOpen,
+        setIsRequestsModalOpen,
       }}
     >
       {children}

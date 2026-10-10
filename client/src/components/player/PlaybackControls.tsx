@@ -12,6 +12,9 @@ import {
   Maximize2,
   Search,
   Radio,
+  Lock,
+  KeyRound,
+  Clock,
 } from 'lucide-react';
 
 interface PlaybackControlsProps {
@@ -30,6 +33,10 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const {
     playback,
     canControl,
+    currentUser,
+    pendingRequests,
+    requestControl,
+    showToast,
     playVideo,
     pauseVideo,
     seekVideo,
@@ -48,10 +55,15 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const [volume, setVolume] = useState<number>(85);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  const isPlaying = canControl ? playback.playState === 'playing' : localPlayState === 'playing';
+  // Check if current user has a pending playback control request
+  const myPendingRequest = pendingRequests.find(
+    (r) => r.userId === currentUser?.id && r.status === 'pending'
+  );
+  const isRequestPending = Boolean(myPendingRequest);
+
+  const isPlaying = playback.playState === 'playing';
 
   const liveEdge = getAuthoritativeTime();
-  // For host: can scrub full duration. For viewer: live stream DVR capped at live edge (cannot watch more than host)
   const maxScrubTime = canControl
     ? (duration > 0 ? duration : 100)
     : Math.max(0.5, liveEdge);
@@ -72,61 +84,38 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         playVideo(currentTime);
       }
     } else {
-      // In viewer mode: local playback control on this device only
-      if (playerRef) {
-        if (localPlayState === 'playing') {
-          playerRef.pauseVideo?.();
-          setLocalPlayState('paused');
-          setIsLiveSynced(false);
-        } else {
-          playerRef.playVideo?.();
-          setLocalPlayState('playing');
-        }
+      if (isRequestPending) {
+        showToast('Playback is locked. Your request is currently waiting for Host approval.', 'info');
+      } else {
+        showToast('Playback controls are locked for viewers. Click "Request Access" to request control from the Host.', 'info');
       }
     }
   };
 
   const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canControl) return;
     const rawVal = parseFloat(e.target.value);
-    if (!canControl) {
-      const currentLive = getAuthoritativeTime();
-      setScrubValue(Math.min(rawVal, currentLive));
-    } else {
-      setScrubValue(rawVal);
-    }
+    setScrubValue(rawVal);
   };
 
   const handleSeekStart = () => {
+    if (!canControl) {
+      if (!isRequestPending) {
+        showToast('Timeline seek is locked for viewers. Request playback access from the Host.', 'info');
+      }
+      return;
+    }
     setIsScrubbing(true);
-    const currentLive = getAuthoritativeTime();
-    setScrubValue(canControl ? currentTime : Math.min(currentTime, currentLive));
+    setScrubValue(currentTime);
   };
 
   const handleSeekEnd = (e: React.MouseEvent<HTMLInputElement> | React.TouchEvent<HTMLInputElement>) => {
+    if (!canControl) return;
     setIsScrubbing(false);
     const rawTarget = parseFloat((e.target as HTMLInputElement).value);
-    if (canControl) {
-      seekVideo(rawTarget);
-      setIsLiveSynced(true);
-      setTimeBehindLive(0);
-    } else {
-      const currentLive = getAuthoritativeTime();
-      // Viewers cannot watch more than host: clamp to liveEdge
-      const targetValue = Math.min(rawTarget, currentLive);
-      const behind = currentLive - targetValue;
-
-      // If user scrubbed to the end (within 1.5s of host), snap to live
-      if (behind <= 1.5 || targetValue >= currentLive - 0.5) {
-        returnToLive(playerRef);
-      } else {
-        // Watching earlier part like a video (DVR catch-up mode)
-        if (playerRef?.seekTo) {
-          playerRef.seekTo(targetValue, true);
-        }
-        setIsLiveSynced(false);
-        setTimeBehindLive(Math.max(0, Math.round(behind)));
-      }
-    }
+    seekVideo(rawTarget);
+    setIsLiveSynced(true);
+    setTimeBehindLive(0);
   };
 
   const handleSkip = (seconds: number) => {
@@ -136,20 +125,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       setIsLiveSynced(true);
       setTimeBehindLive(0);
     } else {
-      const currentLive = getAuthoritativeTime();
-      // Viewers cannot watch more than host: clamp to liveEdge
-      const target = Math.max(0, Math.min(currentLive, currentTime + seconds));
-      const behind = currentLive - target;
-
-      if (behind <= 1.5 || target >= currentLive - 0.5) {
-        returnToLive(playerRef);
-      } else {
-        if (playerRef?.seekTo) {
-          playerRef.seekTo(target, true);
-        }
-        setIsLiveSynced(false);
-        setTimeBehindLive(Math.max(0, Math.round(behind)));
-      }
+      showToast('Playback controls are locked for viewers. Request access from the Host to seek.', 'info');
     }
   };
 
@@ -195,6 +171,49 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       className="w-full rounded-xl bg-[#16171B] border border-[#282A33] p-3.5 flex flex-col gap-2.5 shadow-cinema"
       aria-label="Playback Controls"
     >
+      {/* Playback Lock Banner for Viewers */}
+      {!canControl && (
+        <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#111215] border border-[#282A33] gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 rounded-md bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/30 flex-shrink-0">
+              <Lock className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-semibold text-[#F2F0E9] truncate">
+                Playback controls are locked for viewers
+              </span>
+              <span className="text-[11px] text-[#8E919C] truncate hidden sm:inline">
+                {isRequestPending
+                  ? 'Your request was sent to the Host. Awaiting approval...'
+                  : 'Host controls playback. Request access to play, pause, or change stream.'}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {isRequestPending ? (
+              <div
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#E5A84B]/10 text-[#E5A84B] border border-[#E5A84B]/30 text-xs font-mono font-medium"
+                title="Your request is pending host review"
+              >
+                <Clock className="w-3.5 h-3.5 animate-spin" />
+                <span>Pending Approval</span>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => requestControl('REQUEST_CONTROL')}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+                title="Request playback control access from the host"
+              >
+                <KeyRound className="w-3.5 h-3.5" />
+                <span>Request Access</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Scrubber Progress Slider */}
       <div className="flex flex-col gap-1 w-full">
         <label htmlFor="playback-scrubber" className="sr-only">
@@ -208,16 +227,19 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             max={maxScrubTime}
             step={0.1}
             value={displayTime}
+            disabled={!canControl}
             onMouseDown={handleSeekStart}
             onTouchStart={handleSeekStart}
             onChange={handleSeekChange}
             onMouseUp={handleSeekEnd}
             onTouchEnd={handleSeekEnd}
-            aria-label={canControl ? 'Playback timeline' : 'Live stream DVR timeline'}
+            aria-label={canControl ? 'Playback timeline' : 'Playback timeline (locked)'}
             aria-valuemin={0}
             aria-valuemax={maxScrubTime}
             aria-valuenow={displayTime}
-            className="w-full h-1.5 rounded appearance-none cursor-pointer relative z-10 transition-colors"
+            className={`w-full h-1.5 rounded appearance-none relative z-10 transition-colors ${
+              canControl ? 'cursor-pointer' : 'cursor-not-allowed opacity-60'
+            }`}
             style={{
               background: `linear-gradient(to right, #D6F279 0%, #D6F279 ${progressPercent}%, #282A33 ${progressPercent}%, #282A33 100%)`,
             }}
@@ -233,10 +255,11 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
             {!canControl && (
               <span
-                className="text-[10px] px-1.5 py-0.2 rounded bg-[#D6F279]/10 text-[#D6F279] border border-[#D6F279]/30 font-semibold"
-                title="End of timeline is the live position the host is currently watching"
+                className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-[#E5A84B]/10 text-[#E5A84B] border border-[#E5A84B]/30 font-semibold"
+                title="Playback timeline is locked to the host broadcast"
               >
-                LIVE EDGE
+                <Lock className="w-2.5 h-2.5" />
+                LOCKED
               </span>
             )}
 
@@ -254,8 +277,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
                 <Radio className={`w-3 h-3 ${isLiveSynced ? 'text-[#D6F279]' : 'text-[#E5A84B]'}`} />
                 <span>
                   {isLiveSynced
-                    ? 'Watching Live with Host'
-                    : 'DVR Mode · Drag to end for Live'}
+                    ? 'Synced with Host'
+                    : 'Catch-up Mode · Click Live to sync'}
                 </span>
               </div>
             ) : (
@@ -275,27 +298,42 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           {/* Main Play / Pause Button */}
           <button
             onClick={handleTogglePlay}
-            aria-label={canControl ? (isPlaying ? 'Pause video' : 'Play video') : 'Play/pause locally'}
+            aria-label={canControl ? (isPlaying ? 'Pause video' : 'Play video') : 'Playback locked for viewers'}
             className={`flex items-center justify-center w-9 h-9 rounded-md transition-colors ${
               canControl
-                ? 'bg-[#D6F279] hover:bg-[#C3E065] text-[#101114]'
-                : 'bg-[#1C1E24] hover:bg-[#24262E] text-[#8E919C] hover:text-[#D6F279] border border-[#282A33]'
+                ? 'bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] cursor-pointer'
+                : 'bg-[#1C1E24] text-[#8E919C] hover:text-[#E5A84B] border border-[#282A33] cursor-pointer'
             }`}
-            title={canControl ? (isPlaying ? 'Pause for room' : 'Play for room') : 'Play/pause locally'}
+            title={
+              canControl
+                ? (isPlaying ? 'Pause for room' : 'Play for room')
+                : (isRequestPending
+                    ? 'Request pending host review'
+                    : 'Playback locked for viewers. Click to request access.')
+            }
           >
-            {isPlaying ? (
-              <Pause className="w-4 h-4 fill-current" />
+            {canControl ? (
+              isPlaying ? (
+                <Pause className="w-4 h-4 fill-current" />
+              ) : (
+                <Play className="w-4 h-4 fill-current ml-0.5" />
+              )
             ) : (
-              <Play className="w-4 h-4 fill-current ml-0.5" />
+              <Lock className="w-4 h-4 text-[#E5A84B]" />
             )}
           </button>
 
           {/* Jump -10s */}
           <button
             onClick={() => handleSkip(-10)}
+            disabled={!canControl}
             aria-label="Rewind 10 seconds"
-            className="p-2 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
-            title="Rewind 10s"
+            className={`p-2 rounded-md transition-colors ${
+              canControl
+                ? 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] cursor-pointer'
+                : 'text-[#484A54] cursor-not-allowed opacity-40'
+            }`}
+            title={canControl ? 'Rewind 10s' : 'Rewind locked for viewers'}
           >
             <RotateCcw className="w-4 h-4" />
           </button>
@@ -303,9 +341,14 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           {/* Jump +10s */}
           <button
             onClick={() => handleSkip(10)}
+            disabled={!canControl}
             aria-label="Fast forward 10 seconds"
-            className="p-2 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
-            title="Fast forward 10s"
+            className={`p-2 rounded-md transition-colors ${
+              canControl
+                ? 'text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] cursor-pointer'
+                : 'text-[#484A54] cursor-not-allowed opacity-40'
+            }`}
+            title={canControl ? 'Fast forward 10s' : 'Fast forward locked for viewers'}
           >
             <RotateCw className="w-4 h-4" />
           </button>
@@ -385,15 +428,27 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
         {/* Right Side: Quick Actions & Reactions */}
         <div className="flex items-center gap-2">
-          {/* Device Playback status pill for Viewers */}
+          {/* Status badge / Request Access button for Viewers */}
           {!canControl && (
-            <span
-              className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 rounded bg-[#1C1E24] border border-[#282A33] text-[10px] font-mono text-[#8E919C]"
-              title="You control playback independently on your device. Click LIVE to rejoin the room stream."
-            >
-              <span className={`w-1.5 h-1.5 rounded-full ${isLiveSynced ? 'bg-[#D6F279]' : 'bg-[#E5A84B]'}`} />
-              <span>Your Device</span>
-            </span>
+            isRequestPending ? (
+              <span
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#E5A84B]/10 border border-[#E5A84B]/30 text-[10px] font-mono text-[#E5A84B]"
+                title="Awaiting host approval for playback control"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[#E5A84B] animate-pulse" />
+                <span>Request Pending</span>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={() => requestControl('REQUEST_CONTROL')}
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#1C1E24] hover:bg-[#282A33] border border-[#282A33] text-[10px] font-mono text-[#D6F279] hover:text-white transition-colors cursor-pointer"
+                title="Request playback access to control stream"
+              >
+                <KeyRound className="w-3 h-3 text-[#D6F279]" />
+                <span>Request Access</span>
+              </button>
+            )
           )}
 
           {/* Change Video button */}

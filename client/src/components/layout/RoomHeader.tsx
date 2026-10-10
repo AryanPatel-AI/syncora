@@ -10,6 +10,8 @@ import {
   Shield,
   User,
   Radio,
+  KeyRound,
+  Clock,
 } from 'lucide-react';
 
 interface RoomHeaderProps {
@@ -22,12 +24,20 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
     currentUser,
     isHost,
     canControl,
+    pendingRequests,
+    requestControl,
+    setIsRequestsModalOpen,
     leaveRoom,
     syncStatus,
     isConnected,
   } = useWatchParty();
 
   const [copied, setCopied] = useState<boolean>(false);
+
+  const myPendingRequest = pendingRequests.find(
+    (r) => r.userId === currentUser?.id && r.status === 'pending'
+  );
+  const isRequestPending = Boolean(myPendingRequest);
 
   const handleCopyLink = () => {
     if (!roomId) return;
@@ -62,6 +72,40 @@ export const RoomHeader: React.FC<RoomHeaderProps> = () => {
 
           {/* Live Audience Presence indicator and roster popover */}
           <AudiencePresence />
+
+          {/* Host Pending Control Requests Pill */}
+          {canControl && pendingRequests.length > 0 && (
+            <button
+              onClick={() => setIsRequestsModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#E5A84B]/20 border border-[#E5A84B] text-[#E5A84B] text-xs font-semibold hover:bg-[#E5A84B]/30 transition-colors cursor-pointer animate-pulse"
+              title="Review pending playback control requests"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Requests ({pendingRequests.length})</span>
+            </button>
+          )}
+
+          {/* Viewer Request Playback Control Button */}
+          {!canControl && (
+            isRequestPending ? (
+              <span
+                className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono px-2 py-1 rounded bg-[#E5A84B]/10 border border-[#E5A84B]/30 text-[#E5A84B]"
+                title="Your playback request is awaiting host review"
+              >
+                <Clock className="w-3 h-3 animate-spin" />
+                <span>Request Pending</span>
+              </span>
+            ) : (
+              <button
+                onClick={() => requestControl('REQUEST_CONTROL')}
+                className="hidden md:inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] transition-colors cursor-pointer shadow-sm"
+                title="Request playback control access from the host"
+              >
+                <KeyRound className="w-3 h-3" />
+                <span>Request Access</span>
+              </button>
+            )
+          )}
 
           {/* Room Code & Copy Button */}
           <div className="flex items-center gap-1.5 bg-[#16171B] border border-[#282A33] px-2.5 py-1 rounded-md text-xs">

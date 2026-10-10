@@ -5,6 +5,7 @@ import { PlaybackControls } from '../../components/player/PlaybackControls';
 import { PresetsBar } from '../../components/player/PresetsBar';
 import { ParticipantList } from '../../components/room/ParticipantList';
 import { ChatSection } from '../../components/chat/ChatSection';
+import { ApprovalQueue } from '../../components/room/ApprovalQueue';
 import { VideoSelectorModal } from '../../components/player/VideoSelectorModal';
 import { AmbientGlow } from '../../components/layout/AmbientGlow';
 import {
@@ -15,6 +16,8 @@ import {
   Play,
   Trash2,
   Plus,
+  ShieldAlert,
+  Check,
 } from 'lucide-react';
 
 interface WatchRoomPageProps {
@@ -27,6 +30,10 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
     playback,
     participants,
     canControl,
+    pendingRequests,
+    handleControlRequest,
+    isRequestsModalOpen,
+    setIsRequestsModalOpen,
     roomQueue,
     removeFromQueue,
     playNextInQueue,
@@ -52,6 +59,54 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
     <div className="relative max-w-7xl mx-auto px-3 sm:px-6 py-4 flex flex-col gap-4 overflow-hidden">
       {/* Intimate Screening Room Ambient Backdrop */}
       <AmbientGlow isPlaying={isPlaying} />
+
+      {/* Host / Moderator Control Request Banner */}
+      {canControl && pendingRequests.length > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-[#1C1E24] border border-[#E5A84B]/40 shadow-cinema gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="p-1.5 rounded-lg bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/30 flex-shrink-0">
+              <ShieldAlert className="w-4 h-4 animate-pulse" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-[#F2F0E9] truncate">
+                  {pendingRequests[0].username} is requesting playback control access
+                </span>
+                <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-[#E5A84B]/20 text-[#E5A84B]">
+                  New Request
+                </span>
+              </div>
+              <span className="text-[11px] text-[#8E919C]">
+                Approve to grant them Moderator playback permissions.
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+            <button
+              onClick={() => handleControlRequest(pendingRequests[0].id, 'rejected')}
+              className="px-2.5 py-1.5 rounded-md text-xs text-[#8E919C] hover:text-[#F87171] hover:bg-[#F87171]/10 border border-[#282A33] transition-colors cursor-pointer"
+            >
+              Decline
+            </button>
+            <button
+              onClick={() => handleControlRequest(pendingRequests[0].id, 'approved')}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-xs font-bold transition-all shadow-sm active:scale-95 cursor-pointer"
+            >
+              <Check className="w-3.5 h-3.5" />
+              <span>Approve Access</span>
+            </button>
+            {pendingRequests.length > 1 && (
+              <button
+                onClick={() => setIsRequestsModalOpen(true)}
+                className="text-xs text-[#D6F279] underline hover:text-[#C3E065] px-1 transition-colors cursor-pointer"
+              >
+                All ({pendingRequests.length})
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Main Theater Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -241,6 +296,11 @@ export const WatchRoomPage: React.FC<WatchRoomPageProps> = () => {
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
       />
+
+      {/* Playback Control Approval Queue Modal */}
+      {isRequestsModalOpen && (
+        <ApprovalQueue onClose={() => setIsRequestsModalOpen(false)} />
+      )}
     </div>
   );
 };

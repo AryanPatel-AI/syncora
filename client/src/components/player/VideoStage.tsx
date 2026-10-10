@@ -2,7 +2,7 @@ import React from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
 import { YouTubePlayer } from './YouTubePlayer';
 import { FloatingReaction } from './FloatingReaction';
-import { Film, Radio } from 'lucide-react';
+import { Film, Lock, KeyRound, Clock, ShieldCheck } from 'lucide-react';
 
 interface VideoStageProps {
   onProgress: (current: number, total: number) => void;
@@ -15,8 +15,23 @@ export const VideoStage: React.FC<VideoStageProps> = ({
   playerRefCallback,
   onOpenSelector,
 }) => {
-  const { playback, canControl, isLiveSynced, returnToLive, timeBehindLive } = useWatchParty();
+  const {
+    playback,
+    canControl,
+    isHost,
+    currentUser,
+    pendingRequests,
+    requestControl,
+    isLiveSynced,
+    returnToLive,
+    timeBehindLive,
+  } = useWatchParty();
   const isPlaying = playback.playState === 'playing';
+
+  const myPendingRequest = pendingRequests.find(
+    (r) => r.userId === currentUser?.id && r.status === 'pending'
+  );
+  const isRequestPending = Boolean(myPendingRequest);
 
   return (
     <section className="flex flex-col gap-2.5 w-full" aria-label="Screening Stage">
@@ -28,6 +43,16 @@ export const VideoStage: React.FC<VideoStageProps> = ({
         />
         {/* Real-time floating reactions & like hearts overlay */}
         <FloatingReaction />
+
+        {/* View-Only Overlay Badge for Viewers */}
+        {!canControl && (
+          <div className="absolute top-3 right-3 z-30 pointer-events-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#101114]/85 backdrop-blur-md border border-[#282A33] text-[11px] font-mono text-[#E5A84B]">
+              <Lock className="w-3 h-3 text-[#E5A84B]" />
+              <span>View-Only Mode</span>
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Under-Player Metadata Bar */}
@@ -72,13 +97,35 @@ export const VideoStage: React.FC<VideoStageProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {canControl && (
-            <button
-              onClick={onOpenSelector}
-              className="text-[11px] font-medium text-[#D6F279] hover:text-[#C3E065] px-2.5 py-1 rounded border border-[#282A33] hover:border-[#383B47] bg-[#1C1E24] transition-colors"
-            >
-              Change Video
-            </button>
+          {canControl ? (
+            <>
+              <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-[#D6F279]/10 text-[#D6F279] border border-[#D6F279]/20">
+                <ShieldCheck className="w-3 h-3" />
+                <span>{isHost ? 'Host Controller' : 'Mod Controller'}</span>
+              </span>
+              <button
+                onClick={onOpenSelector}
+                className="text-[11px] font-medium text-[#D6F279] hover:text-[#C3E065] px-2.5 py-1 rounded border border-[#282A33] hover:border-[#383B47] bg-[#1C1E24] transition-colors cursor-pointer"
+              >
+                Change Video
+              </button>
+            </>
+          ) : (
+            isRequestPending ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-mono text-[#E5A84B] px-2.5 py-1 rounded border border-[#E5A84B]/30 bg-[#E5A84B]/10">
+                <Clock className="w-3 h-3 animate-spin" />
+                <span>Request Pending</span>
+              </span>
+            ) : (
+              <button
+                onClick={() => requestControl('REQUEST_CONTROL')}
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#101114] bg-[#D6F279] hover:bg-[#C3E065] px-2.5 py-1 rounded transition-colors shadow-sm cursor-pointer"
+                title="Request playback control permissions from the Host"
+              >
+                <KeyRound className="w-3 h-3" />
+                <span>Request Control</span>
+              </button>
+            )
           )}
         </div>
       </div>

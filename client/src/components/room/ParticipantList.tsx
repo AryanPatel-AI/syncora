@@ -10,6 +10,8 @@ import {
   UserX,
   ArrowRightLeft,
   Users,
+  Clock,
+  Check,
 } from 'lucide-react';
 
 export const ParticipantList: React.FC = () => {
@@ -17,6 +19,8 @@ export const ParticipantList: React.FC = () => {
     participants,
     currentUser,
     isHost,
+    pendingRequests,
+    handleControlRequest,
     assignRole,
     removeParticipant,
     transferHost,
@@ -77,6 +81,9 @@ export const ParticipantList: React.FC = () => {
         {participants.map((p) => {
           const isCurrentUser = p.id === currentUser?.id;
           const isTargetHost = p.isHost || p.role === 'HOST';
+          const pendingReq = pendingRequests.find(
+            (r) => r.userId === p.id && r.status === 'pending'
+          );
 
           return (
             <div
@@ -99,12 +106,18 @@ export const ParticipantList: React.FC = () => {
                 </div>
 
                 <div className="flex flex-col min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-medium text-[#F2F0E9] truncate max-w-[120px]">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-xs font-medium text-[#F2F0E9] truncate max-w-[110px]">
                       {p.username}
                     </span>
                     {isCurrentUser && (
                       <span className="text-[10px] text-[#8E919C] font-mono">(You)</span>
+                    )}
+                    {pendingReq && (
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-mono bg-[#E5A84B]/15 text-[#E5A84B] border border-[#E5A84B]/30 font-medium">
+                        <Clock className="w-2.5 h-2.5 animate-spin" />
+                        <span>Requested Access</span>
+                      </span>
                     )}
                   </div>
                   <div className="mt-0.5">{getRoleBadge(p.role, p.isHost)}</div>
@@ -113,7 +126,17 @@ export const ParticipantList: React.FC = () => {
 
               {/* Host actions button */}
               {isHost && !isCurrentUser && (
-                <div className="relative">
+                <div className="relative flex items-center gap-1.5">
+                  {pendingReq && (
+                    <button
+                      onClick={() => handleControlRequest(pendingReq.id, 'approved')}
+                      className="flex items-center gap-1 px-2 py-1 rounded bg-[#D6F279] hover:bg-[#C3E065] text-[#101114] text-[10px] font-bold transition-colors cursor-pointer"
+                      title={`Approve control request from ${p.username}`}
+                    >
+                      <Check className="w-3 h-3" />
+                      <span>Approve</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => setActiveMenuUserId(activeMenuUserId === p.id ? null : p.id)}
                     className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"

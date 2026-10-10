@@ -646,6 +646,20 @@ export function registerSocketHandlers(io: Server) {
       const updatedParticipants = room.getAllParticipants();
       const currentPlayback = room.getPlaybackState();
 
+      if (action === 'approved' && requester) {
+        // Persist role update if participant was promoted to moderator
+        RoomRepository.updateParticipantRole(requester.id, requester.role);
+
+        io.to(room.id).emit(SOCKET_EVENTS.ROLE_ASSIGNED, {
+          userId: requester.id,
+          targetUserId: requester.id,
+          username: requester.username,
+          role: requester.role,
+          newRole: requester.role,
+          participants: updatedParticipants,
+        });
+      }
+
       io.to(room.id).emit(SOCKET_EVENTS.CONTROL_REQUEST_UPDATED, {
         request: resolved,
         pendingRequests: room.getPendingRequests(),
