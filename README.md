@@ -1,4 +1,4 @@
-# ✨ Syncora — Real-Time YouTube Watch Party
+# Syncora — Real-Time YouTube Watch Party
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React_18-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
@@ -11,20 +11,20 @@
 
 ---
 
-## 🌐 Live URLs & Deployment Status
+## Live URLs & Deployment Status
 
 | Service | Platform | Status | URL |
 | :--- | :--- | :--- | :--- |
-| **Frontend Client** | Vercel | 🟢 **Live in Production** | [https://syncora-kappa.vercel.app](https://syncora-kappa.vercel.app) <br> [https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app](https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app) |
-| **Backend API & WebSockets** | Render | 🟢 **Live in Production** | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) |
+| **Frontend Client** | Vercel | **Live in Production** | [https://syncora-kappa.vercel.app](https://syncora-kappa.vercel.app) <br> [https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app](https://syncora-4vvqyofl1-aryanpatel-ais-projects.vercel.app) |
+| **Backend API & WebSockets** | Render | **Live in Production** | [https://syncora-backend-rfs0.onrender.com](https://syncora-backend-rfs0.onrender.com) |
 
 > [!NOTE]
 > The codebase is fully configured with production environment variable adapters, SPA route rewrite rules (`vercel.json`), Render Web Service manifests (`render.yaml`), and strict CORS handlers.
-> See the dedicated [Deployment Guide (docs/DEPLOYMENT.md)](docs/DEPLOYMENT.md) and [Step-by-Step Production Deployment Guide](#-step-by-step-production-deployment-guide) below to deploy in minutes.
+> See the dedicated [Deployment Guide (docs/DEPLOYMENT.md)](docs/DEPLOYMENT.md) and [Step-by-Step Production Deployment Guide](#step-by-step-production-deployment-guide) below to deploy in minutes.
 
 ---
 
-## 🎨 Visual Direction & Screening Room Aesthetic
+## Visual Direction & Screening Room Aesthetic
 
 Syncora avoids generic dashboard templates in favor of a bespoke **intimate digital screening room**:
 - **Main Canvas**: Ink black (`#101114`) providing maximum contrast and a distraction-free cinematic backdrop.
@@ -36,9 +36,9 @@ Syncora avoids generic dashboard templates in favor of a bespoke **intimate digi
 
 ---
 
-## 🌟 Core Features
+## Core Features
 
-### 1. 🔄 Real-Time Playback Synchronization
+### 1. Real-Time Playback Synchronization
 - **Server-Authoritative Clock**: The server tracks authoritative video ID, playback state (`playing`, `paused`, `buffering`), position in seconds, and timestamps.
 - **Elapsed Time Interpolation**: When a video is playing, the server computes exact playback position mathematically without flooding the network:
   $$\text{Current Position} = \text{currentTime} + \frac{\text{Date.now()} - \text{lastUpdatedAt}}{1000} \times \text{playbackRate}$$
@@ -46,44 +46,44 @@ Syncora avoids generic dashboard templates in favor of a bespoke **intimate digi
 - **Smart Drift Correction**: Clients continuously monitor playback drift against the authoritative server time. A 1.75-second threshold accommodates minor network jitter without triggering constant re-seek loops; if a client falls behind or moves ahead beyond this threshold, it automatically resynchronizes to the authoritative timestamp.
 - **Live Sync Badge**: Header status indicator displays real-time connection state (`In Sync`, `Syncing`, `Disconnected`).
 
-### 2. 🛡️ Authoritative Role-Based Access Control (RBAC)
+### 2. Authoritative Role-Based Access Control (RBAC)
 Server-side RBAC enforces permissions on every single sensitive action:
 
 | Role | Assigned By | Permissions / Capabilities |
 | :--- | :--- | :--- |
-| **👑 Host** | Auto (room creator or transferred) | Full control: play/pause, seek, change video, assign roles, remove participants, transfer host. |
-| **🛡️ Moderator** | Assigned by Host | Play/pause, seek, change video; review and approve / reject playback requests. |
-| **👤 Participant** | Assigned by Host (default for joiners) | Watch only; cannot control playback or change video. May submit playback requests. |
-| **👁️ Viewer** | Assigned by Host | Same as Participant (watch-only alias to distinguish spectators). |
+| **Host** | Auto (room creator or transferred) | Full control: play/pause, seek, change video, assign roles, remove participants, transfer host. |
+| **Moderator** | Assigned by Host | Play/pause, seek, change video; review and approve / reject playback requests. |
+| **Participant** | Assigned by Host (default for joiners) | Watch only; cannot control playback or change video. May submit playback requests. |
+| **Viewer** | Assigned by Host | Same as Participant (watch-only alias to distinguish spectators). |
 
 > **Strict Server Validation**: Client UI disables locked buttons for usability, but authorization is 100% verified on the backend. Any unauthorized socket packet is immediately rejected with an `error_message`.
 
-### 3. 🙋 Playback Control Request & Approval Workflow
+### 3. Playback Control Request & Approval Workflow
 - When a Participant attempts to play, pause, seek, or change a video, they are prompted to submit an approval request.
 - Host and Moderators receive real-time notifications with a pending request badge.
 - Reviewers can approve or reject requests with one click. Approvals automatically execute the requested action across the entire room.
 
-### 4. 💬 Real-Time Moderated Chat
+### 4. Real-Time Moderated Chat
 - **Server-Authoritative Identity**: Sender username and role are resolved from active room records, preventing spoofing.
 - **Safety Guards**: Strips whitespace, rejects empty messages, and enforces a strict 500-character limit.
 - **Anti-Spam Rate Limiter**: Server-side sliding-window rate limiter prevents flooding while allowing natural conversation.
 - **System Announcements**: Automated room notifications for user join, user leave, video change, and role promotions.
 
-### 5. ❤️ Live Audience Presence & Like Reactions System
+### 5. Live Audience Presence & Like Reactions System
 - **Real-Time Audience Presence**: Header displays `Watching now · <count>` with an overlapping avatar cluster, live green connection dots, and role badges.
 - **Audience Roster Popover**: Accessible dropdown dialog listing all active members and their current roles, with an empty state featuring a 1-click invite copy button.
 - **Synchronized Like Counter**: Clickable Like button in the playback controls broadcasts live to all watching clients with a synchronized room `likeCount`.
 - **Floating Heart Animations**: Floating reaction overlay over the cinema player with smooth float-up animations respecting `prefers-reduced-motion`.
 - **Anti-Spam Cooldown**: Server-enforced 500ms per-client cooldown prevents rapid reaction flooding while isolating room totals across screening rooms.
 
-### 6. 🔗 1-Click Invites & Instant Rooms
+### 6. 1-Click Invites & Instant Rooms
 - Unique 6-character room codes (e.g., `SYNC-4A9B`).
 - Shareable invitation links (e.g., `https://syncora-kappa.vercel.app/room/SYNC-4A9B`).
 - Automatic pre-fill of room codes when opening invite URLs.
 
 ---
 
-## 🏗️ Architecture & Real-Time Flow
+## Architecture & Real-Time Flow
 
 ### System Architecture Diagram
 
@@ -154,7 +154,7 @@ sequenceDiagram
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 syncora/
@@ -198,7 +198,7 @@ syncora/
 
 ---
 
-## ⚡ Socket.IO Event Contract & Payloads
+## Socket.IO Event Contract & Payloads
 
 ### Client to Server Events
 
@@ -242,7 +242,7 @@ syncora/
 
 ---
 
-## 💻 Local Development Setup
+## Local Development Setup
 
 ### Prerequisites
 - **Node.js**: Version `18.0.0` or higher (tested on Node `v20+` and `v24+`)
@@ -296,7 +296,7 @@ npm run dev
 
 ---
 
-## 🧪 Automated Testing
+## Automated Testing
 
 Syncora includes an automated multi-client integration test suite (`server/src/test-sync.ts`) validating all assignment criteria against an actual running Socket.IO server:
 
@@ -306,23 +306,23 @@ npm test
 ```
 
 ### Test Suite Coverage (13/13 Passing)
-1. ✅ **Room Creation**: Host role assignment and unique room code generation.
-2. ✅ **Participant Joining**: Join flow and automatic state synchronization.
-3. ✅ **Validation**: Rejection of empty usernames, non-existent rooms, and invalid YouTube video IDs.
-4. ✅ **Broadcasts**: Multi-client notification of joins and departures.
-5. ✅ **Playback Sync**: Real-time synchronization of play, pause, seek, and video changes.
-6. ✅ **RBAC Enforcement**: Rejection of unauthorized participant play/pause/seek commands.
-7. ✅ **Moderator Capabilities**: Authorized playback control by promoted moderators.
-8. ✅ **Administrative Control**: Host-only role management and participant kicking.
-9. ✅ **Approval Workflow**: Submission, approval, and rejection of playback change requests.
-10. ✅ **Self-Approval Protection**: Preventing participants from approving their own actions.
-11. ✅ **Cleanup & Succession**: Automatic host promotion on disconnect and deletion of empty rooms.
-12. ✅ **Moderated Chat**: 500-char length limits, empty message trimming, server identity validation, and anti-spam rate limiting.
-13. ✅ **Audience Presence & Likes**: Real-time presence broadcasts, synchronized room like counters, 500ms anti-spam cooldown, non-member rejection, and strict room isolation.
+1. **Room Creation**: Host role assignment and unique room code generation.
+2. **Participant Joining**: Join flow and automatic state synchronization.
+3. **Validation**: Rejection of empty usernames, non-existent rooms, and invalid YouTube video IDs.
+4. **Broadcasts**: Multi-client notification of joins and departures.
+5. **Playback Sync**: Real-time synchronization of play, pause, seek, and video changes.
+6. **RBAC Enforcement**: Rejection of unauthorized participant play/pause/seek commands.
+7. **Moderator Capabilities**: Authorized playback control by promoted moderators.
+8. **Administrative Control**: Host-only role management and participant kicking.
+9. **Approval Workflow**: Submission, approval, and rejection of playback change requests.
+10. **Self-Approval Protection**: Preventing participants from approving their own actions.
+11. **Cleanup & Succession**: Automatic host promotion on disconnect and deletion of empty rooms.
+12. **Moderated Chat**: 500-char length limits, empty message trimming, server identity validation, and anti-spam rate limiting.
+13. **Audience Presence & Likes**: Real-time presence broadcasts, synchronized room like counters, 500ms anti-spam cooldown, non-member rejection, and strict room isolation.
 
 ---
 
-## 🚀 Step-by-Step Production Deployment Guide
+## Step-by-Step Production Deployment Guide
 
 Deploying Syncora involves hosting the Express + Socket.IO backend on **Render** (free Web Service) and the React SPA on **Vercel** (free Hobby tier).
 
@@ -390,17 +390,17 @@ Deploying Syncora involves hosting the Express + Socket.IO backend on **Render**
 
 ---
 
-## 📺 Modern Live-Stream Viewing Platform Features
+## Modern Live-Stream Viewing Platform Features
 
 Syncora extends the classic watch party with modern streaming discovery and viewing capabilities:
 
-### 1. 🔍 Video & Live Stream Discovery
+### 1. Video & Live Stream Discovery
 - **YouTube Data API v3 Proxy**: Searches live broadcasts and videos with real thumbnails, channels, and publication dates via backend endpoints (`/api/videos/search`, `/api/videos/live`, `/api/videos/popular`, `/api/videos/categories`).
 - **Private API Key Protection**: The YouTube API key is strictly maintained server-side (`YOUTUBE_API_KEY`).
 - **Resilient Curated Fallback Catalog**: If an API key is not configured or YouTube quota is exceeded, Syncora seamlessly falls back to a curated catalog of 4K ultra-high-definition streams and open-source cinema videos.
 - **Audience Metrics**: Concurrent viewer counts and view statistics are only displayed when provided by the data source.
 
-### 2. 🎬 Dedicated Solo & Stream Watching (`/watch/:videoId`)
+### 2. Dedicated Solo & Stream Watching (`/watch/:videoId`)
 - Full responsive YouTube IFrame player with Play/Pause, Volume/Mute, Theater Mode, and Fullscreen.
 - Live badge with live-edge indicators and return-to-live behavior.
 - Channel metadata with Follow/Unfollow toggling.
@@ -408,24 +408,24 @@ Syncora extends the classic watch party with modern streaming discovery and view
 - 1-Click **"Start Watch Party"** button to transition any discovered stream into a synchronized screening room.
 - Multi-Tab Social Drawer: Syncora Live Chat, embedded official YouTube Live Chat (where permitted), and related streams.
 
-### 3. 💬 Advanced Chat & Real-Time Moderation
+### 3. Advanced Chat & Real-Time Moderation
 - **Pinned Messages**: Hosts and Moderators can pin critical announcements to the top of the room chat.
 - **Message Deletion**: Moderators can remove inappropriate messages in real time.
 - **Participant Timeout**: Temporarily silence disruptive participants for a configurable duration.
 - **Slow Mode**: Configurable room slow mode (5s, 10s, 30s) to manage chat traffic during high-volume watch parties.
 
-### 4. 📋 Shared Room Playback Queue
+### 4. Shared Room Playback Queue
 - Real-time shared queue stored in SQLite.
 - Add upcoming videos, remove items, and auto-advance to the next video with synchronized playback changes.
 
-### 5. 📡 Managed Creator Broadcasting Architecture (Mux / Amazon IVS)
+### 5. Managed Creator Broadcasting Architecture (Mux / Amazon IVS)
 - Dedicated Creator Studio route (`/studio`).
 - Architectural separation between media transcoding and real-time coordination: video ingest is routed via managed streaming providers (e.g., Mux Video, Amazon IVS) using RTMP/RTMPS protocols, while Socket.IO handles room synchronization and chat.
 - Transparent status endpoint (`/api/broadcasts/status`) displaying required credentials without faking video broadcasting.
 
 ---
 
-## 🧪 Comprehensive Automated Test Suites
+## Comprehensive Automated Test Suites
 
 Syncora includes two comprehensive automated integration test suites:
 
@@ -442,7 +442,7 @@ npm --prefix server run test:all
 
 ---
 
-## 🔍 Verification & Pre-Flight Checks
+## Verification & Pre-Flight Checks
 
 Before finalizing deployment, perform these verification checks:
 
@@ -453,7 +453,7 @@ Before finalizing deployment, perform these verification checks:
 
 ---
 
-## ⚠️ Known Limitations & Architectural Notes
+## Known Limitations & Architectural Notes
 
 - **Persistent Relational Storage**: User accounts, saved videos, watch history, followed channels, and room queues are persisted in SQLite (`better-sqlite3` with WAL mode). For containerized environments with ephemeral file systems, mount a persistent disk or specify `DATABASE_PATH` on a volume.
 - **Horizontal Scaling & Clustering**: In multi-instance deployments, Socket.IO requires `@socket.io/redis-adapter` and Redis Pub/Sub so events broadcast across nodes.
