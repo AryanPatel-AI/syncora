@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useWatchParty } from '../../context/WatchPartyContext';
 import { formatSecondsToTime } from '../../utils/formatters';
 import { LikeButton } from './LikeButton';
@@ -55,7 +55,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
   const [volume, setVolume] = useState<number>(85);
   const [isMuted, setIsMuted] = useState<boolean>(false);
 
-  // Check if current user has a pending playback control request
   const myPendingRequest = pendingRequests.find(
     (r) => r.userId === currentUser?.id && r.status === 'pending'
   );
@@ -63,14 +62,30 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
 
   const isPlaying = playback.playState === 'playing';
 
+  const isLiveStream = Boolean(
+    playback.isLive ||
+    duration === 0 ||
+    (playerRef?.getVideoData && playerRef.getVideoData()?.isLive)
+  );
+
+  const maxObservedLiveHeadRef = useRef<number>(0);
+  if (isLiveStream) {
+    maxObservedLiveHeadRef.current = Math.max(
+      maxObservedLiveHeadRef.current,
+      duration,
+      currentTime,
+      getAuthoritativeTime()
+    );
+  }
+
   const liveEdge = getAuthoritativeTime();
-  const maxScrubTime = canControl
-    ? (duration > 0 ? duration : 100)
-    : Math.max(0.5, liveEdge);
+  const maxScrubTime = isLiveStream
+    ? Math.max(maxObservedLiveHeadRef.current, currentTime, liveEdge, 1)
+    : (duration > 0 ? duration : Math.max(1, currentTime, liveEdge));
 
   const displayTime = isScrubbing
-    ? (canControl ? scrubValue : Math.min(scrubValue, liveEdge))
-    : (canControl ? currentTime : Math.min(currentTime, liveEdge));
+    ? (canControl ? scrubValue : Math.min(scrubValue, maxScrubTime))
+    : (canControl ? currentTime : Math.min(currentTime, maxScrubTime));
 
   const progressPercent = maxScrubTime > 0
     ? Math.min(100, Math.max(0, (displayTime / maxScrubTime) * 100))
@@ -114,16 +129,39 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
     setIsScrubbing(false);
     const rawTarget = parseFloat((e.target as HTMLInputElement).value);
     seekVideo(rawTarget);
-    setIsLiveSynced(true);
-    setTimeBehindLive(0);
+    if (isLiveStream) {
+      const behind = Math.max(0, Math.round(maxScrubTime - rawTarget));
+      if (behind > 3) {
+        setIsLiveSynced(false);
+        setTimeBehindLive(behind);
+      } else {
+        setIsLiveSynced(true);
+        setTimeBehindLive(0);
+      }
+    } else {
+      setIsLiveSynced(true);
+      setTimeBehindLive(0);
+    }
   };
 
   const handleSkip = (seconds: number) => {
     if (canControl) {
-      const target = Math.max(0, Math.min(duration, currentTime + seconds));
+      const maxLimit = maxScrubTime;
+      const target = Math.max(0, Math.min(maxLimit, currentTime + seconds));
       seekVideo(target);
-      setIsLiveSynced(true);
-      setTimeBehindLive(0);
+      if (isLiveStream) {
+        const behind = Math.max(0, Math.round(maxLimit - target));
+        if (behind > 3) {
+          setIsLiveSynced(false);
+          setTimeBehindLive(behind);
+        } else {
+          setIsLiveSynced(true);
+          setTimeBehindLive(0);
+        }
+      } else {
+        setIsLiveSynced(true);
+        setTimeBehindLive(0);
+      }
     } else {
       showToast('Playback controls are locked for viewers. Request access from the Host to seek.', 'info');
     }
@@ -171,7 +209,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
       className="w-full rounded-xl bg-[#16171B] border border-[#282A33] p-3.5 flex flex-col gap-2.5 shadow-cinema"
       aria-label="Playback Controls"
     >
-      {/* Playback Lock Banner for Viewers */}
       {!canControl && (
         <div className="flex items-center justify-between p-2.5 rounded-lg bg-[#111215] border border-[#282A33] gap-2">
           <div className="flex items-center gap-2 min-w-0">
@@ -214,7 +251,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         </div>
       )}
 
-      {/* Scrubber Progress Slider */}
       <div className="flex flex-col gap-1 w-full">
         <label htmlFor="playback-scrubber" className="sr-only">
           Timeline seek scrubber
@@ -246,12 +282,15 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           />
         </div>
 
-        {/* Timestamps & Permission Status */}
         <div className="flex items-center justify-between text-xs text-[#8E919C] font-mono px-0.5">
           <div className="flex items-center gap-2">
             <span className="text-[#F2F0E9] font-medium">{formatSecondsToTime(displayTime)}</span>
             <span className="text-[#5E606A]">/</span>
-            <span>{formatSecondsToTime(canControl ? duration : maxScrubTime)}</span>
+            <span>
+              {isLiveStream
+                ? (isLiveSynced ? 'LIVE' : `LIVE (-${formatSecondsToTime(timeBehindLive)})`)
+                : formatSecondsToTime(duration > 0 ? duration : maxScrubTime)}
+            </span>
 
             {!canControl && (
               <span
@@ -263,7 +302,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
               </span>
             )}
 
-            {/* Catch-up badge when viewer is behind */}
             {!canControl && !isLiveSynced && timeBehindLive > 0 && (
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#E5A84B]/10 text-[#E5A84B] border border-[#E5A84B]/30 hidden sm:inline">
                 Catch-up mode (-{formatSecondsToTime(timeBehindLive)})
@@ -291,11 +329,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
         </div>
       </div>
 
-      {/* Control Actions Bar */}
       <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#282A33]/70">
-        {/* Left Side: Core Playback Actions */}
         <div className="flex items-center gap-1.5 sm:gap-2">
-          {/* Main Play / Pause Button */}
           <button
             onClick={handleTogglePlay}
             aria-label={canControl ? (isPlaying ? 'Pause video' : 'Play video') : 'Playback locked for viewers'}
@@ -323,7 +358,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             )}
           </button>
 
-          {/* Jump -10s */}
           <button
             onClick={() => handleSkip(-10)}
             disabled={!canControl}
@@ -338,7 +372,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          {/* Jump +10s */}
           <button
             onClick={() => handleSkip(10)}
             disabled={!canControl}
@@ -353,7 +386,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             <RotateCw className="w-4 h-4" />
           </button>
 
-          {/* Prominent Live / Return to Live Button */}
           <button
             type="button"
             onClick={() => returnToLive(playerRef)}
@@ -389,7 +421,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             )}
           </button>
 
-          {/* Volume Deck */}
           <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-[#282A33]">
             <button
               onClick={handleToggleMute}
@@ -426,9 +457,7 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
           </div>
         </div>
 
-        {/* Right Side: Quick Actions & Reactions */}
         <div className="flex items-center gap-2">
-          {/* Status badge / Request Access button for Viewers */}
           {!canControl && (
             isRequestPending ? (
               <span
@@ -451,7 +480,6 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             )
           )}
 
-          {/* Change Video button */}
           {canControl && (
             <button
               onClick={onOpenVideoSelector}
@@ -464,10 +492,8 @@ export const PlaybackControls: React.FC<PlaybackControlsProps> = ({
             </button>
           )}
 
-          {/* Live Room Likes Reaction Button */}
           <LikeButton />
 
-          {/* Fullscreen button */}
           <button
             onClick={handleFullscreen}
             aria-label="Toggle fullscreen video mode"

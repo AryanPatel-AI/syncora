@@ -41,12 +41,12 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
   const lastLoadedVideoIdRef = useRef<string>(playback.videoId);
   const lastAppliedPlayStateRef = useRef<string>(playback.playState);
   const lastAppliedUpdatedAtRef = useRef<number>(playback.lastUpdatedAt);
+  const liveEdgeRef = useRef<number>(0);
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
   const [hasPlaybackError, setHasPlaybackError] = useState<boolean>(false);
 
-  // Helper to detect if content is live
   const isLiveContent = useCallback((player: any): boolean => {
     if (!player) return false;
     try {
@@ -58,7 +58,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     return Boolean(playback.isLive);
   }, [playback.isLive]);
 
-  // 1. Load YouTube IFrame API Script
   useEffect(() => {
     if (window.YT && window.YT.Player) {
       isApiReady.current = true;
@@ -82,7 +81,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   }, []);
 
-  // 2. Initialize Player instance
   const initPlayer = useCallback(() => {
     if (!window.YT || !window.YT.Player || playerRef.current) return;
 
@@ -108,12 +106,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
           const isLive = isLiveContent(event.target);
           const targetTime = getAuthoritativeTime();
 
-          // Set generous buffer stabilization window (buffer time) to allow stream to buffer
           bufferStabilizationUntilRef.current = Date.now() + 4000;
           isProgrammaticUpdate.current = true;
 
-          // Only seek if non-live content has advanced
-          if (!isLive && targetTime > 1.0) {
+          if ((!isLive && targetTime > 1.0) || (isLive && playback.currentTime > 1.0)) {
             event.target.seekTo(targetTime, true);
           }
 
@@ -134,18 +130,13 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
           const state = event.data;
           playerStateRef.current = state;
 
-          // YT.PlayerState:
-          // -1: UNSTARTED, 1: PLAYING, 2: PAUSED, 3: BUFFERING, 5: CUED
           if (state === 3) {
-            // BUFFERING: suspend drift checks so player has ample buffer time to load chunks
             isBufferingRef.current = true;
             bufferStabilizationUntilRef.current = Date.now() + 3000;
           } else if (state === 1) {
-            // PLAYING: smooth playback resumed
             isBufferingRef.current = false;
             bufferStabilizationUntilRef.current = Date.now() + 2000;
           } else if (state === 2) {
-            // PAUSED: player is stopped, not buffering
             isBufferingRef.current = false;
           } else if (state === -1 || state === 5) {
             isBufferingRef.current = true;
@@ -156,7 +147,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         },
         onError: (e: any) => {
           console.warn('[YouTube Player Notice]: Code', e.data);
-          // Error codes: 2 (invalid), 5 (HTML5 error), 100 (not found/private), 101/150 (embed disabled)
           if ([2, 5, 100, 101, 150].includes(e.data)) {
             markVideoAsUnplayable(playback.videoId);
             setHasPlaybackError(true);
@@ -172,20 +162,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     });
   }, [playback.videoId, getAuthoritativeTime, playerRefCallback, isLiveContent, canControl, showToast]);
 
-  // Handle Player State Changes
   const handlePlayerStateChange = (state: number) => {
     if (isProgrammaticUpdate.current) return;
 
     const player = playerRef.current;
     if (!player) return;
 
-    // YT.PlayerState: PLAYING = 1, PAUSED = 2
     if (state === 1) {
       setLocalPlayState('playing');
       if (!canControl) {
         return;
       }
-      // If server is already in playing state, do not echo duplicate play event
       if (playback.playState === 'playing') {
         return;
       }
@@ -197,7 +184,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         setIsLiveSynced(false);
         return;
       }
-      // If server is already in paused state, do not echo duplicate pause event
       if (playback.playState === 'paused') {
         return;
       }
@@ -206,7 +192,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   };
 
-  // 3. React to video ID changes
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
@@ -230,7 +215,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     }
   }, [playback.videoId, isPlayerReady, playback.currentTime]);
 
-  // 4. React to server play/pause/seek
   useEffect(() => {
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
@@ -244,17 +228,14 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
     // A. Seek handling
     if (canControl || isLiveSynced) {
-      if (!isLive) {
-        // If an explicit seek/update was broadcast from server, or if player drifted > 2.0s
-        const shouldSeek = (isTimestampUpdated && diff > 1.0) || diff > 2.0;
-        if (shouldSeek) {
-          isProgrammaticUpdate.current = true;
-          player.seekTo(authoritativeTime, true);
-          bufferStabilizationUntilRef.current = Date.now() + 2000;
-        }
+      const driftThreshold = isLive ? 3.5 : 2.0;
+      const shouldSeek = (isTimestampUpdated && diff > 1.0) || diff > driftThreshold;
+      if (shouldSeek) {
+        isProgrammaticUpdate.current = true;
+        player.seekTo(authoritativeTime, true);
+        bufferStabilizationUntilRef.current = Date.now() + 2500;
       }
 
-      // B. Play / Pause handling: always ensure player matches authoritative server playState
       if (playback.playState === 'playing') {
         isProgrammaticUpdate.current = true;
         setLocalPlayState('playing');
@@ -268,7 +249,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         player.pauseVideo();
       }
     } else {
-      // For un-synced viewers: if ahead of host, pull back to authoritative position
       const isAheadOfHost = !canControl && playerTime > authoritativeTime + 2.5;
       if (!isLive && isAheadOfHost) {
         isProgrammaticUpdate.current = true;
@@ -301,7 +281,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     setTimeBehindLive,
   ]);
 
-  // 5. Periodic drift and progress monitoring
   useEffect(() => {
     if (!isPlayerReady || !playerRef.current) return;
 
@@ -313,12 +292,18 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       const duration = player.getDuration ? player.getDuration() : 0;
       const isLive = isLiveContent(player);
 
+      if (isLive) {
+        if (duration > 0) {
+          liveEdgeRef.current = Math.max(liveEdgeRef.current, duration);
+        } else {
+          liveEdgeRef.current = Math.max(liveEdgeRef.current, currentTime);
+        }
+      }
+
       if (onProgress) {
         onProgress(currentTime, duration);
       }
 
-      // Check buffering & stabilization window:
-      // If the player is buffering or has just sought/started, DO NOT seek!
       const isBuffering = isBufferingRef.current || playerStateRef.current === 3;
       const isStabilizing = Date.now() < bufferStabilizationUntilRef.current;
       const isProgrammatic = isProgrammaticUpdate.current;
@@ -328,8 +313,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
 
       if (!isBuffering && !isStabilizing && !isProgrammatic) {
         if (isLive) {
-          // LIVE STREAM LOGIC:
-          // Preserve healthy buffer delay behind live edge so audio never stutters, loops, or gets stuck
           if (!canControl) {
             if (!isLiveSynced) {
               setTimeBehindLive(Math.max(0, Math.round(behindSeconds)));
@@ -338,10 +321,8 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
                 setTimeBehindLive(0);
               }
             } else {
-              // In live synced mode: only resync if viewer has fallen severely behind (> 9.0s)
               if (behindSeconds > 9.0 && playback.playState === 'playing') {
                 isProgrammaticUpdate.current = true;
-                // Buffer delay: seek to authTime - 2.5s so player gets time to buffer incoming live segments
                 const safeTarget = Math.max(0, authTime - 2.5);
                 player.seekTo(safeTarget, true);
                 bufferStabilizationUntilRef.current = Date.now() + 4500;
@@ -352,10 +333,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
               setTimeBehindLive(0);
             }
           } else {
-            setTimeBehindLive(0);
+            const liveHead = Math.max(duration, liveEdgeRef.current);
+            const behindLive = Math.max(0, liveHead - currentTime);
+            if (behindLive > 4.0) {
+              setIsLiveSynced(false);
+              setTimeBehindLive(Math.round(behindLive));
+            } else {
+              setIsLiveSynced(true);
+              setTimeBehindLive(0);
+            }
           }
         } else {
-          // RECORDED VIDEO (VOD) LOGIC:
           if (!canControl) {
             if (currentTime > authTime + 2.5) {
               isProgrammaticUpdate.current = true;
@@ -385,7 +373,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
               setTimeBehindLive(0);
             }
           } else {
-            // Host / Controller mode:
             const drift = Math.abs(currentTime - authTime);
             if (playback.playState === 'playing' && drift > 2.5) {
               isProgrammaticUpdate.current = true;
@@ -435,12 +422,10 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         isPlaying ? 'border-[#3E4250]' : 'border-[#282A33]'
       }`}
     >
-      {/* 16:9 Aspect Frame */}
       <div className="video-container relative bg-black">
         <div id="syncora-yt-player-frame" className="w-full h-full" />
       </div>
 
-      {/* Stream Error Recovery Overlay */}
       {hasPlaybackError && (
         <div className="absolute inset-0 z-40 bg-[#101114]/95 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
           <div className="p-3 rounded-lg bg-[#24262E] border border-[#F59E0B]/40 text-[#F59E0B] mb-3">
@@ -465,7 +450,6 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         </div>
       )}
 
-      {/* Unmute floating banner */}
       {(isMuted || needsUserGesture) && !hasPlaybackError && (
         <button
           onClick={handleUnmute}

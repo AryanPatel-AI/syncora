@@ -150,13 +150,14 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
   const [isConnected, setIsConnected] = useState<boolean>(socket.connected);
   const [connectionError, setConnectionError] = useState<string | null>(null);
 
-  // Moderation state
   const [slowModeSeconds, setSlowModeSeconds] = useState<number>(0);
-
-  // Live DVR & Catch-up Viewing Mode
   const [isLiveSynced, setIsLiveSynced] = useState<boolean>(true);
   const [timeBehindLive, setTimeBehindLive] = useState<number>(0);
   const [localPlayState, setLocalPlayState] = useState<PlayState>('playing');
+
+  const isHost = Boolean(currentUser?.isHost || currentUser?.role === 'HOST');
+  const isModerator = Boolean(currentUser?.role === 'MODERATOR');
+  const canControl = isHost || isModerator;
 
   const getAuthoritativeTime = useCallback(() => {
     if (playback.playState === 'playing') {
@@ -166,23 +167,18 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     return Math.max(0, playback.currentTime);
   }, [playback]);
 
-  // Room Queue state
   const [roomQueue, setRoomQueue] = useState<RoomQueueItem[]>([]);
-
-  // Navigation & routing state
   const [currentRoute, setCurrentRoute] = useState<string>(() => window.location.pathname || '/');
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  // Modals state
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
   const [authModalMode, setAuthModalMode] = useState<'login' | 'register'>('login');
   const [isCreateRoomModalOpen, setIsCreateRoomModalOpen] = useState<boolean>(false);
   const [isScheduleModalOpen, setIsScheduleModalOpen] = useState<boolean>(false);
   const [isRequestsModalOpen, setIsRequestsModalOpen] = useState<boolean>(false);
 
-  // User account
   const [currentUserAccount, setCurrentUserAccount] = useState<UserAccount | null>(null);
 
   const showToast = useCallback((text: string, type: 'info' | 'error' | 'success' = 'info') => {
@@ -196,7 +192,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     setToastMessage(null);
   }, []);
 
-  // Fetch user account on mount
   const refreshAuth = useCallback(async () => {
     const token = localStorage.getItem('syncora_auth_token');
     if (!token) {
@@ -224,7 +219,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     showToast('Signed out successfully.', 'info');
   }, [showToast]);
 
-  // Route parser helper
   const parseCurrentUrl = useCallback(() => {
     const path = window.location.pathname;
     const parts = path.split('/').filter(Boolean);
@@ -614,7 +608,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     };
   }, [showToast, roomId, fetchRoomQueue, navigateTo]);
 
-  // Actions
   const createRoom = useCallback(
     (username: string, initialVideoId?: string): Promise<string> => {
       return new Promise((resolve, reject) => {
@@ -751,28 +744,45 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
       setIsLiveSynced(true);
       setTimeBehindLive(0);
       setLocalPlayState(playback.playState);
-      const targetTime = getAuthoritativeTime();
       if (playerRef) {
-        // Provide a 2.5s buffer delay for live streams to avoid buffer underrun and repeated audio
         const isLive = Boolean(
           playback.isLive ||
           (playerRef.getVideoData && playerRef.getVideoData().isLive) ||
           (playerRef.getDuration && playerRef.getDuration() === 0)
         );
-        const seekTarget = isLive ? Math.max(0, targetTime - 2.5) : targetTime;
 
-        if (typeof playerRef.seekTo === 'function') {
-          playerRef.seekTo(seekTarget, true);
-        }
-        if (playback.playState === 'playing' && typeof playerRef.playVideo === 'function') {
-          playerRef.playVideo();
-        } else if (playback.playState === 'paused' && typeof playerRef.pauseVideo === 'function') {
-          playerRef.pauseVideo();
+        if (canControl && isLive) {
+          const liveDuration = typeof playerRef.getDuration === 'function' ? playerRef.getDuration() : 0;
+          const liveTarget = liveDuration > 0 ? liveDuration : 99999999;
+          if (typeof playerRef.seekTo === 'function') {
+            playerRef.seekTo(liveTarget, true);
+          }
+          if (playback.playState === 'playing' && typeof playerRef.playVideo === 'function') {
+            playerRef.playVideo();
+          }
+          setTimeout(() => {
+            const actualHead = playerRef.getCurrentTime ? playerRef.getCurrentTime() : liveDuration;
+            if (actualHead > 0) {
+              seekVideo(actualHead);
+            }
+          }, 400);
+        } else {
+          const targetTime = getAuthoritativeTime();
+          const seekTarget = isLive ? Math.max(0, targetTime - 2.5) : targetTime;
+
+          if (typeof playerRef.seekTo === 'function') {
+            playerRef.seekTo(seekTarget, true);
+          }
+          if (playback.playState === 'playing' && typeof playerRef.playVideo === 'function') {
+            playerRef.playVideo();
+          } else if (playback.playState === 'paused' && typeof playerRef.pauseVideo === 'function') {
+            playerRef.pauseVideo();
+          }
         }
       }
       showToast('Synchronized with Live Stream', 'success');
     },
-    [getAuthoritativeTime, playback.playState, playback.isLive, showToast]
+    [canControl, getAuthoritativeTime, playback.playState, playback.isLive, seekVideo, showToast]
   );
 
   const assignRole = useCallback((userId: string, role: Role) => {
@@ -844,7 +854,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     socket.emit(SOCKET_EVENTS.SYNC_PING, { clientTime: time });
   }, []);
 
-  // Moderation Methods
   const deleteMessage = useCallback((messageId: string) => {
     socket.emit(SOCKET_EVENTS.DELETE_MESSAGE, { messageId });
   }, []);
@@ -861,7 +870,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     socket.emit(SOCKET_EVENTS.TOGGLE_SLOW_MODE, { seconds });
   }, []);
 
-  // Room Queue Methods
   const addToQueue = useCallback(async (video: { videoId: string; title: string; channelTitle?: string; thumbnailUrl?: string }) => {
     if (!roomId) return;
     try {
@@ -903,9 +911,6 @@ export const WatchPartyProvider: React.FC<{ children: ReactNode }> = ({ children
     }
   }, [roomId, fetchRoomQueue, showToast]);
 
-  const isHost = currentUser?.isHost || currentUser?.role === 'HOST';
-  const isModerator = currentUser?.role === 'MODERATOR';
-  const canControl = isHost || isModerator;
   const pinnedMessages = chatHistory.filter((m) => m.isPinned && !m.isDeleted);
 
   return (
