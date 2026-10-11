@@ -10,19 +10,19 @@ export class PermissionService {
   }
 
   /**
-   * Only the Host can assign or change roles (promote to moderator, demote to participant).
+   * Host and Moderators can assign or change roles.
+   * Host has full authority; Moderator can manage participants and viewers.
    */
   public static canAssignRoles(
     participant: Participant | undefined,
     roomHostId?: string
   ): boolean {
     if (!participant) return false;
-    if (roomHostId && participant.id !== roomHostId) return false;
-    return participant.role === 'HOST' || participant.isHost;
+    return participant.role === 'HOST' || participant.isHost || participant.role === 'MODERATOR';
   }
 
   /**
-   * Only the Host can remove/kick participants, and cannot kick themselves.
+   * Host and Moderators can remove/kick participants (cannot kick self or Host; Moderator cannot kick peer Moderator).
    */
   public static canRemoveParticipant(
     actor: Participant | undefined,
@@ -31,8 +31,18 @@ export class PermissionService {
   ): boolean {
     if (!actor || !target) return false;
     if (actor.id === target.id) return false; // cannot kick self
-    if (roomHostId && actor.id !== roomHostId) return false;
-    return actor.role === 'HOST' || actor.isHost;
+    if (roomHostId && target.id === roomHostId) return false; // cannot kick room host
+    if (target.role === 'HOST' || target.isHost) return false; // cannot kick host
+
+    if (actor.role === 'HOST' || actor.isHost) {
+      return true;
+    }
+
+    if (actor.role === 'MODERATOR') {
+      return target.role !== 'MODERATOR';
+    }
+
+    return false;
   }
 
   /**

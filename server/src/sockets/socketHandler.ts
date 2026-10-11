@@ -348,6 +348,16 @@ export function registerSocketHandlers(io: Server) {
           return;
         }
 
+        if (target.id === room.hostId || target.role === 'HOST' || target.isHost) {
+          emitError('Permission denied: Cannot modify the Host role.');
+          return;
+        }
+
+        if (actor.role === 'MODERATOR' && target.role === 'MODERATOR') {
+          emitError('Permission denied: Moderators cannot modify roles of other Moderators.');
+          return;
+        }
+
         const rawRole = String(data?.newRole || data?.role || '').toUpperCase();
         let targetRole: Role | undefined;
         if (rawRole === 'MODERATOR') {
@@ -367,10 +377,11 @@ export function registerSocketHandlers(io: Server) {
         // Persist updated role in SQLite repository
         RoomRepository.updateParticipantRole(target.id, target.role);
 
+        const actorTitle = (actor.role === 'HOST' || actor.isHost) ? 'Host' : 'Moderator';
         const sysMsg = room.addChatMessage(
           'system',
           'System',
-          `${target.username} was updated to ${target.role} by Host ${actor.username}.`,
+          `${target.username} was updated to ${target.role} by ${actorTitle} ${actor.username}.`,
           'system'
         );
 
@@ -393,7 +404,7 @@ export function registerSocketHandlers(io: Server) {
       }
     );
 
-    // 9. REMOVE PARTICIPANT (Host Only)
+    // 9. REMOVE PARTICIPANT (Host & Moderator)
     socket.on(
       SOCKET_EVENTS.REMOVE_PARTICIPANT,
       (data: { userId?: string; targetUserId?: string }) => {
@@ -424,15 +435,16 @@ export function registerSocketHandlers(io: Server) {
         const targetUserId = target.id;
         const targetUsername = target.username;
 
+        const removerTitle = (actor.role === 'HOST' || actor.isHost) ? 'the host' : `moderator ${actor.username}`;
         const targetSocket = io.sockets.sockets.get(targetSocketId);
         if (targetSocket) {
           targetSocket.emit(SOCKET_EVENTS.PARTICIPANT_REMOVED, {
             userId: targetUserId,
             targetUserId: targetUserId,
-            message: 'You have been removed from the watch party by the host.',
+            message: `You have been removed from the watch party by ${removerTitle}.`,
           });
           targetSocket.emit(SOCKET_EVENTS.ERROR_MESSAGE, {
-            message: 'You have been removed from the watch party by the host.',
+            message: `You have been removed from the watch party by ${removerTitle}.`,
           });
           targetSocket.leave(room.id);
         }

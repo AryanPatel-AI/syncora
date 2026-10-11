@@ -38,6 +38,9 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
   const isBufferingRef = useRef<boolean>(false);
   const bufferStabilizationUntilRef = useRef<number>(Date.now() + 4000);
   const playerStateRef = useRef<number>(-1);
+  const lastLoadedVideoIdRef = useRef<string>(playback.videoId);
+  const lastAppliedPlayStateRef = useRef<string>(playback.playState);
+  const lastAppliedUpdatedAtRef = useRef<number>(playback.lastUpdatedAt);
   const [isPlayerReady, setIsPlayerReady] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [needsUserGesture, setNeedsUserGesture] = useState<boolean>(false);
@@ -136,14 +139,17 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
           if (state === 3) {
             // BUFFERING: suspend drift checks so player has ample buffer time to load chunks
             isBufferingRef.current = true;
-            bufferStabilizationUntilRef.current = Date.now() + 3500;
+            bufferStabilizationUntilRef.current = Date.now() + 3000;
           } else if (state === 1) {
-            // PLAYING: ensure 2.5s of smooth playback before resuming drift monitoring
+            // PLAYING: smooth playback resumed
             isBufferingRef.current = false;
-            bufferStabilizationUntilRef.current = Date.now() + 2500;
+            bufferStabilizationUntilRef.current = Date.now() + 2000;
+          } else if (state === 2) {
+            // PAUSED: player is stopped, not buffering
+            isBufferingRef.current = false;
           } else if (state === -1 || state === 5) {
             isBufferingRef.current = true;
-            bufferStabilizationUntilRef.current = Date.now() + 3500;
+            bufferStabilizationUntilRef.current = Date.now() + 3000;
           }
 
           handlePlayerStateChange(state);
@@ -179,12 +185,20 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
       if (!canControl) {
         return;
       }
+      // If server is already in playing state, do not echo duplicate play event
+      if (playback.playState === 'playing') {
+        return;
+      }
       const currentTime = player.getCurrentTime ? player.getCurrentTime() : 0;
       playVideo(currentTime);
     } else if (state === 2) {
       setLocalPlayState('paused');
       if (!canControl) {
         setIsLiveSynced(false);
+        return;
+      }
+      // If server is already in paused state, do not echo duplicate pause event
+      if (playback.playState === 'paused') {
         return;
       }
       const currentTime = player.getCurrentTime ? player.getCurrentTime() : 0;
@@ -197,12 +211,12 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     const player = playerRef.current;
     if (!player || !isPlayerReady) return;
 
-    const currentUrl = player.getVideoUrl ? player.getVideoUrl() : '';
-    if (playback.videoId && !currentUrl.includes(playback.videoId)) {
+    if (playback.videoId && lastLoadedVideoIdRef.current !== playback.videoId) {
+      lastLoadedVideoIdRef.current = playback.videoId;
       setHasPlaybackError(false);
       isProgrammaticUpdate.current = true;
       isBufferingRef.current = true;
-      bufferStabilizationUntilRef.current = Date.now() + 4500; // 4.5s buffer time for new stream to load
+      bufferStabilizationUntilRef.current = Date.now() + 3500;
 
       if (player.loadVideoById) {
         player.loadVideoById({
@@ -214,7 +228,7 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
         isProgrammaticUpdate.current = false;
       }, 1500);
     }
-  }, [playback.videoId, isPlayerReady]);
+  }, [playback.videoId, isPlayerReady, playback.currentTime]);
 
   // 4. React to server play/pause/seek
   useEffect(() => {
@@ -226,44 +240,66 @@ export const YouTubePlayer: React.FC<YouTubePlayerProps> = ({ onProgress, player
     const playerTime = player.getCurrentTime ? player.getCurrentTime() : 0;
     const diff = Math.abs(playerTime - authoritativeTime);
 
-    // If player is actively buffering or stabilizing, do not interrupt its buffer!
-    if (isBufferingRef.current || Date.now() < bufferStabilizationUntilRef.current) {
-      return;
-    }
+    const isTimestampUpdated = lastAppliedUpdatedAtRef.current !== playback.lastUpdatedAt;
 
-    isProgrammaticUpdate.current = true;
-
-    // On recorded videos, apply drift seek; on live streams, prevent micro-seeks
-    if (!isLive) {
-      const isAheadOfHost = !canControl && playerTime > authoritativeTime + 2.5;
-
-      if ((canControl || isLiveSynced || isAheadOfHost) && (diff > 2.2 || isAheadOfHost)) {
-        player.seekTo(authoritativeTime, true);
-        bufferStabilizationUntilRef.current = Date.now() + 3000;
-        if (isAheadOfHost) {
-          setIsLiveSynced(true);
-          setTimeBehindLive(0);
+    // A. Seek handling
+    if (canControl || isLiveSynced) {
+      if (!isLive) {
+        // If an explicit seek/update was broadcast from server, or if player drifted > 2.0s
+        const shouldSeek = (isTimestampUpdated && diff > 1.0) || diff > 2.0;
+        if (shouldSeek) {
+          isProgrammaticUpdate.current = true;
+          player.seekTo(authoritativeTime, true);
+          bufferStabilizationUntilRef.current = Date.now() + 2000;
         }
       }
-    }
 
-    if (canControl || isLiveSynced) {
+      // B. Play / Pause handling: always ensure player matches authoritative server playState
       if (playback.playState === 'playing') {
+        isProgrammaticUpdate.current = true;
+        setLocalPlayState('playing');
         const playPromise = player.playVideo();
         if (playPromise && typeof playPromise.catch === 'function') {
           playPromise.catch(() => setNeedsUserGesture(true));
         }
       } else if (playback.playState === 'paused') {
+        isProgrammaticUpdate.current = true;
+        setLocalPlayState('paused');
         player.pauseVideo();
       }
+    } else {
+      // For un-synced viewers: if ahead of host, pull back to authoritative position
+      const isAheadOfHost = !canControl && playerTime > authoritativeTime + 2.5;
+      if (!isLive && isAheadOfHost) {
+        isProgrammaticUpdate.current = true;
+        player.seekTo(authoritativeTime, true);
+        setIsLiveSynced(true);
+        setTimeBehindLive(0);
+        bufferStabilizationUntilRef.current = Date.now() + 2000;
+      }
     }
+
+    lastAppliedPlayStateRef.current = playback.playState;
+    lastAppliedUpdatedAtRef.current = playback.lastUpdatedAt;
 
     const timer = setTimeout(() => {
       isProgrammaticUpdate.current = false;
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [playback.playState, playback.currentTime, playback.lastUpdatedAt, isPlayerReady, getAuthoritativeTime, canControl, isLiveSynced, isLiveContent]);
+  }, [
+    playback.playState,
+    playback.currentTime,
+    playback.lastUpdatedAt,
+    isPlayerReady,
+    getAuthoritativeTime,
+    canControl,
+    isLiveSynced,
+    isLiveContent,
+    setLocalPlayState,
+    setIsLiveSynced,
+    setTimeBehindLive,
+  ]);
 
   // 5. Periodic drift and progress monitoring
   useEffect(() => {

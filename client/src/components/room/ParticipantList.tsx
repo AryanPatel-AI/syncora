@@ -19,6 +19,8 @@ export const ParticipantList: React.FC = () => {
     participants,
     currentUser,
     isHost,
+    isModerator,
+    canControl,
     pendingRequests,
     handleControlRequest,
     assignRole,
@@ -81,6 +83,12 @@ export const ParticipantList: React.FC = () => {
         {participants.map((p) => {
           const isCurrentUser = p.id === currentUser?.id;
           const isTargetHost = p.isHost || p.role === 'HOST';
+          const isTargetMod = p.role === 'MODERATOR';
+          const canManageThisParticipant =
+            !isCurrentUser &&
+            !isTargetHost &&
+            (isHost || (isModerator && !isTargetMod));
+
           const pendingReq = pendingRequests.find(
             (r) => r.userId === p.id && r.status === 'pending'
           );
@@ -124,8 +132,8 @@ export const ParticipantList: React.FC = () => {
                 </div>
               </div>
 
-              {/* Host actions button */}
-              {isHost && !isCurrentUser && (
+              {/* Host and Moderator actions */}
+              {(canControl && !isCurrentUser) && (
                 <div className="relative flex items-center gap-1.5">
                   {pendingReq && (
                     <button
@@ -137,19 +145,22 @@ export const ParticipantList: React.FC = () => {
                       <span>Approve</span>
                     </button>
                   )}
-                  <button
-                    onClick={() => setActiveMenuUserId(activeMenuUserId === p.id ? null : p.id)}
-                    className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
-                    title="Manage participant"
-                    aria-label={`Manage ${p.username}`}
-                  >
-                    <MoreVertical className="w-3.5 h-3.5" />
-                  </button>
+
+                  {canManageThisParticipant && (
+                    <button
+                      onClick={() => setActiveMenuUserId(activeMenuUserId === p.id ? null : p.id)}
+                      className="p-1.5 rounded-md text-[#8E919C] hover:text-[#F2F0E9] hover:bg-[#24262E] transition-colors"
+                      title="Manage participant"
+                      aria-label={`Manage ${p.username}`}
+                    >
+                      <MoreVertical className="w-3.5 h-3.5" />
+                    </button>
+                  )}
 
                   {/* Dropdown Menu */}
-                  {activeMenuUserId === p.id && (
+                  {activeMenuUserId === p.id && canManageThisParticipant && (
                     <div className="absolute right-0 top-full mt-1 z-40 w-44 rounded-lg bg-[#16171B] p-1.5 shadow-cinema border border-[#282A33] text-xs flex flex-col gap-1">
-                      {/* Host can promote Participant or Viewer to Moderator */}
+                      {/* Promote Participant or Viewer to Moderator */}
                       {(p.role === 'PARTICIPANT' || p.role === 'VIEWER') && (
                         <button
                           onClick={() => {
@@ -191,8 +202,8 @@ export const ParticipantList: React.FC = () => {
                         </button>
                       )}
 
-                      {/* Moderator demotion */}
-                      {p.role === 'MODERATOR' && (
+                      {/* Moderator demotion (Host only) */}
+                      {isHost && p.role === 'MODERATOR' && (
                         <>
                           <button
                             onClick={() => {
@@ -217,7 +228,8 @@ export const ParticipantList: React.FC = () => {
                         </>
                       )}
 
-                      {!isTargetHost && (
+                      {/* Transfer Host (Host only) */}
+                      {isHost && !isTargetHost && (
                         <button
                           onClick={() => {
                             if (confirm(`Transfer Host role to ${p.username}?`)) {
@@ -232,20 +244,19 @@ export const ParticipantList: React.FC = () => {
                         </button>
                       )}
 
-                      {!isTargetHost && (
-                        <button
-                          onClick={() => {
-                            if (confirm(`Remove ${p.username} from this room?`)) {
-                              removeParticipant(p.id);
-                              setActiveMenuUserId(null);
-                            }
-                          }}
-                          className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[#F87171] hover:bg-[#F87171]/10 text-left transition-colors border-t border-[#282A33] mt-1 pt-1.5"
-                        >
-                          <UserX className="w-3.5 h-3.5" />
-                          <span>Remove from Room</span>
-                        </button>
-                      )}
+                      {/* Remove from Room */}
+                      <button
+                        onClick={() => {
+                          if (confirm(`Remove ${p.username} from this room?`)) {
+                            removeParticipant(p.id);
+                            setActiveMenuUserId(null);
+                          }
+                        }}
+                        className="flex items-center gap-2 px-2.5 py-1.5 rounded text-[#F87171] hover:bg-[#F87171]/10 text-left transition-colors border-t border-[#282A33] mt-1 pt-1.5"
+                      >
+                        <UserX className="w-3.5 h-3.5" />
+                        <span>Remove from Room</span>
+                      </button>
                     </div>
                   )}
                 </div>
